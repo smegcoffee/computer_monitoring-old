@@ -1,0 +1,35 @@
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+function BarGraph() {
+    const data = [
+        { name: 'Week 1', 'Monitored Computers': 65 },
+        { name: 'Week 2', 'Monitored Computers': 59 },
+        { name: 'Week 3', 'Monitored Computers': 80 },
+        { name: 'Week 4', 'Monitored Computers': 81 },
+    ];
+
+    return (
+        <div style={{ width: '100%', height: '300px' }}>
+            <ResponsiveContainer>
+                <BarChart
+                    data={data}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                        dataKey="Monitored Computers"
+                        fill="rgba(54, 162, 235, 0.2)"
+                        stroke="rgba(54, 162, 235, 1)"
+                        strokeWidth={1}
+                    />
+                </BarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+}
+
+export default BarGraph;
