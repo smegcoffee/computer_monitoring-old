@@ -29,9 +29,11 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<div align="center">
+<div align="">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <div align="center">
+    <img src="https://smctgroup.com/wp-content/uploads/2022/12/smct-1024x502.png" alt="Logo" width="180" height="80">
+    </div>
   </a>
 
  <!--  <h3 align="center">Best-README-Template</h3> 
@@ -83,7 +85,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![Product Name Screen Shot][product-screenshot]](https://drive.google.com/uc?export=view&id=1Qv8MpmkLW77XLOuAjTLRybI6O5RHz0Yr)
 
 There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
 
@@ -244,7 +246,7 @@ Use this space to list resources you find helpful and would like to give credit 
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: https://drive.google.com/uc?export=view&id=1Qv8MpmkLW77XLOuAjTLRybI6O5RHz0Yr
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
