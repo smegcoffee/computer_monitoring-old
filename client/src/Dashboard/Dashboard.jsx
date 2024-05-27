@@ -31,7 +31,7 @@ function DashBoard() {
                     <p className='font-normal text-2xl pt-10 ml-10'>Dashboard</p>
                     <p className='font-light text-lg ml-10'>Home</p>
                     <br/> <br/>
-                    <div className='w-11/12 ml-10'>
+                    <div className='w-full ml-10'>
                     <p className='font-light text-2xl mb-5'>This Month</p>
                     <BarGraph/> <br/> <br/> <br/>
                     <p className='font-light text-2xl mb-5' style={{marginTop: '-70px'}}>This Year</p>
@@ -39,7 +39,7 @@ function DashBoard() {
                     </div>
                 </div>
                 <div style={{ flex: 'none'}}>
-                    <p className='font-normal text-xl pt-10 pr-10'>Welcome, <Link to="/profile"><b>Angeleen Darunday</b></Link></p>
+                    <p className='font-normal text-xl pt-10 pr-10'>Welcome, <Link to="/profile"><b>Angeleen Darunday</b></Link></p> 
                 </div>
             </div>
         </div>
