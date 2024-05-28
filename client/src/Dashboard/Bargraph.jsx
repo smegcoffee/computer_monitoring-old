@@ -10,21 +10,26 @@ function BarGraph() {
     ];
 
     return (
-        <div style={{ width: '100%', height: '300px' }}>
+        <div style={{ width: '100%', height: '300px'}}>
             <ResponsiveContainer>
                 <BarChart
                     data={data}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false}/>
+                    <YAxis axisLine={false} tickLine={false}/>
+                    <Tooltip
+                        isAnimationActive={false}
+                        separator={": "}
+                        cursor={false}
+                    />
+                    <Legend/>
                     <Bar
                         dataKey="Monitored Computers"
-                        fill="rgba(54, 162, 235, 0.2)"
+                        fill="rgba(54, 162, 235, 0.5)"
                         stroke="rgba(54, 162, 235, 1)"
                         strokeWidth={1}
+                        className='neona'
                     />
                 </BarChart>
             </ResponsiveContainer>

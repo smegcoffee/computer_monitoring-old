@@ -32,14 +32,27 @@ function LoginForm({ fields }) {
     setInputValues(newInputValues);
   };
 
-  // Handler for form submission (dummy implementation)
-  const handleSubmit = (event) => {
+  //Fetch API but will change if will be using Axios
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const email = inputValues[0];
+    const email= inputValues[0];
     const password = inputValues[1];
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // send the data to the server for authentication
+    try{
+      const response = await fetch('INSERT BACKEND API', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email, password}),
+      });
+      if (response.ok){
+        console.log('Login Successfully!');
+      } else{
+        console.log('Login Failed!');
+      }
+    } catch (error){
+      console.error('Error:', error);
+    }
   };
 
   return (

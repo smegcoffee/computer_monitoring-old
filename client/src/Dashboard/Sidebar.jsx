@@ -1,114 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import smct from '../img/smct.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTachometerAlt, faDesktop, faQrcode, faWrench } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 
 function SideBar() {
-  const [dashboardActive, setDashboardActive] = useState(true);
-  const [monitoredActive, setMonitoredActive] = useState(false);
-  const [qrCodesActive, setQrCodesActive] = useState(false);
-  const [unitActive, setUnitActive] = useState(false);
-  const [setActive, setSetActive] = useState(false);
+  const [activeItem, setActiveItem] = useState();
 
-  const handleDashboardClick = () => {
-    setDashboardActive(true);
-    setMonitoredActive(false);
-    setQrCodesActive(false);
-    setUnitActive(false);
-    setSetActive(false);
-  };
-
-  const handleMonitoredClick = () => {
-    setDashboardActive(false);
-    setMonitoredActive(true);
-    setQrCodesActive(false);
-    setUnitActive(false);
-    setSetActive(false);
-  };
-
-  const handleQrCodesClick = () => {
-    setDashboardActive(false);
-    setMonitoredActive(false);
-    setQrCodesActive(true);
-    setUnitActive(false);
-    setSetActive(false);
-  };
-
-  const handleUnitClick = () => {
-    setDashboardActive(false);
-    setMonitoredActive(false);
-    setQrCodesActive(false);
-    setUnitActive(true);
-    setSetActive(false);
-  };
-
-  const handleSetClick = () => {
-    setDashboardActive(false);
-    setMonitoredActive(false);
-    setQrCodesActive(false);
-    setUnitActive(false);
-    setSetActive(true);
-  };
+  useEffect(() => {
+    switch (window.location.pathname) {
+      case '/dashboard':
+        setActiveItem('dashboard');
+        break;
+      case '/computers':
+        setActiveItem('computers');
+        break;
+      case '/qr':
+        setActiveItem('qr');
+        break;
+      case '/unit':
+        setActiveItem('unit');
+        break;
+      case '/set':
+        setActiveItem('set');
+        break;
+      default:
+        setActiveItem('dashboard');
+    }
+  }, []);
 
   return (
+    <div className="sidebar">
     <div className='w-96 h-full'>
       <div>
         <img src={smct} alt="SMCT Logo" className='w-72 h-32 ml-10 pt-5 block'></img>
       </div>
       <div className='ml-10 mt-5'>
-        <Link to="/dashboard"> <p
-          className={`text-2xl font-semibold pl-5 pt-0.5 ${
-            dashboardActive ? 'bg-blue-500 text-white' : ''
-          } rounded-3xl h-10 cursor-pointer`}
-          onClick={handleDashboardClick}
-        >
-          <FontAwesomeIcon icon={faTachometerAlt} /> Dashboard
-        </p> </Link>
+        <Link to="/dashboard">
+          <button className={`text-2xl font-semibold pl-5 pt-0.5 w-full text-justify ${activeItem === 'dashboard' ? 'bg-blue-500 text-white active' : ''} rounded-3xl h-10 cursor-pointer`}>
+            <FontAwesomeIcon icon={faTachometerAlt} /> Dashboard
+          </button>
+        </Link>
         <Link to="/computers">
-        <p
-          className={`text-2xl font-semibold mt-5 pl-5 pt-0.5 ${
-            monitoredActive ? 'bg-blue-500 text-white' : ''
-          } rounded-3xl h-10 cursor-pointer`}
-          onClick={handleMonitoredClick}
-        >
-          <FontAwesomeIcon icon={faDesktop} /> Monitored Computers
-        </p>
+          <button className={`text-2xl font-semibold mt-5 pl-5 pt-0.5 w-full text-justify ${activeItem === 'computers' ? 'bg-blue-500 text-white active' : ''} rounded-3xl h-10 cursor-pointer`}>
+            <FontAwesomeIcon icon={faDesktop} /> Monitored Computers
+          </button>
         </Link>
         <Link to="/qr">
-        <p
-          className={`text-2xl font-semibold mt-5 pl-5 pt-0.5 ${
-            qrCodesActive ? 'bg-blue-500 text-white' : ''
-          } rounded-3xl h-10 cursor-pointer`}
-          onClick={handleQrCodesClick}
-        >
-          <FontAwesomeIcon icon={faQrcode} /> Scan QR Codes
-        </p>
+          <button className={`text-2xl font-semibold mt-5 pl-5 pt-0.5 w-full text-justify ${activeItem === 'qr' ? 'bg-blue-500 text-white active' : ''} rounded-3xl h-10 cursor-pointer`}>
+            <FontAwesomeIcon icon={faQrcode} /> Scan QR Codes
+          </button>
         </Link>
         <p className={`text-2xl font-semibold mt-5 pl-5 pt-0.5 rounded-3xl h-10 cursor-default`}>
           <FontAwesomeIcon icon={faWrench} /> Setup
         </p>
         <Link to="/unit">
-        <p
-          className={`text-2xl font-semibold mt-5 pl-8 pt-0.5 ${
-            unitActive ? 'bg-blue-500 text-white' : ''
-          } rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-48 ml-20 cursor-pointer`}
-          onClick={handleUnitClick}
-        >
-         Setup Unit
-        </p>
+          <button className={`text-2xl font-semibold mt-5 pl-8 text-justify pt-0.5 ${activeItem === 'unit' ? 'bg-blue-500 text-white active' : ''} rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-48 ml-14 cursor-pointer`}>
+            Setup Unit
+          </button>
         </Link>
-        <Link to= "/set">
-        <p
-          className={`text-2xl font-semibold mt-5 pl-8 pt-0.5 ${
-            setActive ? 'bg-blue-500 text-white' : ''
-          } rounded-tl-none rounded-br-none rounded-tr-full rounded-bl-full h-10 w-72 ml-20 cursor-pointer`}
-          onClick={handleSetClick}
-        >
-          Setup Computer Set
-        </p>
+        <Link to="/set">
+          <button className={`text-2xl font-semibold mt-5 pl-8 text-justify pt-0.5 ${activeItem === 'set' ? 'bg-blue-500 text-white active' : ''} rounded-tl-none rounded-br-none rounded-tr-full rounded-bl-full h-10 w-72 ml-14 cursor-pointer`}>
+            Setup Computer Set
+          </button>
         </Link>
       </div>
+    </div>
     </div>
   );
 }

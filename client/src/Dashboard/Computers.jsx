@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import Specs from './Popup for Computers/Specs';
 import View from './Popup for Computers/View';
 import QrCode from './Popup for Computers/Qr';
-
 import {
     Table,
     TableBody,
@@ -47,15 +46,15 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
         }
       };
   
-      // Attach event listener when dropdown is open
+      // Attaching event listener when dropdown is open
       if (isOpen) {
         document.addEventListener('click', handleClickOutside);
       } else {
-        // Remove event listener when dropdown is closed
+        // Removing event listener when dropdown is closed
         document.removeEventListener('click', handleClickOutside);
       }
   
-      // Cleanup function to remove event listener on unmount
+      // Cleaning up function to remove event listener on unmount
       return () => {
         document.removeEventListener('click', handleClickOutside);
       };
@@ -223,7 +222,6 @@ function Computers() {
         setInputValues(newInputValues);
       };
       
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <Header />
@@ -239,11 +237,11 @@ function Computers() {
                     <div className='w-full h-2/6 border-gray-300 shadow-2xl rounded-xl'>
                         <div className='pl-16 pt-5'>
                         {/* search thru branch code */}
-                                <p className='text-lg font-normal pt-4 pl-4'>Branch Code</p>
+                                <p className='text-lg font-normal pt-4 pl-4'>Search</p>
                                 <div className='flex'>
                                 <SearchableDropdown
                                     options={["BOHL", "DSMT", "DSMT2", "DSMAO", "DSMBN"]}
-                                    placeholder="Select Branch Code..."
+                                    placeholder="Enter keyword..."
                                     onSelect={(option) => {
                                     const event = { target: { value: option } };
                                     handleChange(4, event);
