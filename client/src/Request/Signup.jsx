@@ -15,19 +15,16 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false); // Close dropdown if click occurs outside of it
+        setIsOpen(false);
       }
     };
 
-    // Attach event listener when dropdown is open
     if (isOpen) {
       document.addEventListener('click', handleClickOutside);
     } else {
-      // Remove event listener when dropdown is closed
       document.removeEventListener('click', handleClickOutside);
     }
 
-    // Cleanup function to remove event listener on unmount
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
@@ -97,7 +94,6 @@ function SignUp(){
     setInputValues(newInputValues);
   };
 
-      // Function to validate email format
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
@@ -136,7 +132,7 @@ function SignUp(){
       newPlaceholders[index] = "••••••••••"; // Placeholder text as dots
       setPasswordPlaceholders(newPlaceholders);
     } else {
-      newPlaceholders[index] = ""; // Clear placeholder if there is input
+      newPlaceholders[index] = "";
       setPasswordPlaceholders(newPlaceholders);
     }
   

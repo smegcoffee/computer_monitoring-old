@@ -107,13 +107,36 @@ function Placeholder() {
     );
   }
   
-  const Profile = () => {
-    const openFile = () => {
-      // Replace 'filePath' with the URL of the file you want to open
-      const filePath = 'https://example.com/file'; // Example URL
-      window.open(filePath, '_blank');
-    };
+  class OpenFolder extends React.Component {
+    handleClick = () => {
+      // Trigger file explorer opening
+      this.openFileExplorer();
+    }
   
+    openFileExplorer() {
+      // Code to open file explorer will depend on browser/OS
+      // For security reasons, browsers don't allow direct control over the file system
+      // However, you can simulate this behavior by allowing the user to choose files using <input type="file"> element
+  
+      // Example:
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.click();
+    }
+  
+    render() {
+      return (
+        <div className="folder" onClick={this.handleClick}>
+            <p className='text-center font-normal text-gray-600 bg-gray-100 hover:bg-gray-300 cursor-pointer'>
+              Change Photo
+              <FontAwesomeIcon icon={faCamera} className='pl-2'/>
+            </p>
+        </div>
+      );
+    }
+  }
+
+  const Profile = () => {
     // Example profile picture URL
     const profilePictureUrl = 'https://example.com/profile-picture.jpg';
   
@@ -129,10 +152,7 @@ function Placeholder() {
               {/* Display profile picture */}
               <img src={profilePictureUrl} alt="Profile" className="w-36 h-36 rounded-full" />
             </div>
-            <p className='text-center font-normal text-gray-600 bg-gray-100 hover:bg-gray-300 cursor-pointer' onClick={openFile}>
-              Change Photo
-              <FontAwesomeIcon icon={faCamera} className='pl-2'/>
-            </p>
+            <OpenFolder/>
             <p className='text-center font-semibold text-lg pt-2'>Angeleen Darunday</p>
           </div>
         </div>

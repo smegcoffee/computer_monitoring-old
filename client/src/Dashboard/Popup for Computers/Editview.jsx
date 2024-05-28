@@ -3,13 +3,13 @@ import smct from './../../img/smct.png';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 function TableView() {
-  //sample data
+  // Sample data
   const [rows, setRows] = useState([
-    { category: 'Status', description: 'Working' },
-    { category: 'Recent Previous User', description: 'Zoro Kun' },
-    { category: 'Installed Applications', description: 'Microsoft Office' },
-    { category: 'Date of Purchase', description: 'January 11, 2001' },
-    { category: 'Remarks', description: 'Lorem Epsom Dolor' },
+    { category: 'Status', description: 'Working', editable: true },
+    { category: 'Recent Previous User', description: 'Zoro Kun', editable: true },
+    { category: 'Installed Applications', description: 'Microsoft Office', editable: true },
+    { category: 'Date of Purchase', description: 'January 11, 2001', editable: true },
+    { category: 'Remarks', description: 'Lorem Epsom Dolor', editable: false },
     // Add more data objects as needed
   ]);
 
@@ -18,36 +18,38 @@ function TableView() {
     newRows[index].description = event.target.value;
     setRows(newRows);
   };
-    
-  
-    return (
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><Typography variant='subtitle1' fontWeight='bold'>DEVICE INFORMATION</Typography></TableCell>
-              <TableCell><Typography variant='subtitle1' fontWeight='bold'>DETAILS</Typography></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell><Typography variant='subtitle1' fontWeight='medium'>{row.category}</Typography></TableCell>
-                <TableCell>
-                <input 
+
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell><Typography variant='subtitle1' fontWeight='bold'>DEVICE INFORMATION</Typography></TableCell>
+            <TableCell><Typography variant='subtitle1' fontWeight='bold'>DETAILS</Typography></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((row, index) => (
+            <TableRow key={index}>
+              <TableCell><Typography variant='subtitle1' fontWeight='medium'>{row.category}</Typography></TableCell>
+              <TableCell>
+                {row.editable ? (
+                  <input 
                     type="text" 
                     value={row.description} 
                     onChange={(event) => handleDescriptionChange(event, index)}
-                />
-                </TableCell>
-
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
-  }
+                  />
+                ) : (
+                  <Typography variant='subtitle1'>{row.description}</Typography>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
 
 function EditView({ isOpen, onClose }) {
   if (!isOpen) {
