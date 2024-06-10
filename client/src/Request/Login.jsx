@@ -4,15 +4,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
+import { user } from './Signup';
 
-// Component for rendering input fields with icons
+
 function InputField({ icon, text, value, onChange }) {
   return (
     <div className="flex items-center mb-4">
       <span className="mr-2 text-gray-400">{icon}</span>
       <input
         type={text === 'Password' ? 'password' : 'text'}
-        className="w-full h-12 px-4 rounded-md border border-gray-300"
+        className= "w-full h-12 px-4 rounded-md border border-gray-300"
         placeholder={text}
         value={value}
         onChange={onChange}
@@ -24,6 +25,8 @@ function InputField({ icon, text, value, onChange }) {
 // Component for rendering the login form
 function LoginForm({ fields }) {
   const [inputValues, setInputValues] = useState(fields.map(() => ''));
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
 
   // Handler for input change
   const handleChange = (index, event) => {
@@ -32,28 +35,67 @@ function LoginForm({ fields }) {
     setInputValues(newInputValues);
   };
 
-  //Fetch API but will change if will be using Axios
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const email= inputValues[0];
+    const email = inputValues[0];
     const password = inputValues[1];
-    try{
+    setLoading(true);
+  
+    if (!email || !password) {
+      console.log('Please fill in all fields.');
+      setError('Please fill in all field.');
+      setLoading(false);
+      return;
+    }
+  
+  const userWithEmail = user.find(user => user.email === email);
+  if (!userWithEmail) {
+    console.log('Email not registered.');
+    setError('Email not registered.');
+    setLoading(false);
+    return;
+  }
+
+    // Email format validation
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      console.log('Please enter a valid email address.');
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    if (password !== userWithEmail.password){
+      console.log('Incorrect password.');
+      setError('Incorrect password.');
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      // Backend API request for authentication
       const response = await fetch('INSERT BACKEND API', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email, password}),
+        body: JSON.stringify({ email, password }),
       });
-      if (response.ok){
-        console.log('Login Successfully!');
-      } else{
-        console.log('Login Failed!');
+  
+      if (response.ok || email === userWithEmail.email) {
+        console.log('Login successfully!');
+        setError(null);
+      } else {
+        console.log('Login failed!');
+        setError('Login failed!');
+        setLoading(false);
       }
-    } catch (error){
+    } catch (error) {
       console.error('Error:', error);
+    } finally{
+      setLoading(false);
     }
-  };
+  };  
 
   return (
     <form className="rounded p-4 w-full max-w-md mt-10" onSubmit={handleSubmit}>
@@ -67,11 +109,16 @@ function LoginForm({ fields }) {
         />
       ))}
       <div className="flex justify-center flex-col items-center">
+        <div className='text-red-500 mb-5'>
+        {error ? error : null}
+        </div>
   <div className="mb-4">
     <Link to="/forgot" className='hover:underline'>Forgot Password?</Link>
   </div>
   <div>
-    <button type="submit" className='w-32 h-10 mt-8 rounded-full font-semibold bg-blue-800 text-white'>LOG IN</button>
+    <button type="submit" className='w-32 h-10 mt-8 rounded-full font-semibold bg-blue-800 text-white'>
+      {loading? "Logging In..." : "LOG IN"}
+    </button>
   </div>
 </div>
     </form>
@@ -101,7 +148,7 @@ function LogIn() {
         <h1 className="text-4xl font-bold mt-5">COMPUTER MONITORING SYSTEM</h1>
         <h1 className="text-4xl font-medium mt-2">Log In</h1>
         <LoginForm fields={fields} />
-        <p className='mt-2'>Do you have an account? <Link to="/signup" className='text-blue-800'>Sign Up</Link></p>
+        <p className='mt-2'>Don't have an account yet? <Link to="/signup" className='text-blue-800'>Sign Up</Link></p>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './../styles/Tailwind.css';
 
 function BarGraphB() {
@@ -19,30 +19,27 @@ function BarGraphB() {
     ];
 
     return (
-        <div style={{ width: '100%', height: '300px'}}>
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                     data={data}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    width={150}
+                    height={40}
                 >
-                    <XAxis dataKey="month" axisLine={false} tickLine={false}/>
-                    <YAxis axisLine={false} tickLine={false}/>
                     <Tooltip 
                     isAnimationActive={false}
                     separator={": "}
                     cursor={false}
+                    labelFormatter={(value) => data[value].month}
                     />
                     <Legend />
                     <Bar
                         dataKey="Monitored Computers"
-                        fill="rgba(235, 0, 0, 0.5)"
-                        stroke="rgba(235, 0, 0, 1)"
+                        fill="#ff4d4d"
+                        stroke="#ff3333"
                         strokeWidth={1}
-                        className='neonb'
                     />
                 </BarChart>
             </ResponsiveContainer>
-        </div>
     );
 }
 

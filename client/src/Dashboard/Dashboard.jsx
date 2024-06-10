@@ -3,8 +3,7 @@ import SideBar from './Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import BarGraph from './Bargraph';
-import BarGraphB from './BargraphB';
+import Dashboard from './Db2';
 
 function Header(){
     return(
@@ -28,18 +27,19 @@ function DashBoard() {
                     <SideBar />
                 </div>
                 <div style={{ flex: 2, paddingBottom: '50px'}}>
+                <div className='grid gap-5 grid-cols-3'>
+                <div className='col-span-2 row-span-1'>
                     <p className='font-normal text-2xl pt-10 ml-10'>Dashboard</p>
                     <p className='font-light text-lg ml-10'>Home</p>
-                    <br/> <br/>
-                    <div className='w-full ml-10'>
-                    <p className='font-light text-2xl mb-5'>This Month</p>
-                    <BarGraph/> <br/> <br/> <br/>
-                    <p className='font-light text-2xl mb-5' style={{marginTop: '-70px'}}>This Year</p>
-                    <BarGraphB/>
                     </div>
-                </div>
-                <div style={{ flex: 'none'}}>
-                    <p className='font-normal text-xl pt-10 pr-10'>Welcome, <Link to="/profile"><b>Angeleen Darunday</b></Link></p> 
+                    <div className='col-span-1 row-span-1 justify-end text-end'>
+                    <p className='font-normal text-lg pt-10 mr-14'>Welcome, <Link to ="/profile"><b>Noreen Darunday</b></Link></p>
+                    </div>
+                    </div>
+                    <br/> <br/>
+                    <div className='ml-10 mr-10'>
+                    <Dashboard/>
+                    </div>
                 </div>
             </div>
         </div>

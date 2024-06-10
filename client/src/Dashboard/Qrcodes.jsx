@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import SideBar from './Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCamera, faRightFromBracket, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { QrReader } from 'react-qr-reader';
-import Extract from './Extract';
+//import { QrReader } from 'react-qr-reader';
+import Codes from './Codes';
 
 
 function Header() {
@@ -20,86 +20,7 @@ function Header() {
     );
 }
 
-class OpenFolder extends React.Component {
-    handleClick = () => {
-      this.openFileExplorer();
-    }
-  
-    openFileExplorer() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.click();
-    }
-  
-    render() {
-      return (
-        <div className="folder" onClick={this.handleClick}>
-            <FontAwesomeIcon icon={faUpload} className='w-64 h-36 mt-16 text-amber-600'></FontAwesomeIcon>
-        </div>
-      );
-    }
-  }
-
 function QrC() {
-    const [dragging, setDragging] = useState(false);
-    const [showCamera, setShowCamera] = useState(false);
-    const [scanResult, setScanResult] = useState('');
-    const [showComponentA, setShowComponentA] = useState(true);
-    const [showComponentB, setShowComponentB] = useState(false);
-
-        const toggleComponentA = () => {
-        setShowComponentA(true);
-        setShowComponentB(false);
-    };
-
-        const toggleComponentB = () => {
-        setShowComponentA(false);
-        setShowComponentB(true);
-    };
-
-    // eslint-disable-next-line
-    const toggleCamera = () => {
-        setShowCamera(!showCamera);
-    };
-
-    const handleScan = (data) => {
-        if (data) {
-            setScanResult(data);
-        }
-    };
-    
-    const handleError = (err) => {
-        console.error(err);
-    };    
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setDragging(true);
-    };
-
-    const handleDragEnter = (e) => {
-        e.preventDefault();
-        setDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setDragging(false);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setDragging(false);
-
-        const files = Array.from(e.dataTransfer.files);
-        // Handle file upload
-        handleUpload(files);
-    };
-
-    const handleUpload = (files) => {
-        // Implement your file upload logic here
-        console.log(files);
-    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -113,60 +34,8 @@ function QrC() {
                     <p className='font-light text-lg ml-10'><Link to="/dashboard" className='text-blue-800'>Home</Link> &gt; Scan QR</p>
                     <br /> <br />
                     <div className='flex text-center justify-center items-center'>
-                        <h1 className='font-normal text-xl'><button onClick={toggleComponentA} style={{ fontWeight: showComponentA ? 'bold' : 'normal'}}>Scan QR Code from Image</button> or <button onClick={toggleComponentB} style={{ fontWeight: showComponentB ? 'bold' : 'normal'}}>Cam QR Code Scanner</button></h1>
+                        <Codes/>
                     </div>
-                    {showComponentA && (
-                        <div className= 'mx-auto border border-l-slate-300 border-r-slate-300 border-t-transparent rounded-3xl border-b-slate-300 my-auto mt-4' style={{ height: '500px', width: '800px' }}>
-                        <p className= 'border rounded-3xl h-8 bg-red-600' style={{ width: '800px' }}></p>
-                        <div className='flex justify-center items-center'>
-                        <div className={`border border-dashed border-slate-900 rounded-3xl mt-8 ${dragging ? 'bg-gray-200' : ''}`} style={{ width: '650px', height: '400px' }}
-                        onDragOver={handleDragOver}
-                        onDragEnter={handleDragEnter}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}>
-                            <div className='text-center'>
-                                <OpenFolder/>
-                                <h1 className='font-semibold text-lg mt-4'>Drag & Drop or Browse</h1>
-                                <h1 className='font-light text-lg'><i>All image types allowed.</i></h1>
-                                </div>
-                                {scanResult && <Extract data={scanResult} />}
-                        </div>
-                        </div>
-                    </div>
-                    )}
-                    {showComponentB && (
-                        <div className= 'mx-auto border border-l-slate-300 border-r-slate-300 border-t-transparent rounded-3xl border-b-slate-300 my-auto mt-4' style={{ height: '550px', width: '800px' }}>
-                        <p className= 'border rounded-3xl h-8 bg-blue-600' style={{ width: '800px' }}></p>
-                        <div className='flex justify-center items-center'>
-                        <div className='border border-slate-200 rounded-3xl mt-8' style={{ width: '650px', height: '400px' }}>
-                            {/* Display camera if showCamera is true */}
-                            {showCamera && (
-                                <div className='text-center'>
-                                    <QrReader
-                                        delay={300}
-                                        onError={handleError}
-                                        onScan={handleScan}
-                                        style={{ width: '100%' }}
-                                    />
-                                </div>
-                            )}
-                            {/* Display scan result */}
-                            {scanResult && <Extract data={scanResult} />}
-                        </div>
-                        </div>
-                        <div className='flex justify-center items-center'>
-                        <button 
-                            className='text-center align-middle rounded-lg bg-cyan-600 text-white mt-3 pb-1 font-normal text-3xl' 
-                            style={{ width: '650px', height: '45px'}}
-                        >
-                            <FontAwesomeIcon icon={faCamera}></FontAwesomeIcon> {showCamera ? "Close Camera" : "Open Camera"}
-                        </button>  
-                        </div>
-                    </div>
-                    )}
-                </div>
-                <div style={{ flex: 'none', height: '100px' }}>
-                    <p className='font-normal text-xl pt-10 pr-10'>Welcome, <Link to="/profile"><b>Angeleen Darunday</b></Link></p>
                 </div>
             </div>
         </div>

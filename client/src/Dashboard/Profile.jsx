@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import smct from '../img/smct.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
@@ -17,6 +17,73 @@ function Header(){
         </div>
     );
 }
+
+const SearchableDropdown = ({ options, placeholder, onSelect }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredOptions, setFilteredOptions] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleInputChange = (event) => {
+    const searchTerm = event.target.value;
+    setSearchTerm(searchTerm);
+
+    const filteredOptions = options.filter(option =>
+      option.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredOptions(filteredOptions);
+    setIsOpen(true);
+  };
+
+  const handleSelectOption = (option) => {
+    setSearchTerm(option);
+    onSelect(option);
+    setIsOpen(false);
+  };
+
+  return (
+    <div ref={dropdownRef} className="flex items-center mb-4 relative">
+      <input
+        type="text"
+        className="w-full h-12 px-4 rounded-md border border-gray-300"
+        placeholder={placeholder}
+        value={searchTerm}
+        onChange={handleInputChange}
+      />
+      {isOpen && filteredOptions.length > 0 && (
+        <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md mt-1 top-full">
+          {filteredOptions.map(option => (
+            <li
+              key={option}
+              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              onClick={() => handleSelectOption(option)}
+            >
+              {option}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 function Placeholder() {
     const [inputValues, setInputValues] = useState(['', '', '', '', '', '', '', '']);
@@ -61,21 +128,14 @@ function Placeholder() {
             onChange={(event) => handleChange(3, event)}
           />
         </div>
-        <div className="flex items-center mb-4">
-          <select
-            className="w-full h-12 px-4 rounded-md border border-gray-300"
-            value={inputValues[4]}
-            onChange={(event) => handleChange(4, event)}
-          >
-            <option value="" disabled selected hidden>Select Branch Code</option>
-            <option value="BOHL">BOHL</option>
-            <option value="DSMT">DSMT</option>
-            <option value="DSMT2">DSMT2</option>
-            <option value="DSMAO">DSMAO</option>
-            <option value="DSMBN">DSMBN</option>
-            {/* Add your dropdown options here */}
-          </select>
-        </div>
+        <SearchableDropdown
+            options={["BOHL", "DSMT", "DSMT2", "DSMAO", "DSMBN"]}
+            placeholder="Select Branch Code"
+            onSelect={(option) => {
+              const event = { target: { value: option } };
+              handleChange(4, event);
+            }}
+          />
         <div className="flex items-center mb-4">
           <input
             type="text"

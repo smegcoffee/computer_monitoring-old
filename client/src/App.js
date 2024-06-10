@@ -9,6 +9,7 @@ import Set from './Dashboard/Setup/Set';
 import Profile from './Dashboard/Profile';
 import Computers from './Dashboard/Computers';
 import QrC from './Dashboard/Qrcodes';
+import Extract from './Dashboard/Extract';
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
       <Route path='/profile' element={<Profile/>}></Route>
       <Route path='/computers' element={<Computers/>}></Route>
       <Route path='/qr' element={<QrC/>}></Route>
+      <Route path='/computers/:id' element={<Extract/>}/>
     </Routes>
     </BrowserRouter>
   ); 

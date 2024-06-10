@@ -147,6 +147,7 @@ function EditSet({ isOpen, onClose }) {
   
 
   return (
+    <>
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div className="bg-white rounded-tl-xl rounded-tr-xl shadow-md" style={{maxWidth:'100vh', maxHeight:'100vh'}}>
         <div className='text-justify'>
@@ -179,6 +180,7 @@ function EditSet({ isOpen, onClose }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
