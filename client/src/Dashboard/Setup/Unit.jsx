@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import SideBar from '../Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -72,9 +72,83 @@ const CustomTableB = () => {
     );
   }
 
+//Searchable Dropdown
+  const SearchableDropdown = ({ options, placeholder, onSelect }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+  
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+  
+      if (isOpen) {
+        document.addEventListener('click', handleClickOutside);
+      } else {
+        document.removeEventListener('click', handleClickOutside);
+      }
+  
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }, [isOpen]);
+  
+    const handleInputChange = (event) => {
+      const searchTerm = event.target.value;
+      setSearchTerm(searchTerm);
+  
+      const filteredOptions = options.filter(option =>
+        option.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredOptions(filteredOptions);
+      setIsOpen(true);
+    };
+  
+    const handleSelectOption = (option) => {
+      setSearchTerm(option);
+      onSelect(option);
+      setIsOpen(false);
+    };
+  
+    return (
+      <div ref={dropdownRef} className="flex items-center relative">
+        <input
+          type="text"
+          className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+          placeholder={placeholder}
+          value={searchTerm}
+          onChange={handleInputChange}
+        />
+        {isOpen && filteredOptions.length > 0 && (
+          <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-xl mt-1 top-full text-justify">
+            {filteredOptions.map(option => (
+              <li
+                key={option}
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSelectOption(option)}
+              >
+                {option}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
   const CustomTableA = ({ rows, setRows }) => {
     const classes = useStyles();
-  
+    
+    //This is a sample data for Category
+    const Category = ["Monitor", "Keyboard"];
+
+    //This is a sample data for Supplier
+    const Supplier = ["TTI", "Computer Republic", "Bohol Computers"];
+
     const addRow = () => {
       setRows([
         ...rows,
@@ -148,12 +222,14 @@ const CustomTableB = () => {
                 />
               </TableCell>
               <TableCell align='center'>
-                <input
-                  type="text"
+              <SearchableDropdown
+                  options={Category}
                   value={row.value2}
                   onChange={(e) => handleChange(index, 'value2', e.target.value)}
                   placeholder=""
-                  className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                  onSelect={(option) => {
+                    handleChange(index, 'value2', option);
+                  }}
                 />
               </TableCell>
               <TableCell align='center'>
@@ -166,12 +242,14 @@ const CustomTableB = () => {
                 />
               </TableCell>
               <TableCell align='center'>
-                <input
-                  type="text"
+              <SearchableDropdown
+                  options={Supplier}
                   value={row.value4}
                   onChange={(e) => handleChange(index, 'value4', e.target.value)}
                   placeholder=""
-                  className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                  onSelect={(option) => {
+                    handleChange(index, 'value4', option);
+                  }}
                 />
               </TableCell>
               <TableCell align='center'>
@@ -221,8 +299,6 @@ function Unit() {
 
       const handleAddCategory = () => {
         if (category.trim() !== '') {
-          //kintahay ga add ko sa database
-            // call the backend url api chu chu
             console.log('Category added:', category);
 
             setCategory('');
@@ -237,8 +313,6 @@ function Unit() {
 
       const handleAddSupplier = () => {
         if (supplier.trim() !== '') {
-            //kintahay ga add ko sa database
-            // call the backend url api chu chu
             console.log('Supplier added:', supplier);
 
             setSupplier('');

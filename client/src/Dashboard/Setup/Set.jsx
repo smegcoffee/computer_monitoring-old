@@ -11,6 +11,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { Typography, TablePagination } from '@mui/material';
 import Add from './Add';
 import EditSet from './Editset';
 
@@ -41,6 +42,17 @@ const useStyles = makeStyles({
 function CompSet(){
     const classes = useStyles();
     const [isEditPopupOpen, setEditPopupOpen] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     const openEditPopup = () => {
         setEditPopupOpen(true);
@@ -49,8 +61,10 @@ function CompSet(){
       const closeEditPopup = () => {
         setEditPopupOpen(false);
       };
+
+      const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
             return(
-                <div className='w-full max-h-max'>
+                <div className='w-full max-h-max rounded-xl'>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="simple table">
                 <TableHead>
@@ -82,7 +96,7 @@ function CompSet(){
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map((row) => (
+                {rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((row, index) => (
                     <TableRow key={row.id}>
                         <TableCell align='center'>{row.id}</TableCell>
                         <TableCell align='center'>{row.dateOfPurchase}</TableCell>
@@ -95,10 +109,25 @@ function CompSet(){
                         <EditSet isOpen={isEditPopupOpen} onClose={() => closeEditPopup('editset')} />
                     </TableRow>
                     ))}
+                    {emptyRows > 0 && (
+                        <TableRow style={{height: 53 * emptyRows}}>
+                            <TableCell colSpan={8} />
+                        </TableRow>
+                    )}
                 </TableBody>
                 </Table>
+                <TablePagination
+                    rowsPerPageOptions={[5, 15, 20, 25]}
+                    component="div"
+                    count={rows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={(event, newPage) => handleChangePage(event, newPage)}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage={<Typography variant="subtitle" fontWeight={600}>Entries Per Page:</Typography>}
+                />
             </TableContainer>
-                        </div>
+            </div>
     );
 }
 
