@@ -7,15 +7,36 @@ import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 import { makeStyles } from '@material-ui/core/styles';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import axios from '../../api/axios';
 
 function Header(){
+  const handleLogout = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        console.log(token);
+        if (!token) {
+            return;
+        }
+
+        await axios.get('/api/logout', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        localStorage.removeItem('token');
+        window.location = "/login";
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+};
     return(
         <div>
             <div className='h-20 bg-blue-800 w-full flex justify-between items-center'>
                 <div className='flex-grow text-center'>
                     <p className='text-white text-4xl font-bold'>COMPUTER MONITORING SYSTEM</p>
                 </div>
-                <Link to="/login"><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
+                <Link onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
             </div>
         </div>
     );

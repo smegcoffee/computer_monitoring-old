@@ -106,6 +106,7 @@ class LoginController extends Controller
             return response()->json([
                 'status'            =>          true,
                 'message'           =>          'You need to change your password first',
+                'token'             =>          $user->createToken("API TOKEN")->plainTextToken,
                 'data'              =>          $user,
                 'id'                =>          auth()->user()->id
             ], 409);

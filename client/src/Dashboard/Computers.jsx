@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import Specs from './Popup for Computers/Specs';
 import View from './Popup for Computers/View';
 import QrCode from './Popup for Computers/Qr';
+import axios from '../api/axios';
 import {
     Table,
     TableBody,
@@ -20,13 +21,33 @@ import {
   } from '@mui/material';
 
 function Header(){
+  const handleLogout = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        console.log(token);
+        if (!token) {
+            return;
+        }
+
+        await axios.get('/api/logout', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        localStorage.removeItem('token');
+        window.location = "/login";
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+};
     return(
         <div>
             <div className='h-20 bg-blue-800 w-full flex justify-between items-center'>
                 <div className='flex-grow text-center'>
                     <p className='text-white text-4xl font-bold'>COMPUTER MONITORING SYSTEM</p>
                 </div>
-                <Link to="/login"><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
+                <Link onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
             </div>
         </div>
     );

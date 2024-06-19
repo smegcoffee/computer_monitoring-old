@@ -20,8 +20,8 @@ Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware("auth:sanctum")->group(function () {
     // GET
-    Route::get('/logout', [LogoutController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'index']);
+    Route::get('/logout', [LogoutController::class, 'logout']);
 
     // POST
 });

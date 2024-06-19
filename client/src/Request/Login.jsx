@@ -89,7 +89,7 @@ function LoginForm({ fields }) {
         setError(null);
         navigate('/dashboard');
         localStorage.setItem('token', response.data.token);
-
+        console.log(response.data.token);
       } else {
         console.log('Login failed!');
         setError('Login failed!');
@@ -100,7 +100,7 @@ function LoginForm({ fields }) {
       if (error.response && error.response.status === 409) {
         console.log('Backend error response:', error.response.data);
         setError(error.response.data.message);
-        navigate('/change-new-password');
+        navigate('/change-new-password/');
       } else if (error.response && error.response.data) {
         console.log('Backend error response:', error.response.data);
         setError(error.response.data.message);

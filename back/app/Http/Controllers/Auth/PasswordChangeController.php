@@ -11,7 +11,9 @@ class PasswordChangeController extends Controller
 {
     public function update(Request $request, $id)
     {
+
         $user = User::find($id);
+
         if ($user) {
             $validation = Validator::make($request->all(), [
                 'new_password'          =>          ['required', 'confirmed', 'min:8']

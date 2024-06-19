@@ -304,8 +304,8 @@ function SignUp() {
           confirmButtonColor: '#1e88e5',
           confirmButtonTExt: 'Done',
           html: "You will redirected to Login page <br>Thank you!"
-        }).then(function() {
-          window.location  = "/login";
+        }).then(function () {
+          window.location = "/login";
         });
         setSuccess(response.data.message);
         setError('');
