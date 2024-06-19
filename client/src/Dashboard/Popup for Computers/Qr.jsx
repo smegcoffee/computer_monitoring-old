@@ -1,13 +1,29 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import smct from './../../img/smct.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 import { QRCode } from 'react-qr-svg';
+import {toPng} from 'html-to-image'
 
 function QrCode({ isOpen, onClose, qrCodeData }) {
+  const qrCodeRef = useRef(null);
+
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
   }
+
+  const downloadQRCode = () => {
+    toPng(qrCodeRef.current)
+      .then(function (dataUrl) {
+        const link = document.createElement('a');
+        link.download = `${qrCodeData.id}.png`;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch(function (error) {
+        console.error('Error generating QR Code image:', error);
+      });
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -25,7 +41,13 @@ function QrCode({ isOpen, onClose, qrCodeData }) {
         </div>
         <div className="flex justify-center items-center">
         <div className='mt-7 mb-14 size-60'>
+        <div
+          ref={qrCodeRef}
+          onClick={downloadQRCode}
+          style={{ cursor: 'pointer' }}
+        >
         <QRCode value={qrCodeData.data}/>
+        </div>
           <h1 className='text-base font-semibold mt-3 text-center'>Computer QR Code</h1>
           </div>
           </div>
