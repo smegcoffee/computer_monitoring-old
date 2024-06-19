@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function BarGraph() {
     const data = [
@@ -10,30 +10,27 @@ function BarGraph() {
     ];
 
     return (
-        <div style={{ width: '100%', height: '300px'}}>
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
                 <BarChart
+                    width={150}
+                    height={40}
                     data={data}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                    <XAxis dataKey="name" axisLine={false} tickLine={false}/>
-                    <YAxis axisLine={false} tickLine={false}/>
                     <Tooltip
                         isAnimationActive={false}
                         separator={": "}
                         cursor={false}
+                        labelFormatter={(value) => data[value].name}
                     />
                     <Legend/>
                     <Bar
                         dataKey="Monitored Computers"
-                        fill="rgba(54, 162, 235, 0.5)"
+                        fill="rgba(54, 162, 235, 0.9)"
                         stroke="rgba(54, 162, 235, 1)"
                         strokeWidth={1}
-                        className='neona'
                     />
                 </BarChart>
             </ResponsiveContainer>
-        </div>
     );
 }
 
