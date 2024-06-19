@@ -1,6 +1,6 @@
 import './styles/Tailwind.css';
 import LogIn from './Request/Login';
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Forgot from './Request/Forgot';
 import SignUp from './Request/Signup';
 import DashBoard from './Dashboard/Dashboard';
@@ -12,8 +12,8 @@ import QrC from './Dashboard/Qrcodes';
 import Extract from './Dashboard/Extract';
 import Reset from './Request/Reset';
 
-
 function App() {
+
   return (
     <BrowserRouter>
     <Routes>
@@ -31,7 +31,7 @@ function App() {
       <Route path='/reset/:code' element={<Reset/>}></Route>
     </Routes>
     </BrowserRouter>
-  ); 
+  );
 }
 
 export default App;
