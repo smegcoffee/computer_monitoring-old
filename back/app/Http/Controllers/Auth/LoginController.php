@@ -67,9 +67,13 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+
+        $user = User::where('email', $request->email)->first();
+
+
         $validation = Validator::make($request->all(), [
             'email'         =>          ['required', 'email', 'regex:/^\S+@\S+\.\S+$/'],
-            'password'      =>          ['required']
+            'password'      =>          ['required', 'min:8']
         ]);
 
         if ($validation->fails()) {
@@ -80,9 +84,6 @@ class LoginController extends Controller
             ], 400);
         }
 
-        $user = User::where('email', $request->email)->first();
-
-        
 
         if (!$user) {
             return response()->json([
@@ -104,7 +105,9 @@ class LoginController extends Controller
         }elseif ($user->request_new_password == true) {
             return response()->json([
                 'status'            =>          true,
-                'message'           =>          'You need to change your password first'
+                'message'           =>          'You need to change your password first',
+                'data'              =>          $user,
+                'id'                =>          auth()->user()->id
             ], 409);
         
         } else {
