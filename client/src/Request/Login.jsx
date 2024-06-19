@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
+import { user } from './Signup';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,47 +45,24 @@ function LoginForm({ fields }) {
     const password = inputValues[1];
     setLoading(true);
 
-    // if (!email || !password) {
-    //   console.log('Please fill in all fields.');
-    //   setError('Please fill in all field.');
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // const userWithEmail = user.find(user => user.email === email);
-    // if (!userWithEmail) {
-    //   console.log('Email not registered.');
-    //   setError('Email not registered.');
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // // Email format validation
-    // const emailRegex = /^\S+@\S+\.\S+$/;
-    // if (!emailRegex.test(email)) {
-    //   console.log('Please enter a valid email address.');
-    //   setError('Please enter a valid email address.');
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // if (password !== userWithEmail.password) {
-    //   console.log('Incorrect password.');
-    //   setError('Incorrect password.');
-    //   setLoading(false);
-    //   return;
-    // }
-
+    if (password !== userWithEmail.password){
+      console.log('Incorrect password.');
+      setError('Incorrect password.');
+      setLoading(false);
+      return;
+    }
     try {
       // Backend API request for authentication
-      const response = await axios.post('/api/login', {
+      const response = await axios.post('API_ENDPOINT_HERE', {
         email,
-        password
+        password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-
-      console.log('Response:', response.data);
-
-      if (response.status === 200) {
+  
+      if ((response.status >= 200 && response.status < 300) || email === userWithEmail.email) {
         console.log('Login successfully!');
         setError(null);
         navigate('/dashboard');

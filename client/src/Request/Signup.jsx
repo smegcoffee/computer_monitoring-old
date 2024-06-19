@@ -3,7 +3,6 @@ import smct from '../img/smct.png';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
 import axios from '../api/axios';
-// import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 
@@ -200,22 +199,14 @@ function SignUp() {
     e.preventDefault();
     setLoading(true);
     try {
-      // const response = await fetch('http://127.0.0.1:8000/api/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     firstName: inputValues[0],
-      //     lastName: inputValues[1],
-      //     contactNumber: inputValues[2],
-      //     email: inputValues[3],
-      //     branchCode: inputValues[4],
-      //     username: inputValues[5],
-      //     password: inputValues[6],
-      //     passwordConfirmation: inputValues[7],
-      //   }),
-      // });
+      for (let i = 0; i< user.length; i++){
+        if (inputValues[3] === user[i].email){
+          console.log('Email already registered.');
+        setError('Email already registered.');
+        setLoading(false);
+        return;
+        }
+      }
 
       //   const response = await axios.post('/api/register', {
       //       firstName: inputValues[0],
@@ -254,7 +245,6 @@ function SignUp() {
       //     setLoading(false);
       //     return;
       //   }
-
       //   for (let i = 0; i < user.length; i++) {
       //     if (inputValues[5] === user[i].username) {
       //       console.log('Username is already in use.');

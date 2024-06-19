@@ -4,58 +4,63 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus } from '@fortawesome/free-solid-svg-icons';
 
 
-function EditUser() {
-    // Initialize rows state with sample data
-    const [rows, setRows] = useState([
-      { id: 1, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2'},
-      { id: 2, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      { id: 3, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      { id: 4, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      { id: 5, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      { id: 6, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      { id: 7, data1: 'Data 1', data2: 'Data 2', data3: 'Data 1', data4: 'Data 2', data5: 'Data 2', data6: 'Data 2', data7: 'Data 2' },
-      // Add more sample rows as needed
-    ]);
+function EditUser({units}) {
+  const [rows, setRows] = useState([]);
   
+    useEffect(() => {
+      if (Array.isArray(units)) {
+        setRows(units);
+      } else {
+        console.error('Units is not an array');
+      }
+    }, [units]);
+
     // Function to delete a row
-    const deleteRow = (id) => {
-      const newRows = rows.filter(row => row.id !== id);
+    const handleDelete = (index) => {
+      if (!Array.isArray(rows)) {
+        console.error('Rows is not an array');
+        return;
+      }
+  
+      const newRows = [...rows];
+      newRows.splice(index, 1);
       setRows(newRows);
     };
+
   
     return (
       <TableContainer component={Paper} style={{ borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
-        <Table>
-          <TableHead>
-            <TableRow className='bg-red-200'>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>UNIT CODE</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DATE OF PURCHASE</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>CATEGORY</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DESCRIPTION</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SUPPLIER</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SERIAL NO.</Typography></TableCell>
-            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>STATUS</Typography></TableCell>
-            <TableCell align='center'></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map(row => (
-              <TableRow key={row.id}>
-                <TableCell align='center'>{row.data1}</TableCell>
-                <TableCell align='center'>{row.data2}</TableCell>
-                <TableCell align='center'>{row.data3}</TableCell>
-                <TableCell align='center'>{row.data4}</TableCell>
-                <TableCell align='center'>{row.data5}</TableCell>
-                <TableCell align='center'>{row.data6}</TableCell>
-                <TableCell align='center'>{row.data7}</TableCell>
-                <TableCell align='center'>
-                  <button onClick={() => deleteRow(row.id)} className="text-red-600 text-base font-semibold"><FontAwesomeIcon icon={faMinus} /></button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <Table>
+                <TableHead>
+                    <TableRow className='bg-red-200'>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>UNIT CODE</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DATE OF PURCHASE</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>CATEGORY</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DESCRIPTION</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SUPPLIER</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SERIAL NO.</Typography></TableCell>
+                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>STATUS</Typography></TableCell>
+                        <TableCell align='center'></TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {rows.map((unit, index) => (
+                        <TableRow key={index}>
+                            <TableCell align='center'>{unit.unit}</TableCell>
+                            <TableCell align='center'>{unit.dop}</TableCell>
+                            <TableCell align='center'>{unit.category}</TableCell>
+                            <TableCell align='center'>{unit.description2}</TableCell>
+                            <TableCell align='center'>{unit.supplier}</TableCell>
+                            <TableCell align='center'>{unit.serial}</TableCell>
+                            <TableCell align='center'>{unit.status}</TableCell>
+                            <TableCell align='center'>
+                                <button onClick={() => handleDelete(index)} className="text-red-600 text-base font-semibold"><FontAwesomeIcon icon={faMinus} /></button>
+                            </TableCell>
+                            </TableRow>
+                            ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
     );
   }
 
@@ -126,13 +131,12 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
     );
   }
 
-function EditSet({ isOpen, onClose }) {
+function EditSet({ isOpen, onClose, row, editPopupData }) {
     const [inputValue, setInputValue] = useState('');
 
   if (!isOpen) {
     return null;
   }
- 
 
 
   const handleChange = (index, event) => {
@@ -148,10 +152,10 @@ function EditSet({ isOpen, onClose }) {
 
   return (
     <>
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-      <div className="bg-white rounded-tl-xl rounded-tr-xl shadow-md" style={{maxWidth:'100vh', maxHeight:'100vh'}}>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+      <div className="bg-white rounded-tl-xl rounded-tr-xl shadow-md" style={{minWidth: '1000px', maxWidth:'100vh', maxHeight:'100vh'}}>
         <div className='text-justify'>
-        <EditUser/>
+        {editPopupData && <EditUser units={editPopupData.units} />}
         <div className='flex justify-center items-center'>
         <div className='flex-none'>
         <p className='ml-4 mt-3 mb-1 font-semibold'>Assign User:</p>

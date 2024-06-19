@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Grid, Container, CardContent, Button, TextField, MenuItem, Typography, TableContainer, Table, TableHead, TableRow, TableBody, TableCell } from '@mui/material';
+import { Card, Grid, Container, CardContent, Button, TextField, MenuItem, Typography, TableContainer, Table, TableHead, TableRow, TableBody, TableCell,
+List, ListItem, ListItemText
+ } from '@mui/material';
 import { tableData } from './Computers';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+//import axios from 'axios';
 
 const Extract = () => {
   const { id } = useParams();
@@ -12,11 +15,15 @@ const Extract = () => {
   const [application, setApplication] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [otherApplication, setOtherApplication] = useState('');
+  const [showAll, setShowAll] = useState(false);
 
 
   // Sample computer data
   const computer = tableData.find(computer => computer.id === parseInt(id));
-  console.log(computer);
+
+  const toggleShowAll = () => {
+    setShowAll(!showAll);
+  };
 
   const handleChangeDate = (date) => {
     setSelectedDate(date);
@@ -63,16 +70,14 @@ const Extract = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/computers/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: computer.id,
-          remark,
-          application,
-        }),
+      const response = await axios.put('/api/computers/update', {
+      id,
+      remark,
+      application,
+      }, {
+      headers: {
+      'Content-Type': 'application/json',
+      },
       });
       if (response.ok) {
         console.log('Added.');
@@ -82,7 +87,6 @@ const Extract = () => {
     }
   }
     */}
-
   return (
     <Container>
       <Card className='mt-20'>
@@ -98,22 +102,64 @@ const Extract = () => {
                 <Table>
                   <TableHead className='bg-blue-200'>
                     <TableRow>
-                    <TableCell align='center'><Typography variant="body1"><b>Unit</b></Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1"><b>Category</b></Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1"><b>Status</b></Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1"><b>Recent</b></Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>UNIT CODE</Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>CATEGORY</Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>DESCRIPTION</Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>SUPPLIER</Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>DATE OF PURCHASE</Typography></TableCell>
+                    <TableCell align= "center"><Typography variant='subtitle1' fontWeight='bold'>SERIAL NUMBER</Typography></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow>
-                    <TableCell align='center'><Typography variant="body1">{computer.unit}</Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1">{computer.category}</Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1">{computer.status}</Typography></TableCell>
-                    <TableCell align='center'><Typography variant="body1">{computer.recent}</Typography></TableCell>
+                    {computer.units.map((unit, index) =>(
+                    <TableRow key= {index}>
+                    <TableCell align= "center">{unit.unit}</TableCell>
+                    <TableCell align= "center">{unit.category}</TableCell>
+                    <TableCell align= "center">{unit.description2}</TableCell>
+                    <TableCell align= "center">{unit.supplier}</TableCell>
+                    <TableCell align= "center">{unit.dop}</TableCell>
+                    <TableCell align= "center">{unit.serial}</TableCell>
                   </TableRow>
+                  ))}
               </TableBody>
               </Table>
               </TableContainer>
+            </Grid>
+            <Grid container spacing={2} justify="center" style={{marginTop: "10px"}}>
+            <Grid item xs={12} md={6}>
+              <Typography variant='h5' align='center'>Installed Applications</Typography>
+              <div style={{marginLeft: "165px"}}>
+                <List>
+                  {computer.description.slice(0, showAll ? computer.description.length : 5).map((item, index) => (
+                    <ListItem key={index}>
+                      <ListItemText primary={item} />
+                    </ListItem>
+                  ))}
+                </List>
+                {computer.description.length > 5 && (
+                  <Button onClick={toggleShowAll}>
+                    {showAll ? 'Show less' : 'Show more'}
+                  </Button>
+                )}
+              </div>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant='h5' align='center'>Remarks</Typography>
+              <div style={{marginLeft: "185px"}}>
+                <List>
+                  {computer.information.slice(0, showAll ? computer.information.length : 5).map((item, index) => (
+                    <ListItem key={index}>
+                      <ListItemText primary={item} />
+                    </ListItem>
+                  ))}
+                </List>
+                {computer.information.length > 5 && (
+                  <Button onClick={toggleShowAll}>
+                    {showAll ? 'Show less' : 'Show more'}
+                  </Button>
+                )}
+              </div>
+            </Grid>
             </Grid>
             <Grid item xs={12}>
               <form onSubmit={handleSubmit}>
