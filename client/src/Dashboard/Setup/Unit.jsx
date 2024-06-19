@@ -7,6 +7,7 @@ import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 import { makeStyles } from '@material-ui/core/styles';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { data } from './Add';
 
 function Header(){
     return(
@@ -61,11 +62,20 @@ const CustomTableB = () => {
               <TableCell align='center'>
                 <p className='font-semibold text-base mt-1.5'>STATUS</p>
               </TableCell>
-              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Add Table Rows and Cells here */}
+            {data.map((data, index) => (
+            <TableRow key={index}>
+              <TableCell align="center">{data.unit}</TableCell>
+              <TableCell align="center">{data.dop}</TableCell>
+              <TableCell align="center">{data.category}</TableCell>
+              <TableCell align="center">{data.description}</TableCell>
+              <TableCell align="center">{data.supplier}</TableCell>
+              <TableCell align="center">{data.serial}</TableCell>
+              <TableCell align="center">{data.status}</TableCell>
+            </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
@@ -118,7 +128,7 @@ const CustomTableB = () => {
       <div ref={dropdownRef} className="flex items-center relative">
         <input
           type="text"
-          className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+          className='bg-gray-200 border border-transparent rounded-xl w-full h-9 pl-2'
           placeholder={placeholder}
           value={searchTerm}
           onChange={handleInputChange}
@@ -144,7 +154,7 @@ const CustomTableB = () => {
     const classes = useStyles();
     
     //This is a sample data for Category
-    const Category = ["Monitor", "Keyboard"];
+    const Category = ["Monitor", "Keyboard", "Mouse"];
 
     //This is a sample data for Supplier
     const Supplier = ["TTI", "Computer Republic", "Bohol Computers"];
@@ -152,7 +162,7 @@ const CustomTableB = () => {
     const addRow = () => {
       setRows([
         ...rows,
-        { value1: '', selectedDate: null, value2: '', value3: '', value4: '', value5: '', value6: '' }
+        { selectedDate: null, value2: '', value3: '', value4: '', value5: '', value6: '' }
       ]);
     };
   
@@ -178,9 +188,6 @@ const CustomTableB = () => {
           <TableHead>
             <TableRow className='bg-blue-200'>
               <TableCell align='center'>
-                <p className='font-semibold text-base mt-1.5'>UNIT CODE</p>
-              </TableCell>
-              <TableCell align='center'>
                 <p className='font-semibold text-base mt-1.5'>DATE OF PURCHASE</p>
               </TableCell>
               <TableCell align='center'>
@@ -204,15 +211,6 @@ const CustomTableB = () => {
           <TableBody>
           {rows.map((row, index) => (
             <TableRow key={index}>
-              <TableCell align='center'>
-                <input
-                  type="text"
-                  value={row.value1}
-                  onChange={(e) => handleChange(index, 'value1', e.target.value)}
-                  placeholder=""
-                  className='bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-2'
-                />
-              </TableCell>
               <TableCell align='center'>
                 <DatePicker
                   selected={row.selectedDate}

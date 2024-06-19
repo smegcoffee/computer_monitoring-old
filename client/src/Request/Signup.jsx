@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import smct from '../img/smct.png';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 
 //This is for the Searchable Dropdown
@@ -175,23 +176,6 @@ function SignUp(){
     setLoading(true);
   
     try {
-      const response = await fetch('API_ENDPOINT_HERE', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: inputValues[0],
-          lastName: inputValues[1],
-          contactNumber: inputValues[2],
-          email: inputValues[3],
-          branchCode: inputValues[4],
-          username: inputValues[5],
-          password: inputValues[6],
-          confirmPassword: inputValues[7],
-        }),
-      });
-
       for (let i = 0; i< user.length; i++){
         if (inputValues[3] === user[i].email){
           console.log('Email already registered.');
@@ -247,8 +231,23 @@ function SignUp(){
         setLoading(false);
         return;
       }
+      
+      const response = await axios.post('API_ENDPOINT_HERE', {
+        firstName: inputValues[0],
+        lastName: inputValues[1],
+        contactNumber: inputValues[2],
+        email: inputValues[3],
+        branchCode: inputValues[4],
+        username: inputValues[5],
+        password: inputValues[6],
+        confirmPassword: inputValues[7],
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      if (response.ok) {
+      if (response.status >= 200 && response.status < 300) {
         console.log('Signup successful');
       } else{
           console.log('Signup failed.');

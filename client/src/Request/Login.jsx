@@ -5,6 +5,7 @@ import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
 import { user } from './Signup';
+import axios from 'axios';
 
 
 function InputField({ icon, text, value, onChange }) {
@@ -71,18 +72,18 @@ function LoginForm({ fields }) {
       setLoading(false);
       return;
     }
-  
     try {
       // Backend API request for authentication
-      const response = await fetch('INSERT BACKEND API', {
-        method: 'POST',
+      const response = await axios.post('API_ENDPOINT_HERE', {
+        email,
+        password,
+      }, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
       });
   
-      if (response.ok || email === userWithEmail.email) {
+      if ((response.status >= 200 && response.status < 300) || email === userWithEmail.email) {
         console.log('Login successfully!');
         setError(null);
       } else {

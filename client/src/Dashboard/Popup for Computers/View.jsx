@@ -55,12 +55,14 @@ function View({ isOpen, onClose, viewData}) {
           </TableRow>
         </TableHead>
         <TableBody>
-            <TableRow>
-              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{viewData.unit}</Typography></TableCell>
-              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{viewData.category}</Typography></TableCell>
-              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{viewData.status}</Typography></TableCell>
-              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{viewData.recent}</Typography></TableCell>
+          {viewData.units.map((unit, index) =>(
+            <TableRow key={index}>
+              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{unit.unit}</Typography></TableCell>
+              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{unit.category}</Typography></TableCell>
+              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{unit.status}</Typography></TableCell>
+              <TableCell align='center'><Typography variant='subtitle1' fontWeight='medium'>{unit.recent}</Typography></TableCell>
             </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
