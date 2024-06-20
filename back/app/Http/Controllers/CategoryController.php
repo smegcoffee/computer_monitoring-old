@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
-class ProfileController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $user = auth()->user();
-
-        return response()->json([
-            'status'        =>          true,
-            'message'       =>          'Profile Information',
-            'data'          =>          $user,
-            'id'            =>          auth()->user()->id
-        ], 200);
+        //
     }
 
     /**
@@ -42,7 +34,7 @@ class ProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
         //
     }
@@ -50,7 +42,7 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Category $category)
     {
         //
     }
@@ -58,7 +50,7 @@ class ProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
         //
     }
@@ -66,7 +58,7 @@ class ProfileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
         //
     }

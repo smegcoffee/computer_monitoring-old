@@ -41,7 +41,7 @@ class RegisterController extends Controller
         if ($validation->fails()) {
             return response()->json([
                 'status'        =>          false,
-                'message'       =>          '"' . "Something went wrong please fix" . '"',
+                'message'       =>          "Something went wrong please fix.",
                 'errors'        =>          $validation->errors()
             ], 422);
         }

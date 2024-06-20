@@ -7,18 +7,29 @@ import { Link } from 'react-router-dom';
 import { user } from './Signup';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
-function InputField({ icon, text, value, onChange }) {
+function InputField({ icon, text, value, onChange, errorMessage }) {
+
   return (
-    <div className="flex items-center mb-4">
-      <span className="mr-2 text-gray-400">{icon}</span>
-      <input
-        type={text === 'Password' ? 'password' : 'text'}
-        className="w-full h-12 px-4 rounded-md border border-gray-300"
-        placeholder={text}
-        value={value}
-        onChange={onChange}
-      />
+    <div className="mb-4">
+      <div className="flex items-center">
+        <span className="mr-2 text-gray-400">{icon}</span>
+        <input
+          type={text === 'Password' ? 'password' : 'text'}
+          className={`w-full h-12 px-4 rounded-md border ${errorMessage ? 'border-red-500' : 'border-gray-300'
+            } focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50`}
+          placeholder={text}
+          value={value}
+          onChange={onChange}
+        />
+      </div>
+      <div className='flex items-center'>
+        <span className={errorMessage ? 'mr-2 text-gray-400 opacity-0' : 'hidden'}>{icon}</span>
+        {errorMessage && (
+          <span className="text-red-500">{errorMessage}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -26,11 +37,11 @@ function InputField({ icon, text, value, onChange }) {
 // Component for rendering the login form
 function LoginForm({ fields }) {
   const [inputValues, setInputValues] = useState(fields.map(() => ''));
-  const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
-  const [success] = useState();
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState({});
+  const [error, setError] = useState('');
 
   // Handler for input change
   const handleChange = (index, event) => {
@@ -45,44 +56,40 @@ function LoginForm({ fields }) {
     const password = inputValues[1];
     setLoading(true);
 
-    if (password !== userWithEmail.password){
-      console.log('Incorrect password.');
-      setError('Incorrect password.');
-      setLoading(false);
-      return;
-    }
     try {
-      // Backend API request for authentication
-      const response = await axios.post('API_ENDPOINT_HERE', {
-        email,
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if ((response.status >= 200 && response.status < 300) || email === userWithEmail.email) {
-        console.log('Login successfully!');
-        setError(null);
+      const response = await axios.post('/api/login', { email, password });
+
+      if (response.status === 200) {
+        setSuccess('Login successful!');
         navigate('/dashboard');
         localStorage.setItem('token', response.data.token);
-
       } else {
-        console.log('Login failed!');
-        setError('Login failed!');
         setLoading(false);
+        setError('Login failed.');
       }
     } catch (error) {
       console.error('Error:', error);
       if (error.response && error.response.status === 409) {
-        console.log('Backend error response:', error.response.data);
-        setError(error.response.data.message);
-        navigate('/change-new-password');
+        navigate('/change-new-password/');
       } else if (error.response && error.response.data) {
-        console.log('Backend error response:', error.response.data);
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-right',
+          iconColor: 'red',
+          customClass: {
+            popup: 'colored-toast',
+          },
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+
+        await Toast.fire({
+          icon: 'error',
+          title: error.response.data.message,
+        });
       } else {
         setError('An unexpected error occurred.');
       }
@@ -100,31 +107,25 @@ function LoginForm({ fields }) {
           text={item.text}
           value={inputValues[index]}
           onChange={(event) => handleChange(index, event)}
+          errorMessage={validationErrors[item.text.toLowerCase()]}
         />
       ))}
+      {success && <div className="text-green-500 mb-2">{success}</div>}
+
       <div className="flex justify-center flex-col items-center">
-        {/* <div className='text-red-500 mb-5'>
-        {error ? error : null}
-        </div> */}
-        {error && <div className="text-red-500">{error}</div>}
-        {success && <div className="text-green-500">{success}</div>}
-        {Object.keys(validationErrors).length > 0 &&
-          <div className="text-red-500">
-            <ul>
-              {Object.values(validationErrors).flat().map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </div>
-        }
         <div className="mb-4">
-          <Link to="/forgot" className='hover:underline'>Forgot Password?</Link>
+          <Link to="/forgot" className="hover:underline">
+            Forgot Password?
+          </Link>
         </div>
         <div>
-          <button type="submit" className='w-32 h-10 mt-8 rounded-full font-semibold bg-blue-800 text-white'>
-            {loading ? "Logging In..." : "LOG IN"}
+          <button
+            type="submit"
+            className="w-32 h-10 mt-8 rounded-full font-semibold bg-blue-800 text-white"
+            disabled={loading}
+          >
+            {loading ? 'Logging In...' : 'LOG IN'}
           </button>
-          
         </div>
       </div>
     </form>
