@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { FormControl, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import smct from '../img/smct.png';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
-//import { Link } from 'react-router-dom';
 import axios from '../api/axios';
 import Swal from 'sweetalert2';
 
@@ -121,5 +121,3 @@ function Forgot() {
 }
 
 export default Forgot;
-
-//You will be redirected to this page upon clicking Forgot Password? in the Log In Form

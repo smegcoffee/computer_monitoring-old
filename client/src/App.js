@@ -12,6 +12,7 @@ import QrC from './Dashboard/Qrcodes';
 import Extract from './Dashboard/Extract';
 import ProtectedRoutes from './context/ProtectedRoutes';
 import AuthContext from './context/AuthContext';
+import Reset from './Request/Reset';
 
 function App() {
 

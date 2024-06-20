@@ -8,7 +8,6 @@ function Specs({ isOpen, onClose, specsData }) {
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
   }
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div className="bg-white rounded-2xl shadow-md" style={{maxWidth:'100vh', maxHeight:'100vh'}}>
@@ -21,6 +20,7 @@ function Specs({ isOpen, onClose, specsData }) {
             </div>
             <div className='flex-2 ml-28 text-white text-3xl mt-7 font-medium'>
                 Computer ID: {specsData.id}
+
             </div>
         </div>
         <div className='text-justify mt-6 ml-6 mr-6 mb-4'>
@@ -38,14 +38,16 @@ function Specs({ isOpen, onClose, specsData }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
-          <TableCell align= "center">{specsData.unit}</TableCell>
-            <TableCell align= "center">{specsData.category}</TableCell>
-            <TableCell align= "center">{specsData.description2}</TableCell>
-            <TableCell align= "center">{specsData.supplier}</TableCell>
-            <TableCell align= "center">{specsData.dop}</TableCell>
-            <TableCell align= "center">{specsData.serial}</TableCell>
+          {specsData.units.map((unit, index)=> (
+          <TableRow key={index}>
+          <TableCell align= "center">{unit.unit}</TableCell>
+            <TableCell align= "center">{unit.category}</TableCell>
+            <TableCell align= "center">{unit.description2}</TableCell>
+            <TableCell align= "center">{unit.supplier}</TableCell>
+            <TableCell align= "center">{unit.dop}</TableCell>
+            <TableCell align= "center">{unit.serial}</TableCell>
           </TableRow>
+          ))}
       </TableBody>
       </Table>
     </TableContainer>

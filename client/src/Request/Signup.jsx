@@ -3,7 +3,6 @@ import smct from '../img/smct.png';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
 import axios from '../api/axios';
-// import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 
@@ -122,8 +121,6 @@ function SignUp() {
     e.preventDefault();
     setLoading(true);
     try {
-
-
       const response = await axios.post('/api/register', inputValues);
       if (response.data.status === true) {
         Swal.fire({

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
+import { user } from './Signup';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
