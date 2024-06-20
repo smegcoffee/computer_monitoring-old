@@ -51,7 +51,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   };
 
   return (
-    <div ref={dropdownRef} className="flex items-center mb-4 relative">
+    <div ref={dropdownRef} className="flex items-center mt-4 relative">
       <input
         type="text"
         className="w-full h-12 px-4 rounded-md border border-gray-300"
@@ -99,8 +99,6 @@ const user = ([
 ]);
 
 function SignUp() {
-  // const [inputValues, setInputValues] = useState(['', '', '', '', '', '', '', '']);
-  // const navigate = useNavigate();
   const [inputValues, setInputValues] = useState({
     firstName: '',
     lastName: '',
@@ -111,189 +109,19 @@ function SignUp() {
     password: '',
     password_confirmation: ''
   });
-  const [passwordPlaceholders, setPasswordPlaceholders] = useState(["Password", "Confirm Password"]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
 
-
-  //Sample Data for the Branch Code Options
-  const options = ["BOHL", "DSMT", "HO"];
-
-  // const handleChange = (index, event) => {
-  //   const newInputValues = [...inputValues];
-  //   newInputValues[index] = event.target.value;
-  //   setInputValues(newInputValues);
-  //   // console.log(newInputValues);
-  // };
-
   const handleChange = (e) => {
     setInputValues({ ...inputValues, [e.target.name]: e.target.value });
   };
-
-
-
-  // For the Password to be not visible when typing
-
-  const handlePasswordBlur = (index) => {
-    const newInputValues = [...inputValues];
-    const newPlaceholders = [...passwordPlaceholders];
-
-    if (!newInputValues[index]) {
-      newPlaceholders[index] = "••••••••••"; // Placeholder text as dots
-      setPasswordPlaceholders(newPlaceholders);
-    }
-  };
-
-  const handlePasswordChange = (index, event) => {
-    const newInputValues = [...inputValues];
-    const newPlaceholders = [...passwordPlaceholders];
-
-    newInputValues[index] = event.target.value;
-
-    if (!newInputValues[index]) {
-      newPlaceholders[index] = "••••••••••"; // Placeholder text as dots
-      setPasswordPlaceholders(newPlaceholders);
-    } else {
-      newPlaceholders[index] = "";
-      setPasswordPlaceholders(newPlaceholders);
-    }
-
-    setInputValues(newInputValues);
-  };
-
-  const handlePasswordConfirmationFocus = (index) => {
-    // Function implementation, if needed
-  };
-
-  const handlePasswordConfirmationBlur = (index) => {
-    const newInputValues = [...inputValues];
-    const newPlaceholders = [...passwordPlaceholders];
-
-    if (!newInputValues[index]) {
-      newPlaceholders[index] = "••••••••••"; // Placeholder text as dots
-      setPasswordPlaceholders(newPlaceholders);
-    }
-  };
-
-  const handlePasswordConfirmationChange = (index, event) => {
-    const newInputValues = [...inputValues];
-    const newPlaceholders = [...passwordPlaceholders];
-
-    newInputValues[index] = event.target.value;
-
-    if (!newInputValues[index]) {
-      newPlaceholders[index] = "••••••••••"; // Placeholder text as dots
-      setPasswordPlaceholders(newPlaceholders);
-    } else {
-      newPlaceholders[index] = ""; // Clear placeholder if there is input
-      setPasswordPlaceholders(newPlaceholders);
-    }
-
-    setInputValues(newInputValues);
-  };
-
-  // END OF THE ENCRYPTED PASSWORD
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // const response = await fetch('http://127.0.0.1:8000/api/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     firstName: inputValues[0],
-      //     lastName: inputValues[1],
-      //     contactNumber: inputValues[2],
-      //     email: inputValues[3],
-      //     branchCode: inputValues[4],
-      //     username: inputValues[5],
-      //     password: inputValues[6],
-      //     passwordConfirmation: inputValues[7],
-      //   }),
-      // });
-
-      //   const response = await axios.post('/api/register', {
-      //       firstName: inputValues[0],
-      //       lastName: inputValues[1],
-      //       contactNumber: inputValues[2],
-      //       email: inputValues[3],
-      //       branchCode: inputValues[4],
-      //       username: inputValues[5],
-      //       password: inputValues[6],
-      //       password_confirmation: inputValues[7],
-      //   });
-      //   console.log(response);
-
-      //   for (let i = 0; i< user.length; i++){
-      //     if (inputValues[3] === user[i].email){
-      //       console.log('Email already registered.');
-      //     setError('Email already registered.');
-      //     setLoading(false);
-      //     return;
-      //     }
-      //   }
-
-      //   for (let i = 0; i < inputValues.length; i++) {
-      //     if (!inputValues[i]) {
-      //         console.log('Please fill in all fields!');
-      //         setError('Please fill in all fields!');
-      //         setLoading(false);
-      //         return;
-      //     }
-      // }
-
-      //   const emailRegex = /^\S+@\S+\.\S+$/;
-      //   if (!emailRegex.test(inputValues[3])) {
-      //     console.log('Please enter a valid email address.');
-      //     setError('Please enter a valid email address.');
-      //     setLoading(false);
-      //     return;
-      //   }
-
-      //   for (let i = 0; i < user.length; i++) {
-      //     if (inputValues[5] === user[i].username) {
-      //       console.log('Username is already in use.');
-      //       setError('Username is already in use.');
-      //       setLoading(false);
-      //       return;
-      //     }
-      //   }      
-
-      //   if (inputValues[6].length < 6){
-      //     console.log('Password must be at least 6 characters long.');
-      //     setError('Password must be at least 6 characters long.');
-      //     setLoading(false);
-      //     return;
-      //   }
-
-      //   if (inputValues[7] !== inputValues[6]){
-      //     console.log('Password did not match.');
-      //     setError('Password did not match.');
-      //     setLoading(false);
-      //     return;
-      //   }
-
-      //   if (!options.includes(inputValues[4])){
-      //     console.log('No branch code found.');
-      //     setError('No branch code found.');
-      //     setLoading(false);
-      //     return;
-      //   }
-
-      //   if (response.status >= 200) {
-      //     console.log('Signup successful');
-      //     setSuccess('Signup successfully.');
-      //     setInputValues(['', '', '', '', '', '', '', '']);
-      //     setPasswordPlaceholders(["Password", "Confirm Password"]);
-      //   } else{
-      //       console.log('Signup failed.');
-      //       setError('Signup failed.');
-      //   }
 
 
       const response = await axios.post('/api/register', inputValues);
@@ -329,6 +157,23 @@ function SignUp() {
         console.log('Backend error response:', error.response.data);
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-right',
+          iconColor: 'red',
+          customClass: {
+            popup: 'colored-toast',
+          },
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        })
+          ; (async () => {
+            await Toast.fire({
+              icon: 'error',
+              title: error.response.data.message,
+            })
+          })();
       } else {
         setError('An unexpected error occurred.');
       }
@@ -346,100 +191,177 @@ function SignUp() {
         <h1 className="text-4xl font-medium mt-2">Sign Up</h1>
         <form onSubmit={handleSubmit}>
           <div className="rounded p-4 w-full max-w-2xl mt-10">
-            <div className="flex items-center mb-4">
-              <input
-                type="text"
-                name="firstName"
-                id="firstName"
-                className="w-1/2 h-12 px-4 rounded-md border border-gray-300 mr-2"
-                placeholder="First Name"
-                value={inputValues.firstName}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="lastName"
-                id="lastName"
-                className="w-1/2 h-12 px-4 rounded-md border border-gray-300 ml-2"
-                placeholder="Last Name"
-                value={inputValues.lastName}
-                onChange={handleChange}
-              />
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <div className="col-span-1">
+                <input
+                  type="text"
+                  name="firstName"
+                  id="firstName"
+                  className={validationErrors.firstName ? ' w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : ' w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  placeholder="First Name"
+                  value={inputValues.firstName}
+                  onChange={handleChange}
+                />
+                <span className='text-sm'>
+                  {validationErrors.firstName && (
+                    <div className="text-red-500">
+                      {validationErrors.firstName.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+              </div>
+              <div className="col-span-1">
+                <input
+                  type="text"
+                  name="lastName"
+                  id="lastName"
+                  className={validationErrors.lastName ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  placeholder="Last Name"
+                  value={inputValues.lastName}
+                  onChange={handleChange}
+                />
+                <span className='text-sm'>
+                  {validationErrors.lastName && (
+                    <div className="text-red-500">
+                      {validationErrors.lastName.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center mb-4">
-              <input
-                type="text"
-                name="contactNumber"
-                id="contactNumber"
-                className="w-1/2 h-12 px-4 rounded-md border border-gray-300 mr-2"
-                placeholder="Contact Number"
-                value={inputValues.contactNumber}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="email"
-                id="email"
-                className="w-1/2 h-12 px-4 rounded-md border border-gray-300 ml-2"
-                placeholder="Email"
-                value={inputValues.email}
-                onChange={handleChange}
-              />
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              <div className="col-span-1">
+                <input
+                  type="text"
+                  name="contactNumber"
+                  id="contactNumber"
+                  className={validationErrors.contactNumber ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  placeholder="Contact Number"
+                  value={inputValues.contactNumber}
+                  onChange={handleChange}
+                />
+                <span className="text-sm flex">
+                  {validationErrors.contactNumber && (
+                    <div className="text-red-500">
+                      {validationErrors.contactNumber.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+              </div>
+              <div className="col-span-1">
+                <input
+                  type="text"
+                  name="email"
+                  id="email"
+                  className={validationErrors.email ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  placeholder="Email"
+                  value={inputValues.email}
+                  onChange={handleChange}
+                />
+                <span className="text-sm">
+                  {validationErrors.email && (
+                    <div className="text-red-500">
+                      {validationErrors.email.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+              </div>
             </div>
             <SearchableDropdown
-              options={["BOHL", "DSMT", "HO"]} // Example options for branch code
+              options={["BOHL", "DSMT", "HO"]}
               name="branchCode"
               id="branchCode"
               placeholder="Select Branch Code"
               onSelect={(option) => setInputValues({ ...inputValues, branchCode: option })}
             />
-            <div className="flex items-center mb-4">
+            <span className='mb-2'>
+              {validationErrors.branchCode && (
+                <div className="text-red-500">
+                  <ul>
+                    {validationErrors.branchCode.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </span>
+            <div className="flex items-center mt-4">
               <input
                 type="text"
                 name="username"
                 id="username"
-                className="w-full h-12 px-4 rounded-md border border-gray-300"
+                className={validationErrors.username ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Username"
                 value={inputValues.username}
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center mb-4">
+            <span className='mb-2'>
+              {validationErrors.username && (
+                <div className="text-red-500">
+                  <ul>
+                    {validationErrors.username.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </span>
+            <div className="flex items-center mt-4">
               <input
                 type="password"
                 name="password"
                 id="password"
-                className="w-full h-12 px-4 rounded-md border border-gray-300"
+                className={validationErrors.password ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Password"
                 value={inputValues.password}
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center mb-4">
+            <span className='mb-2'>
+              {validationErrors.password && (
+                <div className="text-red-500">
+                  <ul>
+                    {validationErrors.password.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </span>
+            <div className="flex items-center mt-4">
               <input
                 type="password"
                 name="password_confirmation"
                 id="password_confirmation"
-                className="w-full h-12 px-4 rounded-md border border-gray-300"
+                className={validationErrors.password_confirmation ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Confirm Password"
                 value={inputValues.password_confirmation}
                 onChange={handleChange}
               />
             </div>
+            <span className='mb-2'>
+              {validationErrors.password_confirmation && (
+                <div className="text-red-500">
+                  <ul>
+                    {validationErrors.password_confirmation.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </span>
           </div>
           <div className="text-center">
-            {error && <div className="text-red-500">{error}</div>}
             {success && <div className="text-green-500">{success}</div>}
-
-            {Object.keys(validationErrors).length > 0 &&
-              <div className="text-red-500">
-                <ul>
-                  {Object.values(validationErrors).flat().map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            }
 
             <button type='submit' className='mt-10 w-32 h-10 rounded-full font-semibold bg-blue-800 text-white' disabled={loading}>
               {loading ? 'Signing Up...' : 'SIGN UP'}

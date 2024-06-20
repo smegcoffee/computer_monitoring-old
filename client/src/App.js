@@ -11,16 +11,19 @@ import Computers from './Dashboard/Computers';
 import QrC from './Dashboard/Qrcodes';
 import Extract from './Dashboard/Extract';
 import ProtectedRoutes from './context/ProtectedRoutes';
+import AuthContext from './context/AuthContext';
 
 function App() {
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<LogIn />}></Route>
-        <Route path='/forgot' element={<Forgot />}></Route>
-        <Route path='/signup' element={<SignUp />}></Route>
-        <Route path='/login' element={<LogIn />}></Route>
+        <Route element={<AuthContext />}>
+          <Route path='/' element={<LogIn />}></Route>
+          <Route path='/forgot' element={<Forgot />}></Route>
+          <Route path='/signup' element={<SignUp />}></Route>
+          <Route path='/login' element={<LogIn />}></Route>
+        </Route>
         <Route element={<ProtectedRoutes />}>
 
           <Route path='/dashboard' element={<DashBoard />}></Route>

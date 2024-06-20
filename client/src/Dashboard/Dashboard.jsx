@@ -35,7 +35,7 @@ function Header() {
                 <div className='flex-grow text-center'>
                     <p className='text-white text-4xl font-bold'>COMPUTER MONITORING SYSTEM</p>
                 </div>
-                
+
                 <Link onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
             </div>
         </div>

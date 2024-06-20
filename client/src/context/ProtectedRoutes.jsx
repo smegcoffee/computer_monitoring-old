@@ -11,7 +11,7 @@ const ProtectedRoutes = () => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    setAuthenticate(false); // No token found, user is not authenticated
+                    setAuthenticate(false);
                     return;
                 }
                 const response = await axios.get('/api/profile', {
@@ -19,23 +19,30 @@ const ProtectedRoutes = () => {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setUser(response.data); // Set user data if authenticated
-                setAuthenticate(false); // Set authentication check to false
+                setUser(response.data);
+                setAuthenticate(false);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
-                setAuthenticate(false); // Error occurred, user is not authenticated
+                setAuthenticate(false);
             }
         };
 
         fetchUserProfile();
     }, []);
 
-    // While checking authentication, don't render anything
     if (authenticate) {
-        return null; // Or you can show a loading spinner or message
+        return (
+
+            <div className="flex items-center justify-center h-screen">
+                <div className="flex space-x-4">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                </div>
+            </div>
+        );
     }
 
-    // Render based on authentication status
     return user ? <Outlet /> : <Navigate to="/login" />;
 };
 

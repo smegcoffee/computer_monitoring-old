@@ -79,7 +79,7 @@ class LoginController extends Controller
         if ($validation->fails()) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      '"' . "Something went wrong please fix" . '"',
+                'message'       =>      "Something went wrong please fix.",
                 'errors'        =>      $validation->errors()
             ], 400);
         }
@@ -88,7 +88,7 @@ class LoginController extends Controller
         if (!$user) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      "This email is not exists or not verfied yet",
+                'message'       =>      "This email is not exists or not verified yet",
             ], 400);
         }
 

@@ -1,37 +1,49 @@
-import { useContext } from "react";
-import { useState } from "react";
-import { createContext } from "react";
+import React, { useEffect, useState } from 'react';
+import axios from '../api/axios';
+import { Outlet, Navigate } from 'react-router-dom';
 
-const StateContext = createContext({
-    user: null,
-    token: null,
-    setUser: () => {},
-    setToken: () => {}
-});
+const AuthContext = () => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export const ContextProvider = ({children}) => {
-    const [user, setUser] = useState({});
-    const [token, _setToken] = useState(localStorage.getItem('token'));
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setLoading(false);
+                    return;
+                }
+                const response = await axios.get('/api/profile', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setUser(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+                setLoading(false);
+            }
+        };
 
-    const setToken = (token) => {
-        _setToken(token)
-        if(token){
-            localStorage.setItem('token',token);
-        }
-        else{
-            localStorage.removeItem('token');
-        }
+        fetchUserProfile();
+    }, []);
+
+    if (loading) {
+        return (
+
+            <div className="flex items-center justify-center h-screen">
+                <div className="flex space-x-4">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                </div>
+            </div>
+        );
     }
-    return (
-        <StateContext.Provider value={{
-            user,
-            token,
-            setUser,
-            setToken
-        }}>
-            {children}
-        </StateContext.Provider>
-    )
-}
 
-export const useStateContext = () => useContext(StateContext)
+    return user ? <Navigate to="/dashboard" /> : <Outlet />;
+};
+
+export default AuthContext;
