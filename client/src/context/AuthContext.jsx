@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Outlet, Navigate } from 'react-router-dom';
+import smct from '../img/smct.png';
+import Loading from './Loading';
 
 const AuthContext = () => {
     const [user, setUser] = useState(null);
@@ -31,16 +33,7 @@ const AuthContext = () => {
     }, []);
 
     if (loading) {
-        return (
-
-            <div className="flex items-center justify-center h-screen">
-                <div className="flex space-x-4">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
-                </div>
-            </div>
-        );
+        return <Loading />;
     }
 
     return user ? <Navigate to="/dashboard" /> : <Outlet />;
