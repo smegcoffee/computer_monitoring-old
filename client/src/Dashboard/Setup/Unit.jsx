@@ -3,12 +3,13 @@ import SideBar from '../Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Table, TableHead, TableRow, TableCell, TableBody, TablePagination, Typography } from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from '../../api/axios';
-import { data } from './Add';
+import { data } from '../../data/vacantUnitsData';
+import { TableContainer } from '@material-ui/core';
 
 function Header(){
   const handleLogout = async () => {
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
       width: '100%',
       overflowX: 'auto',
       marginTop: theme.spacing(3),
-      borderRadius: '12px', // Adjust the value according to your preference
+      borderRadius: '12px', 
     },
     //table: {
       //minWidth: 650,
@@ -57,8 +58,23 @@ const useStyles = makeStyles((theme) => ({
 
 const CustomTableB = () => {
     const classes = useStyles();
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
+
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+
     return (
       <div className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}>
+        <TableContainer>
         <Table className={classes.table}>
           <TableHead>
             <TableRow className='bg-red-200'>
@@ -86,7 +102,7 @@ const CustomTableB = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((data, index) => (
+          {data.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((data, index) => (
             <TableRow key={index}>
               <TableCell align="center">{data.unit}</TableCell>
               <TableCell align="center">{data.dop}</TableCell>
@@ -97,8 +113,24 @@ const CustomTableB = () => {
               <TableCell align="center">{data.status}</TableCell>
             </TableRow>
             ))}
+            {emptyRows > 0 && (
+              <TableRow style={{height: 53 * emptyRows}}>
+                <TableCell colSpan={6}/>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 15, 20, 25]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(event, newPage) => handleChangePage(event, newPage)}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage={<Typography variant="subtitle" fontWeight={600}>Entries Per Page:</Typography>}
+        />
+        </TableContainer>
       </div>
     );
   }

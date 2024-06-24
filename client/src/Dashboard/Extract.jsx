@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Card, Grid, Container, CardContent, Button, TextField, MenuItem, Typography, TableContainer, Table, TableHead, TableRow, TableBody, TableCell,
 List, ListItem, ListItemText
  } from '@mui/material';
-import { tableData } from './Computers';
+import { tableData } from '../data/computerData';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 //import axios from 'axios';

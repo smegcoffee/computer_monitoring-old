@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
-import { user } from './Signup';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -41,6 +40,7 @@ function LoginForm({ fields }) {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState({});
+  //eslint-disable-next-line
   const [error, setError] = useState('');
 
   // Handler for input change

@@ -6,7 +6,7 @@ module.exports = {
     './src/Dashboard/Dashboard.jsx', './src/Dashboard/Setup/Unit.jsx', './src/Dashboard/Setup/Set.jsx', './src/Dashboard/Profile.jsx', './src/Dashboard/Computers.jsx',
     './src/Dashboard/Popup for Computers/Specs.jsx', './src/Dashboard/Popup for Computers/View.jsx', './src/Dashboard/Popup for Computers/Editview.jsx', 
     './src/Dashboard/Popup for Computers/Qr.jsx', './src/Dashboard/Qrcodes.jsx', './src/Dashboard/Setup/Add.jsx', './src/Dashboard/Setup/Editset.jsx', './src/Dashboard/Extract.jsx',
-    './src/Dashboard/Db2.jsx', './src/Dashboard/Codes.jsx'
+    './src/Dashboard/Db2.jsx', './src/Dashboard/Codes.jsx', './src/Dashboard/Setup/User.jsx'
     
     ],
     options: {
