@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { FormControl, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import smct from '../img/smct.png';
 import bg from '../img/bg.png';
 import axios from '../api/axios';

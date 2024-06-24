@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Outlet, Navigate } from 'react-router-dom';
-import smct from '../img/smct.png';
+//import smct from '../img/smct.png';
 import Loading from './Loading';
 
 const AuthContext = () => {

@@ -24,6 +24,9 @@ function SideBar() {
       case '/set':
         setActiveItem('set');
         break;
+      case '/user':
+        setActiveItem('user');
+        break;
       default:
         setActiveItem('dashboard');
     }
@@ -62,6 +65,11 @@ function SideBar() {
         <Link to="/set">
           <button className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${activeItem === 'set' ? 'bg-blue-500 text-white active' : ''} rounded-tl-none rounded-br-none rounded-tr-full rounded-bl-full h-10 w-56 ml-8 cursor-pointer`}>
             Setup Computer Set
+          </button>
+        </Link>
+        <Link to="/user">
+          <button className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${activeItem === 'user' ? 'bg-blue-500 text-white active' : ''} rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-44 ml-8 cursor-pointer`}>
+            Setup Users
           </button>
         </Link>
       </div>

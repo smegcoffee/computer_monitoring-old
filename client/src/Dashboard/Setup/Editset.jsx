@@ -1,34 +1,83 @@
-import React, { useState, useRef, useEffect }from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import React, { useState, useEffect }from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Autocomplete, TextField } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus } from '@fortawesome/free-solid-svg-icons';
+import { userData } from '../../data/userAddData';
+import Swal from 'sweetalert2';
+import axios from '../../api/axios';
 
-
-function EditUser({units}) {
-  const [rows, setRows] = useState([]);
+function EditSet({ isOpen, onClose, row, editPopupData }) {
+    const units = editPopupData.units;
+    const [user, setUser] = useState('');
+    const [rows, setRows] = useState([]);
+    
+      useEffect(() => {
+        if (Array.isArray(units)) {
+          setRows(units);
+        } else {
+          console.error('Units is not an array');
+        }
+      }, [units]);
   
-    useEffect(() => {
-      if (Array.isArray(units)) {
-        setRows(units);
-      } else {
-        console.error('Units is not an array');
+      // Function to delete a row
+       const handleDelete = (index) => {
+        if (!Array.isArray(rows)) {
+          console.error('Rows is not an array');
+          return;
+        }
+    
+        const newRows = [...rows];
+        newRows.splice(index, 1);
+        setRows(newRows);
+      };
+
+  if (!isOpen) {
+    return null;
+  }
+  
+  const handleSubmitEditedSet = async (event) => {
+    event.preventDefault();
+    try{
+      const response = await axios.put('api/insertApiForComputerSet', {
+        units: units,
+        user: user
+      });
+      if (response.data.status === true){
+          Swal.fire({
+            title: "Do you want to save the changes?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Save",
+            denyButtonText: `Don't save`
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire("Saved!", "", "success");
+            } else if (result.isDenied) {
+              Swal.fire("Changes are not saved", "", "info");
+            }
+          }).then(function(){
+          window.location = "/set";
+        });
       }
-    }, [units]);
-
-    // Function to delete a row
-    const handleDelete = (index) => {
-      if (!Array.isArray(rows)) {
-        console.error('Rows is not an array');
-        return;
+      console.log('Updating computer set:', response.data);
+    }catch(error) {
+      console.log('Error in adding user:', error);
+      if(error.response && error.response.data){
+        console.log('Backend error response:', error.response.data);
+      } else{
+        console.log('ERROR!');
       }
-  
-      const newRows = [...rows];
-      newRows.splice(index, 1);
-      setRows(newRows);
-    };
+    }finally{
 
-  
-    return (
+    }
+  }
+
+  return (
+    <>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+      <div className="bg-white rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl shadow-md" style={{minWidth: '1000px', maxWidth:'100vh', maxHeight:'100vh'}}>
+        <div className='text-justify'>
+          <form onSubmit={handleSubmitEditedSet}>
       <TableContainer component={Paper} style={{ borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
             <Table>
                 <TableHead>
@@ -54,133 +103,53 @@ function EditUser({units}) {
                             <TableCell align='center'>{unit.serial}</TableCell>
                             <TableCell align='center'>{unit.status}</TableCell>
                             <TableCell align='center'>
-                                <button onClick={() => handleDelete(index)} className="text-red-600 text-base font-semibold"><FontAwesomeIcon icon={faMinus} /></button>
+                                <button onClick={handleDelete} className="text-red-600 text-base font-semibold">
+                                  <FontAwesomeIcon icon={faMinus} />
+                                </button>
                             </TableCell>
                             </TableRow>
                             ))}
                 </TableBody>
             </Table>
         </TableContainer>
-    );
-  }
-
-const SearchableDropdown = ({ options, placeholder, onSelect }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredOptions, setFilteredOptions] = useState([]);
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
-  
-    useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-          setIsOpen(false);
-        }
-      };
-  
-      if (isOpen) {
-        document.addEventListener('click', handleClickOutside);
-      } else {
-        document.removeEventListener('click', handleClickOutside);
-      }
-  
-      return () => {
-        document.removeEventListener('click', handleClickOutside);
-      };
-    }, [isOpen]);
-  
-    const handleInputChange = (event) => {
-      const searchTerm = event.target.value;
-      setSearchTerm(searchTerm);
-  
-      const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredOptions(filteredOptions);
-      setIsOpen(true);
-    };
-  
-    const handleSelectOption = (option) => {
-      setSearchTerm(option);
-      onSelect(option);
-      setIsOpen(false);
-    };
-  
-    return (
-      <div ref={dropdownRef}>
-        <input
-          type="text"
-          className='ml-3 mb-3 bg-gray-100 rounded-md p-1'
-          placeholder={placeholder}
-          value={searchTerm}
-          onChange={handleInputChange}
-        />
-        {isOpen && filteredOptions.length > 0 && (
-          <ul className="absolute z-20 max-w-max bg-white border border-gray-300 rounded-md mt-1 ml-4">
-            {filteredOptions.map(option => (
-              <li
-                key={option}
-                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSelectOption(option)}
-              >
-                {option}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
-
-function EditSet({ isOpen, onClose, row, editPopupData }) {
-    const [inputValue, setInputValue] = useState('');
-
-  if (!isOpen) {
-    return null;
-  }
-
-
-  const handleChange = (index, event) => {
-    if (event && event.target) {
-      const newInputValue = [...inputValue];
-      newInputValue[index] = event.target.value;
-      setInputValue(newInputValue);
-    } else {
-      console.error('Event object or target property is undefined');
-    }
-  };
-  
-
-  return (
-    <>
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
-      <div className="bg-white rounded-tl-xl rounded-tr-xl shadow-md" style={{minWidth: '1000px', maxWidth:'100vh', maxHeight:'100vh'}}>
-        <div className='text-justify'>
-        {editPopupData && <EditUser units={editPopupData.units} />}
         <div className='flex justify-center items-center'>
         <div className='flex-none'>
-        <p className='ml-4 mt-3 mb-1 font-semibold'>Assign User:</p>
-        <input type='text' className='ml-3 mb-3 bg-gray-100 rounded-md p-1' placeholder="Enter name..."/>
-        </div>
-        <div className='flex-none'>
-        <p className='ml-4 mt-3 mb-1 font-semibold'>Position:</p>
-        <input type='text' className='ml-3 mb-3 bg-gray-100 rounded-md p-1' placeholder="Enter position..."/>
-        </div>
-        <div className='flex-none'>
-        <p className='ml-4 mt-3 mb-1 font-semibold'>Branch Code:</p>
-        <SearchableDropdown
-        options={["BOHL", "DSMT", "DSMT2", "DSMAO", "DSMBN", "HO"]}
-        placeholder="Select Branch Code"
-        onSelect={(option) => {
-            const event = { target: { value: option } };
-            handleChange(0, event);
-        }}
+        <Autocomplete
+            freeSolo
+            id='user'
+            disableClearable
+            options={userData.map((option) => option.name)}
+            renderInput={(params) => (
+                <TextField
+                    value={user}
+                    placeholder={editPopupData.name}
+                    onChange={(event) => {
+                      setUser(event.target.value);
+                    }}
+                    {...params}
+                    label='Assign New User?'
+                    InputProps={{
+                        ...params.InputProps,
+                        type: 'search',
+                    }}
+                    variant='outlined'
+                    style={{
+                        marginLeft: "20px",
+                        marginTop: "20px",
+                        marginBottom: "20px",
+                        marginRight: "400px",
+                        width: "300px",
+                    }}
+                />
+            )}
         />
         </div>
         <div className='flex-1 justify-center items-center text-center'>
             <button className='bg-gray-200 h-8 w-24 rounded-full font-semibold text-sm' onClick={onClose}>CANCEL</button>
-            <button className='bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold'>SAVE</button>
+            <button type='submit' className='bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold'>SAVE</button>
         </div>
         </div>
+        </form>
         </div>
       </div>
     </div>

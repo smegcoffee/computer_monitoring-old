@@ -85,18 +85,6 @@ function Backg() {
   );
 }
 
-//Sample Data for the Registered User
-const user = ([
-  {
-    firstName: "Noreen Angeleen", lastName: "Darunday", contactNumber: "09485931172", email: "angeleensuarez14@gmail.com",
-    branchCode: "HO", username: "noreenangeleen", password: "123456789"
-  },
-  {
-    firstName: "Luffy", lastName: "Monkey", contactNumber: "09484521145", email: "luffy@gmail.com",
-    branchCode: "DSMT", username: "kingp", password: "qwertyuiop"
-  }
-]);
-
 function SignUp() {
   const [inputValues, setInputValues] = useState({
     firstName: '',
@@ -109,6 +97,7 @@ function SignUp() {
     password_confirmation: ''
   });
   const [loading, setLoading] = useState(false);
+  //eslint-disable-next-line
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
@@ -194,7 +183,7 @@ function SignUp() {
                   type="text"
                   name="firstName"
                   id="firstName"
-                  className={validationErrors.firstName ? ' w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : ' w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  className={validationErrors.firstName ? ' w-full h-12 px-4 rounded-md border mr-2 border-red-500' : ' w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
                   placeholder="First Name"
                   value={inputValues.firstName}
                   onChange={handleChange}
@@ -214,7 +203,7 @@ function SignUp() {
                   type="text"
                   name="lastName"
                   id="lastName"
-                  className={validationErrors.lastName ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  className={validationErrors.lastName ? 'w-full h-12 px-4 rounded-md border mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
                   placeholder="Last Name"
                   value={inputValues.lastName}
                   onChange={handleChange}
@@ -236,7 +225,7 @@ function SignUp() {
                   type="text"
                   name="contactNumber"
                   id="contactNumber"
-                  className={validationErrors.contactNumber ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  className={validationErrors.contactNumber ? 'w-full h-12 px-4 rounded-md border mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
                   placeholder="Contact Number"
                   value={inputValues.contactNumber}
                   onChange={handleChange}
@@ -256,7 +245,7 @@ function SignUp() {
                   type="text"
                   name="email"
                   id="email"
-                  className={validationErrors.email ? 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
+                  className={validationErrors.email ? 'w-full h-12 px-4 rounded-md border mr-2 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300 mr-2'}
                   placeholder="Email"
                   value={inputValues.email}
                   onChange={handleChange}
@@ -295,7 +284,7 @@ function SignUp() {
                 type="text"
                 name="username"
                 id="username"
-                className={validationErrors.username ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
+                className={validationErrors.username ? 'w-full h-12 px-4 rounded-md border border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Username"
                 value={inputValues.username}
                 onChange={handleChange}
@@ -317,7 +306,7 @@ function SignUp() {
                 type="password"
                 name="password"
                 id="password"
-                className={validationErrors.password ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
+                className={validationErrors.password ? 'w-full h-12 px-4 rounded-md border border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Password"
                 value={inputValues.password}
                 onChange={handleChange}
@@ -339,7 +328,7 @@ function SignUp() {
                 type="password"
                 name="password_confirmation"
                 id="password_confirmation"
-                className={validationErrors.password_confirmation ? 'w-full h-12 px-4 rounded-md border border-gray-300 border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
+                className={validationErrors.password_confirmation ? 'w-full h-12 px-4 rounded-md border border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
                 placeholder="Confirm Password"
                 value={inputValues.password_confirmation}
                 onChange={handleChange}
@@ -372,4 +361,3 @@ function SignUp() {
 }
 
 export default SignUp;
-export { user };
