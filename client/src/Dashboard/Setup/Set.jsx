@@ -11,19 +11,40 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { Typography, TablePagination } from '@mui/material';
+import { Typography, TablePagination, TextField } from '@mui/material';
 import Add from './Add';
 import EditSet from './Editset';
-import { tableData } from '../Computers';
+import axios from '../../api/axios';
+import { tableData } from '../../data/computerData';
 
 function Header(){
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            console.log(token);
+            if (!token) {
+                return;
+            }
+
+            await axios.get('/api/logout', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            localStorage.removeItem('token');
+            window.location = "/login";
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
     return(
         <div>
             <div className='h-20 bg-blue-800 w-full flex justify-between items-center'>
                 <div className='flex-grow text-center'>
                     <p className='text-white text-4xl font-bold'>COMPUTER MONITORING SYSTEM</p>
                 </div>
-                <Link to="/login"><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
+                <Link onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
             </div>
         </div>
     );
@@ -35,14 +56,44 @@ const useStyles = makeStyles({
     },
 });
 
-function CompSet(){
+function Set(){
+    const [isAddPopupOpen, setAddPopupOpen] = useState(false);
     const classes = useStyles();
     const [isEditPopupOpen, setEditPopupOpen] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedRow, setSelectedRow] = useState(null);
     const [editPopupData, setEditPopupData] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredData, setFilteredData] = useState(tableData);
 
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        filterData(value);
+    };
+
+    const filterData = (value) => {
+        if (!value.trim()) {
+            setFilteredData(tableData);
+        } else {
+            const filtered = tableData.filter((item) =>
+            item.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredData(filtered);
+        }
+        setPage(0);
+    };
+
+    const openAddPopup = () => {
+        setAddPopupOpen(true);
+    };
+
+    const closeAddPopup = () => {
+        setAddPopupOpen(false);
+    };
+
+    
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -65,8 +116,45 @@ function CompSet(){
     const rows = tableData;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-    return(
-        <div className='w-full max-h-max rounded-xl'>
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Header />
+            <div style={{ display: 'flex', flex: 1 }}>
+                <div>
+                    <SideBar />
+                </div>
+                <div style={{ flex: 2, paddingBottom: '50px'}}>
+                    <p className='font-normal text-2xl pt-10 ml-10'>Setup Computer Set</p>
+                    <p className='font-light text-lg ml-10'><Link to="/dashboard" className='text-blue-800'>Home</Link> &gt; Setup</p>
+                    <br/> <br/>
+                    <div className='flex justify-center items-center mr-10'>
+                        <div className='flex justify-end flex-grow'>
+                            <div className='mr-5 z-0'>
+                            <TextField
+                                label="Search User"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                variant="outlined"
+                                fullWidth
+                                sx={{width: 300}}
+                                size='small'
+                                margin="normal"
+                                InputLabelProps={{
+                                shrink: true,
+                                }}
+                            />
+                            </div>
+                            <div className='mt-3.5'>
+                            <button onClick={openAddPopup} className='bg-red-400 border border-transparent rounded-full text-white pb-2 pt-2 pr-4 pl-4 text-base font-semibold'>
+                                Assign Computer Set User
+                            </button>
+                            </div>
+                        </div>
+                        {/* Add component for adding computer set user */}
+                        <Add isOpen={isAddPopupOpen} onClose={() => closeAddPopup('add')} />
+                    </div>
+                    <div className='flex justify-center items-center mt-5 ml-10 mr-10'>
+                    <div className='w-full max-h-max rounded-xl z-0'>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>
@@ -98,7 +186,7 @@ function CompSet(){
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((row, rowIndex) => (
+                        {filteredData.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((row, rowIndex) => (
                             <TableRow key={`${row.id}-${rowIndex}`}>
                                 <TableCell align='center'>{row.id}</TableCell>
                                 <TableCell align='center'>
@@ -175,56 +263,6 @@ function CompSet(){
             {isEditPopupOpen && <EditSet isOpen={isEditPopupOpen} onClose={closeEditPopup} row={selectedRow} editPopupData={editPopupData} setEditPopupData={setEditPopupData} />
         }
         </div>
-    );
-}
-
-function Set(){
-    const [isAddPopupOpen, setAddPopupOpen] = useState(false);
-    const [user, setUser] = useState('');
-
-    const handleUser = (event) => {
-        setUser(event.target.value);
-    };
-
-    const openAddPopup = () => {
-        setAddPopupOpen(true);
-    };
-
-    const closeAddPopup = () => {
-        setAddPopupOpen(false);
-    };
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <Header />
-            <div style={{ display: 'flex', flex: 1 }}>
-                <div>
-                    <SideBar />
-                </div>
-                <div style={{ flex: 2, paddingBottom: '50px'}}>
-                    <p className='font-normal text-2xl pt-10 ml-10'>Setup Computer Set</p>
-                    <p className='font-light text-lg ml-10'><Link to="/dashboard" className='text-blue-800'>Home</Link> &gt; Setup</p>
-                    <br/> <br/>
-                    <div className='flex justify-center items-center mr-10'>
-                        <div className='flex justify-end flex-grow'>
-                            <div>
-                                <input
-                                type= "text"
-                                value={user}
-                                onChange={handleUser}
-                                placeholder='Search User...'
-                                className='bg-gray-100 border border-transparent rounded-xl w-96 h-9 mr-5 pl-3 mt-1'
-                                />
-                            </div>
-                            <button onClick={openAddPopup} className='bg-red-400 border border-transparent rounded-full text-white pb-2 pt-2 pr-4 pl-4 text-base font-semibold'>
-                                Assign Computer Set User
-                            </button>
-                        </div>
-                        {/* Add component for adding computer set user */}
-                        <Add isOpen={isAddPopupOpen} onClose={() => closeAddPopup('add')} />
-                    </div>
-                    <div className='flex justify-center items-center mt-5 ml-10 mr-10'>
-                        <CompSet/>
                     </div>
                 </div>
             </div>

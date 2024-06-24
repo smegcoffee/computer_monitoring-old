@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Outlet, Navigate } from 'react-router-dom';
-//import smct from '../img/smct.png';
 import Loading from './Loading';
 
-const AuthContext = () => {
+const ProtectedRoutes = () => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [authenticate, setAuthenticate] = useState(true);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    setLoading(false);
+                    setAuthenticate(false);
                     return;
                 }
                 const response = await axios.get('/api/profile', {
@@ -22,21 +21,21 @@ const AuthContext = () => {
                     }
                 });
                 setUser(response.data);
-                setLoading(false);
+                setAuthenticate(false);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
-                setLoading(false);
+                setAuthenticate(false);
             }
         };
 
         fetchUserProfile();
     }, []);
 
-    if (loading) {
+    if (authenticate) {
         return <Loading />;
     }
 
-    return user ? <Navigate to="/dashboard" /> : <Outlet />;
+    return user ? <Outlet /> : <Navigate to="/login" />;
 };
 
-export default AuthContext;
+export default ProtectedRoutes;

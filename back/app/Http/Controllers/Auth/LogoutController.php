@@ -9,15 +9,17 @@ class LogoutController extends Controller
 {
     public function logout()
     {
-        auth()->user()->tokens()->delete();
 
         $user = auth()->user();
+        $token = $user->tokens();
+
+        $token->delete();
 
         return response()->json([
             'status'            =>          true,
             'message'           =>          "Logout successfully",
             'data'              =>          $user,
-            'id'                =>          auth()->user()->id
+            'id'                =>          $user->id
         ], 200);
     }
 }

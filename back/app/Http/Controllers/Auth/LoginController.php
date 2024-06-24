@@ -67,27 +67,28 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+
+        $user = User::where('email', $request->email)->first();
+
+
         $validation = Validator::make($request->all(), [
             'email'         =>          ['required', 'email', 'regex:/^\S+@\S+\.\S+$/'],
-            'password'      =>          ['required']
+            'password'      =>          ['required', 'min:8']
         ]);
 
         if ($validation->fails()) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      '"' . "Something went wrong please fix" . '"',
+                'message'       =>      "Something went wrong please fix.",
                 'errors'        =>      $validation->errors()
             ], 400);
         }
 
-        $user = User::where('email', $request->email)->first();
-
-        
 
         if (!$user) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      "This email is not exists or not verfied yet",
+                'message'       =>      "This email is not exists or not verified yet",
             ], 400);
         }
 
@@ -104,7 +105,10 @@ class LoginController extends Controller
         }elseif ($user->request_new_password == true) {
             return response()->json([
                 'status'            =>          true,
-                'message'           =>          'You need to change your password first'
+                'message'           =>          'You need to change your password first',
+                'token'             =>          $user->createToken("API TOKEN")->plainTextToken,
+                'data'              =>          $user,
+                'id'                =>          auth()->user()->id
             ], 409);
         
         } else {
