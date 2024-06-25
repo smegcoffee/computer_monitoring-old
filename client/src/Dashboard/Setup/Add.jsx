@@ -6,10 +6,53 @@ import { data } from '../../data/vacantUnitsData';
 import Swal from 'sweetalert2';
 import axios from '../../api/axios';
 
-function Add({ isOpen, onClose }) {
-    const [user, setUser] = useState('');
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+//Sample data of Units that has no users yet or not setup as Computer Set Yet
+export const data = [
+  {unit: '128', dop: '04/17/2019', category: 'Monitor', description: 'Acer 22 inches', supplier: 'Computer Republic', serial: '764098', status: 'Vacant'},
+  {unit: '129', dop: '11/09/2020', category: 'Mouse', description: '4Tech', supplier: 'Thinking Tools, Inc.', serial: '347903', status: 'Vacant'},
+  {unit: '130', dop: '07/02/2019', category: 'Mouse', description: 'HP Mouse', supplier: 'Thinking Tools, Inc.', serial: '236490', status: 'Vacant'},
+  {unit: '131', dop: '02/10/2022', category: 'Keyboard', description: '4Tech Warriors', supplier: 'Thinking Tools, Inc.', serial: '635966', status: 'Vacant'},
+  {unit: '132', dop: '08/30/2023', category: 'Printer', description: 'Epson L3210', supplier: 'Bohol Computers', serial: '105487', status: 'Vacant'},
+
+  
+];
+
+function AddUser() {
+  return (
+    <TableContainer component={Paper} style={{borderTopLeftRadius: '10px', borderTopRightRadius: '10px'}}>
+      <Table>
+        <TableHead>
+          <TableRow className='bg-red-200'>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>UNIT CODE</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DATE OF PURCHASE</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>CATEGORY</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DESCRIPTION</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SUPPLIER</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SERIAL NO.</Typography></TableCell>
+            <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>STATUS</Typography></TableCell>
+            <TableCell align='center'></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((data, index) => (
+          <TableRow key={index}>
+            <TableCell align='center'>{data.unit}</TableCell>
+            <TableCell align='center'>{data.dop}</TableCell>
+            <TableCell align='center'>{data.category}</TableCell>
+            <TableCell align='center'>{data.description}</TableCell>
+            <TableCell align='center'>{data.supplier}</TableCell>
+            <TableCell align='center'>{data.serial}</TableCell>
+            <TableCell align='center'>{data.status}</TableCell>
+            <TableCell align='center'><Checkbox/></TableCell>
+          </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+const SearchableDropdown = ({ options, placeholder, onSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredData, setFilteredData] = useState(data);
     const [checkedRows, setCheckedRows] = useState([]);

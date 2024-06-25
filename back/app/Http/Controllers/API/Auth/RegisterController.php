@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -31,8 +31,8 @@ class RegisterController extends Controller
         $validation = Validator::make($request->all(), [
             'firstName'         =>          ['required', 'max:255'],
             'lastName'          =>          ['required', 'max:255'],
-            'contactNumber'     =>          ['required', 'numeric'],
-            'branchCode'        =>          ['required', 'in:BOHL,DSMT,HO'],
+            'contactNumber'     =>          ['required', 'numeric', 'digits:11'],
+            'branchCode'        =>          ['required'],
             'username'          =>          ['required', 'max:255', 'unique:users,username'],
             'email'             =>          ['required', 'email', 'max:255', 'unique:users,email', 'regex:/^\S+@\S+\.\S+$/'],
             'password'          =>          ['required', 'confirmed', 'min:8']
@@ -50,7 +50,7 @@ class RegisterController extends Controller
             'firstName'         =>          $request->firstName,
             'lastName'          =>          $request->lastName,
             'contactNumber'     =>          $request->contactNumber,
-            'branchCode'        =>          $request->branchCode,
+            'branch_id'         =>          $request->branchCode,
             'username'          =>          $request->username,
             'email'             =>          $request->email,
             'password'          =>          bcrypt($request->password)

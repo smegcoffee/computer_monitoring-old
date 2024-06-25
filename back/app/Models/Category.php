@@ -4,8 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens;
+
+    protected $guarded = [];
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }

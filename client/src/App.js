@@ -12,6 +12,8 @@ import QrC from './Dashboard/Qrcodes';
 import Extract from './Dashboard/Extract';
 import ProtectedRoutes from './context/ProtectedRoutes';
 import AuthContext from './context/AuthContext';
+import Reset from './Request/Reset';
+import ChangePassword from './context/ChangePassword';
 import User from './Dashboard/Setup/User';
 import Add from './Dashboard/Setup/Add';
 
@@ -21,11 +23,16 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AuthContext />}>
+          <Route path='/login' element={<LogIn />}></Route>
           <Route path='/' element={<LogIn />}></Route>
           <Route path='/forgot' element={<Forgot />}></Route>
           <Route path='/signup' element={<SignUp />}></Route>
-          <Route path='/login' element={<LogIn />}></Route>
         </Route>
+
+        <Route element={<ChangePassword />}>
+          <Route path='/change-new-password' element={<Reset />}></Route>
+        </Route>
+
         <Route element={<ProtectedRoutes />}>
 
           <Route path='/dashboard' element={<DashBoard />}></Route>

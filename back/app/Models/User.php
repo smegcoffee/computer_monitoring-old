@@ -39,6 +39,12 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_purchase'  =>  'datetime'
         ];
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(BranchCode::class);
     }
 }
