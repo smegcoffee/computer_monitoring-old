@@ -1,40 +1,106 @@
-import React, { useState, useEffect }from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Autocomplete, TextField } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus } from '@fortawesome/free-solid-svg-icons';
-import { userData } from '../../data/userAddData';
-import Swal from 'sweetalert2';
-import axios from '../../api/axios';
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinus } from "@fortawesome/free-solid-svg-icons";
+import { userData } from "../../data/userAddData";
+import Swal from "sweetalert2";
+import axios from "../../api/axios";
 
 function EditSet({ isOpen, onClose, row, editPopupData }) {
-    const units = editPopupData.units;
-    const [user, setUser] = useState('');
-    const [rows, setRows] = useState([]);
-    
-      useEffect(() => {
-        if (Array.isArray(units)) {
-          setRows(units);
-        } else {
-          console.error('Units is not an array');
-        }
-      }, [units]);
-  
-      // Function to delete a row
-       const handleDelete = (index) => {
-        if (!Array.isArray(rows)) {
-          console.error('Rows is not an array');
-          return;
-        }
-    
-        const newRows = [...rows];
-        newRows.splice(index, 1);
-        setRows(newRows);
-      };
+  const units = editPopupData.units;
+  const [user, setUser] = useState("");
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    if (Array.isArray(units)) {
+      setRows(units);
+    } else {
+      console.error("Units is not an array");
+    }
+  }, [units]);
+
+  // Function to delete a row
+  const handleDelete = (index) => {
+    if (!Array.isArray(rows)) {
+      console.error("Rows is not an array");
+      return;
+    }
+
+    const newRows = [...rows];
+    newRows.splice(index, 1);
+    setRows(newRows);
+  };
 
   if (!isOpen) {
     return null;
   }
-  
+
+  const handleSubmitEditedSet = async (event) => {
+    event.preventDefault();
+
+    const inputOptions = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          Transfer: "Tranfer",
+          Defective: "Defective",
+        });
+      }, 1000);
+    });
+
+    const { value: reason } = await Swal.fire({
+      title: "Why did you delete this unit?",
+      input: "radio",
+      inputOptions,
+      inputValidator: (value) => {
+        if (!value) {
+          return "You need to indicate the reason!";
+        }
+      },
+    });
+
+    if (reason) {
+      try {
+        const response = await axios.put("api/insertApiForComputerSet", {
+          assignedUser: user,
+          rows: rows,
+          reason: reason,
+        });
+
+        if (response.data.status === true) {
+          Swal.fire({
+            icon: "success",
+            position: "center",
+            title: "Computer set has been saved!",
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(function () {
+            window.location = "/add";
+          });
+        }
+        console.log("Saving computer set:", response.data);
+      } catch (error) {
+        console.error("Error in saving computer set:", error);
+        if (error.response && error.response.data) {
+          console.log("Backend error response:", error.response.data);
+        } else {
+          console.log("ERROR!");
+        }
+      }
+    }
+  };
+
+  /*
   const handleSubmitEditedSet = async (event) => {
     event.preventDefault();
     try{
@@ -70,89 +136,141 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
     }finally{
 
     }
-  }
+  }; */
 
   return (
     <>
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
-      <div className="bg-white rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl shadow-md" style={{minWidth: '1000px', maxWidth:'100vh', maxHeight:'100vh'}}>
-        <div className='text-justify'>
-          <form onSubmit={handleSubmitEditedSet}>
-      <TableContainer component={Paper} style={{ borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}>
-            <Table>
-                <TableHead>
-                    <TableRow className='bg-red-200'>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>UNIT CODE</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DATE OF PURCHASE</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>CATEGORY</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>DESCRIPTION</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SUPPLIER</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>SERIAL NO.</Typography></TableCell>
-                        <TableCell align='center'><Typography variant='subtitle1' fontWeight='bold'>STATUS</Typography></TableCell>
-                        <TableCell align='center'></TableCell>
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+        <div
+          className="bg-white rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl shadow-md"
+          style={{ minWidth: "1000px", maxWidth: "100vh", maxHeight: "100vh" }}
+        >
+          <div className="text-justify">
+            <form onSubmit={handleSubmitEditedSet}>
+              <TableContainer
+                component={Paper}
+                style={{
+                  borderTopLeftRadius: "10px",
+                  borderTopRightRadius: "10px",
+                }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow className="bg-red-200">
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          UNIT CODE
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          DATE OF PURCHASE
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          CATEGORY
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          DESCRIPTION
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          SUPPLIER
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          SERIAL NO.
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          STATUS
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center"></TableCell>
                     </TableRow>
-                </TableHead>
-                <TableBody>
+                  </TableHead>
+                  <TableBody>
                     {rows.map((unit, index) => (
-                        <TableRow key={index}>
-                            <TableCell align='center'>{unit.unit}</TableCell>
-                            <TableCell align='center'>{unit.dop}</TableCell>
-                            <TableCell align='center'>{unit.category}</TableCell>
-                            <TableCell align='center'>{unit.description2}</TableCell>
-                            <TableCell align='center'>{unit.supplier}</TableCell>
-                            <TableCell align='center'>{unit.serial}</TableCell>
-                            <TableCell align='center'>{unit.status}</TableCell>
-                            <TableCell align='center'>
-                                <button onClick={handleDelete} className="text-red-600 text-base font-semibold">
-                                  <FontAwesomeIcon icon={faMinus} />
-                                </button>
-                            </TableCell>
-                            </TableRow>
-                            ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
-        <div className='flex justify-center items-center'>
-        <div className='flex-none'>
-        <Autocomplete
-            freeSolo
-            id='user'
-            disableClearable
-            options={userData.map((option) => option.name)}
-            renderInput={(params) => (
-                <TextField
-                    value={user}
-                    placeholder={editPopupData.name}
-                    onChange={(event) => {
-                      setUser(event.target.value);
-                    }}
-                    {...params}
-                    label='Assign New User?'
-                    InputProps={{
-                        ...params.InputProps,
-                        type: 'search',
-                    }}
-                    variant='outlined'
-                    style={{
-                        marginLeft: "20px",
-                        marginTop: "20px",
-                        marginBottom: "20px",
-                        marginRight: "400px",
-                        width: "300px",
-                    }}
-                />
-            )}
-        />
-        </div>
-        <div className='flex-1 justify-center items-center text-center'>
-            <button className='bg-gray-200 h-8 w-24 rounded-full font-semibold text-sm' onClick={onClose}>CANCEL</button>
-            <button type='submit' className='bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold'>SAVE</button>
-        </div>
-        </div>
-        </form>
+                      <TableRow key={index}>
+                        <TableCell align="center">{unit.unit}</TableCell>
+                        <TableCell align="center">{unit.dop}</TableCell>
+                        <TableCell align="center">{unit.category}</TableCell>
+                        <TableCell align="center">
+                          {unit.description2}
+                        </TableCell>
+                        <TableCell align="center">{unit.supplier}</TableCell>
+                        <TableCell align="center">{unit.serial}</TableCell>
+                        <TableCell align="center">{unit.status}</TableCell>
+                        <TableCell align="center">
+                          <button
+                            onClick={handleDelete}
+                            className="text-red-600 text-base font-semibold"
+                          >
+                            <FontAwesomeIcon icon={faMinus} />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <div className="flex justify-center items-center">
+                <div className="flex-none">
+                  <Autocomplete
+                    freeSolo
+                    id="user"
+                    disableClearable
+                    options={userData.map((option) => option.name)}
+                    renderInput={(params) => (
+                      <TextField
+                        value={user}
+                        placeholder={editPopupData.name}
+                        onChange={(event) => {
+                          setUser(event.target.value);
+                        }}
+                        {...params}
+                        label="Assign New User?"
+                        InputProps={{
+                          ...params.InputProps,
+                          type: "search",
+                        }}
+                        variant="outlined"
+                        style={{
+                          marginLeft: "20px",
+                          marginTop: "20px",
+                          marginBottom: "20px",
+                          marginRight: "400px",
+                          width: "300px",
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex-1 justify-center items-center text-center">
+                  <button
+                    className="bg-gray-200 h-8 w-24 rounded-full font-semibold text-sm"
+                    onClick={onClose}
+                  >
+                    CANCEL
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold"
+                  >
+                    SAVE
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
