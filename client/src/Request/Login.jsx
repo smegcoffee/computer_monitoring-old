@@ -70,7 +70,8 @@ function LoginForm({ fields }) {
     } catch (error) {
       console.error('Error:', error);
       if (error.response && error.response.status === 409) {
-        navigate('/change-new-password/');
+        localStorage.setItem('token', error.response.data.token);
+        navigate('/change-new-password');
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
