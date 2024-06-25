@@ -13,18 +13,21 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('branch_id')->nullable();
             $table->longText('profile_picture')->nullable();
             $table->string('firstName');
             $table->string('lastName');
             $table->string('contactNumber');
             $table->string('email')->unique();
-            $table->string('branchCode');
             $table->string('username');
             $table->boolean('request_new_password')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+
+            
+            $table->foreign('branch_id')->references('id')->on('branch_codes')->onDelete('cascade');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
-import { user } from './Signup';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -70,7 +69,8 @@ function LoginForm({ fields }) {
     } catch (error) {
       console.error('Error:', error);
       if (error.response && error.response.status === 409) {
-        navigate('/change-new-password/');
+        localStorage.setItem('token', error.response.data.token);
+        navigate('/change-new-password');
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});

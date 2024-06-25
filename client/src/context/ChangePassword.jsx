@@ -3,7 +3,7 @@ import axios from '../api/axios';
 import { Navigate, Outlet } from 'react-router-dom';
 import Loading from './Loading';
 
-const ProtectedRoutes = () => {
+const ChangePassword = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -34,14 +34,15 @@ const ProtectedRoutes = () => {
     if (loading) {
         return <Loading />;
     }
-
     if (!user) {
         return <Navigate to="/login" />;
     }
     if (user.data.request_new_password === 1) {
-        return <Navigate to="/change-new-password" />;
+        return <Outlet />;
+    } else {
+        return <Navigate to="/dashboard" />;
     }
-    return <Outlet />;
+
 };
 
-export default ProtectedRoutes;
+export default ChangePassword;

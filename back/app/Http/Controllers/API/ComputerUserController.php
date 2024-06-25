@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+
+use App\Http\Controllers\Controller;
+use App\Models\ComputerUser;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class ComputerUserController extends Controller
+{
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'name'                           =>              ['required'],
+            'position'                       =>              ['required'],
+            'branch_code'                    =>              ['required', 'in:BOHL,DSMT,HO']
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'status'                =>          false,
+                'message'               =>          'Something went wrong. Please fix.',
+                'errors'                =>          $validation->errors()
+            ], 422);
+        }
+
+
+        $user = ComputerUser::create([
+            'name'                    =>          $request->name,
+            'position'                =>          $request->position,
+            'branch_code'             =>          $request->branch_code
+
+        ]);
+
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              $user->name . " added successfully as computer user.",
+            'data'                  =>              $user,
+            'id'                    =>              $user->id
+        ], 200);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(ComputerUser $computerUser)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(ComputerUser $computerUser)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, ComputerUser $computerUser)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(ComputerUser $computerUser)
+    {
+        //
+    }
+}

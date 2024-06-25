@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
-import { Outlet, Navigate } from 'react-router-dom';
-import smct from '../img/smct.png';
+import { Navigate, Outlet } from 'react-router-dom';
 import Loading from './Loading';
 
 const AuthContext = () => {
@@ -36,7 +35,11 @@ const AuthContext = () => {
         return <Loading />;
     }
 
-    return user ? <Navigate to="/dashboard" /> : <Outlet />;
+    if (user) {
+        return <Navigate to="dashboard" />
+    } else {
+        return <Outlet />;
+    }
 };
 
 export default AuthContext;

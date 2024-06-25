@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -22,7 +22,7 @@ class PasswordChangeController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'status'        =>          false,
-                    'message'       =>          '"' . 'Please Input Your Password First' . '"',
+                    'message'       =>          'Something went wrong. Please fix.',
                     'errors'        =>          $validation->errors(),
                 ], 400);
             }
