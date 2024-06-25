@@ -66,17 +66,23 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
         onChange={handleInputChange}
         onFocus={handleInputFocus}
       />
-      {isOpen && filteredOptions.length > 0 && (
+      {isOpen && (
         <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md mt-1 top-full max-h-60 overflow-y-auto">
-          {filteredOptions.map((option) => (
-            <li
-              key={option.value}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSelectOption(option)}
-            >
-              {option.label}
+          {Array.isArray(filteredOptions) && filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <li
+                key={option.value}
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSelectOption(option)}
+              >
+                {option.label}
+              </li>
+            ))
+          ) : (
+            <li className="px-4 py-2 cursor-default text-gray-500">
+              No branches found
             </li>
-          ))}
+          )}
         </ul>
       )}
     </div>
@@ -112,10 +118,10 @@ function SignUp() {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await axios.get('/api/branches');
+        const response = await axios.get("/api/branches");
         setBranches(response.data);
       } catch (error) {
-        console.error('Error fetching branches:', error);
+        console.error("Error fetching branches:", error);
       }
     };
 
@@ -127,11 +133,10 @@ function SignUp() {
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
-  const options = branches.branches.map(branch => ({
+  const options = branches.branches.map((branch) => ({
     label: branch.branch_name,
-    value: branch.id
+    value: branch.id,
   }));
-
 
   const handleChange = (e) => {
     setInputValues({ ...inputValues, [e.target.name]: e.target.value });
