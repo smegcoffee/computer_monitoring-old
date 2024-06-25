@@ -3,13 +3,15 @@ import SideBar from '../Sidebar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faRightFromBracket, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Table, TableHead, TableRow, TableCell, TableBody, TablePagination, Typography } from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from '../../api/axios';
 import Swal from 'sweetalert2';
 import { format } from 'date-fns';
+import { data } from '../../data/vacantUnitsData';
+import { TableContainer } from '@material-ui/core';
 
 function Header() {
   const handleLogout = async () => {

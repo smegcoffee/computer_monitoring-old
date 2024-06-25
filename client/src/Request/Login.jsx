@@ -40,6 +40,7 @@ function LoginForm({ fields }) {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState({});
+  //eslint-disable-next-line
   const [error, setError] = useState('');
 
   // Handler for input change

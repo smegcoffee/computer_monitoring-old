@@ -96,28 +96,6 @@ function Backg() {
   );
 }
 
-//Sample Data for the Registered User
-const user = [
-  {
-    firstName: "Noreen Angeleen",
-    lastName: "Darunday",
-    contactNumber: "09485931172",
-    email: "angeleensuarez14@gmail.com",
-    branchCode: "HO",
-    username: "noreenangeleen",
-    password: "123456789",
-  },
-  {
-    firstName: "Luffy",
-    lastName: "Monkey",
-    contactNumber: "09484521145",
-    email: "luffy@gmail.com",
-    branchCode: "DSMT",
-    username: "kingp",
-    password: "qwertyuiop",
-  },
-];
-
 function SignUp() {
   const [inputValues, setInputValues] = useState({
     firstName: "",
@@ -145,6 +123,7 @@ function SignUp() {
   }, []);
 
   const [loading, setLoading] = useState(false);
+  //eslint-disable-next-line
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
@@ -454,4 +433,3 @@ function SignUp() {
 }
 
 export default SignUp;
-export { user };
