@@ -76,12 +76,12 @@ const CustomTableB = () => {
         });
         setUnit(response.data);
       } catch (error) {
-        console.error('Error fetching chart data:', error);
+        console.e('Error fetching chart data:', error);
       }
     };
 
     fetchUnit();
-  }, []);
+  }, [unit]);
   return (
     <div className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}>
       <Table className={classes.table}>
@@ -215,7 +215,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   );
 };
 
-const CustomTableA = ({ rows, setRows, updateCategory, updateSupplier }) => {
+const CustomTableA = ({ rows, setRows }) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
@@ -243,7 +243,7 @@ const CustomTableA = ({ rows, setRows, updateCategory, updateSupplier }) => {
     };
 
     fetchCategory();
-  }, [updateCategory]);
+  }, [category]);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
@@ -263,7 +263,7 @@ const CustomTableA = ({ rows, setRows, updateCategory, updateSupplier }) => {
     };
 
     fetchSupplier();
-  }, [updateSupplier]);
+  }, [supplier]);
 
   // This is a sample data for Category
   const Category = category.data && category.data.length > 0 ? category.data.map(cat => ({
@@ -679,7 +679,7 @@ function Unit() {
             </div>
           </div>
           <div className='flex justify-center items-center ml-10 mr-10'>
-            <CustomTableA rows={rows} setRows={setRows} updateCategory={sloading} updateSupplier={loading} />
+            <CustomTableA rows={rows} setRows={setRows} />
           </div>
           <div className='flex justify-center items-center ml-10 mr-10'>
             <CustomTableB rows={rows} />
