@@ -32,25 +32,22 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/profile', [ProfileController::class, 'index']);
     Route::get('/logout', [LogoutController::class, 'logout']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
-    Route::get('/units', [UnitController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/units', [UnitController::class, 'index']);
+    Route::get('/suppliers', [SupplierController::class, 'index']);
+    Route::get('/branches', [BranchCodeController::class, 'index']);
+    Route::get('/positions', [PositionController::class, 'index']);
+
+    // POST
+    Route::post('/add-category', [CategoryController::class, 'store']);
+    Route::post('/add-supplier', [SupplierController::class, 'store']);
+    Route::post('/add-unit', [UnitController::class, 'store']);
+    Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
+    Route::post('/add-position', [PositionController::class, 'store']);
+    Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
+
+
+    // DELETE
+    Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
-Route::post('/add-position', [PositionController::class, 'store']);
-Route::get('/suppliers', [SupplierController::class, 'index']);
-
-// POST
-Route::post('/add-category', [CategoryController::class, 'store']);
-Route::post('/add-supplier', [SupplierController::class, 'store']);
-Route::post('/add-unit', [UnitController::class, 'store']);
-Route::post('/add-computer', [ComputerController::class, 'store']);
-Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
-
-
-// GET
-Route::get('/branches', [BranchCodeController::class, 'index']);
-Route::get('/positions', [PositionController::class, 'index']);
-
-
-// DELETE
-Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);

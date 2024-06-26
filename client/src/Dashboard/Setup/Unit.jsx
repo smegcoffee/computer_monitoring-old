@@ -79,7 +79,7 @@ const CustomTableB = () => {
         setUnit(response.data);
         setLoading(false);
       } catch (error) {
-        console.e('Error fetching chart data:', error);
+        console.error('Error fetching chart data:', error);
       }
     };
 
@@ -166,8 +166,13 @@ const CustomTableB = () => {
 }
 
 //Searchable Dropdown
-const SearchableDropdown = ({ options, placeholder, onSelect }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const SearchableDropdown = ({
+  options,
+  placeholder,
+  onSelect,
+  searchTerm,
+  setSearchTerm,
+}) => {
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -180,22 +185,22 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
     };
 
     if (isOpen) {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     } else {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isOpen]);
 
   const handleInputChange = (event) => {
-    const searchTerm = event.target.value;
-    setSearchTerm(searchTerm);
+    const term = event.target.value || "";
+    setSearchTerm(term);
 
-    const filteredOptions = options.filter(option =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOptions = options.filter((option) =>
+      option.label.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredOptions(filteredOptions);
     setIsOpen(true);
@@ -208,17 +213,19 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   };
 
   const handleInputFocus = () => {
+    const term = searchTerm || "";
     const filteredOptions = options.filter((option) =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+      option.label.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredOptions(filteredOptions);
     setIsOpen(true);
   };
+
   return (
     <div ref={dropdownRef} className="flex items-center relative">
       <input
         type="text"
-        className='bg-gray-200 border border-transparent rounded-xl w-full h-9 pl-2'
+        className="bg-gray-200 border border-transparent rounded-xl w-full h-9 pl-2"
         placeholder={placeholder}
         value={searchTerm}
         onChange={handleInputChange}
@@ -227,7 +234,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
       {isOpen && (
         <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-xl mt-1 top-full text-justify">
           {Array.isArray(filteredOptions) && filteredOptions.length > 0 ? (
-            filteredOptions.map(option => (
+            filteredOptions.map((option) => (
               <li
                 key={option.value}
                 className="px-4 py-2 cursor-pointer hover:bg-gray-100"
@@ -237,7 +244,9 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
               </li>
             ))
           ) : (
-            <li className="px-4 py-2 cursor-default text-gray-500">No options found</li>
+            <li className="px-4 py-2 cursor-default text-gray-500">
+              No options found
+            </li>
           )}
         </ul>
       )}
@@ -249,11 +258,13 @@ const CustomTableA = ({ rows, setRows }) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
-  const [validationErrors, setValidationErrors] = useState({});
   const [uloading, setuLoading] = useState(false);
   const [error, setError] = useState();
+  const [validationErrors, setValidationErrors] = useState({});
   const [success, setSuccess] = useState();
   const [status, setStatus] = useState('');
+  const [categorySearchTerms, setCategorySearchTerms] = useState([""]);
+  const [supplierSearchTerms, setSupplierSearchTerms] = useState([""]);
   const options = [
     { value: 'Vacant', label: 'Vacant' },
     { value: 'Used', label: 'Used' },
@@ -319,6 +330,8 @@ const CustomTableA = ({ rows, setRows }) => {
       ...rows,
       { date_of_purchase: '', category: '', description: '', supplier: '', serial_number: '', status: '' }
     ]);
+    setCategorySearchTerms([...categorySearchTerms, ""]);
+    setSupplierSearchTerms([...supplierSearchTerms, ""]);
   };
 
   const handleChangeA = (date, index) => {
@@ -343,13 +356,32 @@ const CustomTableA = ({ rows, setRows }) => {
   const deleteRow = (index) => {
     const newRows = rows.filter((_, i) => i !== index);
     setRows(newRows);
+    const newCategorySearchTerms = categorySearchTerms.filter(
+      (_, i) => i !== index
+    );
+    setCategorySearchTerms(newCategorySearchTerms);
+    const newSupplierSearchTerms = supplierSearchTerms.filter(
+      (_, i) => i !== index
+    );
+    setSupplierSearchTerms(newSupplierSearchTerms);
   };
 
   const handleAddUnit = async (e) => {
     e.preventDefault();
     setuLoading(true);
     try {
-      const response = await axios.post('/api/add-unit', rows);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
+      const response = await axios.post('/api/add-unit',
+        rows,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -373,6 +405,8 @@ const CustomTableA = ({ rows, setRows }) => {
         setError('');
         setValidationErrors('');
         setRows([{ date_of_purchase: '', category: '', description: '', supplier: '', serial_number: '', status: '' }]);
+        setCategorySearchTerms([""]);
+        setSupplierSearchTerms([""]);
       }
     } catch (error) {
       console.error('Error: ', error)
@@ -458,12 +492,16 @@ const CustomTableA = ({ rows, setRows }) => {
                   <SearchableDropdown
                     options={Category}
                     value={row.category}
-                    onChange={(e) => handleChange(index, 'category', e.target.value)}
-                    placeholder={row.category}
-                    onSelect={(option) => {
-                      handleChange(index, 'category', option.value);
+                    searchTerm={categorySearchTerms[index]}
+                    setSearchTerm={(term) => {
+                      const newSearchTerms = [...categorySearchTerms];
+                      newSearchTerms[index] = term;
+                      setCategorySearchTerms(newSearchTerms);
                     }}
-
+                    placeholder=""
+                    onSelect={(option) => {
+                      handleChange(index, "category", option.value);
+                    }}
                   />
                   <span className="text-sm text-center">
                     {validationErrors && validationErrors[`${index}.category`] && (
@@ -497,10 +535,15 @@ const CustomTableA = ({ rows, setRows }) => {
                   <SearchableDropdown
                     options={Supplier}
                     value={row.supplier}
-                    onChange={(e) => handleChange(index, 'supplier', e.target.value)}
+                    searchTerm={supplierSearchTerms[index]}
+                    setSearchTerm={(term) => {
+                      const newSearchTerms = [...supplierSearchTerms];
+                      newSearchTerms[index] = term;
+                      setSupplierSearchTerms(newSearchTerms);
+                    }}
                     placeholder=""
                     onSelect={(option) => {
-                      handleChange(index, 'supplier', option.value);
+                      handleChange(index, "supplier", option.value);
                     }}
                   />
                   <span className="text-sm text-center">
@@ -587,7 +630,19 @@ function Unit() {
     e.preventDefault();
     setsLoading(true);
     try {
-      const response = await axios.post('/api/add-category', { category_name: category });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
+      const response = await axios.post('/api/add-category', {
+        category_name: category
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -653,7 +708,19 @@ function Unit() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/add-supplier', { supplier_name: supplier });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
+      const response = await axios.post('/api/add-supplier', {
+        supplier_name: supplier
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,

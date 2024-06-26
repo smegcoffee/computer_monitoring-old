@@ -15,7 +15,7 @@ class UnitController extends Controller
      */
     public function index()
     {
-        $allUnits = Unit::orderBy('id', 'asc')->with(['category', 'supplier'])->get();
+        $allUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->orWhere('status', 'Defective')->with(['category', 'supplier'])->get();
 
         if ($allUnits->count() > 0) {
             return response()->json([
