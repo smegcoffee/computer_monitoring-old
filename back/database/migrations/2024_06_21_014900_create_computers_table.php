@@ -20,8 +20,8 @@ return new class extends Migration
             $table->timestamps();
 
             
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('cascade');
+            $table->foreign('unit_id')->references('id')->on('units')->onDelete('restrict');
+            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('restrict');
         });
     }
 

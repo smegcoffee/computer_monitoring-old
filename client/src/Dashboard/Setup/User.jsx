@@ -79,7 +79,8 @@ function User() {
           position: "center",
           title: "User added!",
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
         }).then(function () {
           window.location = "/user";
         });
@@ -108,7 +109,8 @@ function User() {
           position: "center",
           title: "Position added!",
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
         }).then(function () {
           window.location = "/user";
         });
@@ -128,7 +130,7 @@ function User() {
   const handleSubmitBranchCode = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("api/insertApiForBranchCode", {
+      const response = await axios.post("api/add-branch", {
         branchCode: branchCode,
       });
       if (response.data.status === true) {
@@ -137,7 +139,8 @@ function User() {
           position: "center",
           title: "Branch Code added!",
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
         }).then(function () {
           window.location = "/user";
         });

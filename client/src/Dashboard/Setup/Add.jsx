@@ -85,7 +85,8 @@ function Add({ isOpen, onClose }) {
           position: "center",
           title: "New computer set added!",
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
         }).then(function () {
           window.location = "/add";
         });

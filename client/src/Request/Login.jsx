@@ -83,7 +83,8 @@ function LoginForm({ fields }) {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         });
 

@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import { format } from 'date-fns';
 import { data } from '../../data/vacantUnitsData';
 import { TableContainer } from '@material-ui/core';
+import Select from 'react-select';
 
 function Header() {
   const handleLogout = async () => {
@@ -61,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
 const CustomTableB = () => {
   const classes = useStyles();
   const [unit, setUnit] = useState({ data: [] });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -75,6 +77,7 @@ const CustomTableB = () => {
           }
         });
         setUnit(response.data);
+        setLoading(false);
       } catch (error) {
         console.e('Error fetching chart data:', error);
       }
@@ -111,7 +114,34 @@ const CustomTableB = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {unit.data && unit.data.length > 0 ? (
+          {loading ? (
+
+            <TableRow>
+              <TableCell colSpan={7}>
+                <div className="rounded p-4 w-full">
+                  <div className="animate-pulse flex space-x-4">
+                    <div className="flex-1 space-y-6 py-1">
+                      <div className="h-10 bg-gray-200 shadow rounded"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded p-4 w-full">
+                  <div className="animate-pulse flex space-x-4">
+                    <div className="flex-1 space-y-6 py-1">
+                      <div className="h-10 bg-gray-200 shadow rounded"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded p-4 w-full">
+                  <div className="animate-pulse flex space-x-4">
+                    <div className="flex-1 space-y-6 py-1">
+                      <div className="h-10 bg-gray-200 shadow rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : (unit.data && unit.data.length > 0 ? (
             unit.data.map((data, index) => (
               <TableRow key={index}>
                 <TableCell align="center">{data.unit_code}</TableCell>
@@ -127,7 +157,7 @@ const CustomTableB = () => {
             <TableRow>
               <TableCell colSpan={7} align="center">No units found</TableCell>
             </TableRow>
-          )}
+          ))}
 
         </TableBody>
       </Table>
@@ -223,6 +253,13 @@ const CustomTableA = ({ rows, setRows }) => {
   const [uloading, setuLoading] = useState(false);
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
+  const [status, setStatus] = useState('');
+  const options = [
+    { value: 'Vacant', label: 'Vacant' },
+    { value: 'Used', label: 'Used' },
+    { value: 'Defective', label: 'Defective' },
+    { value: 'Transfer', label: 'Transfer' },
+  ];
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -290,6 +327,13 @@ const CustomTableA = ({ rows, setRows }) => {
     setRows(newRows);
   };
 
+  const handleSelectChange = (selectedOption, index) => {
+    const newRows = [...rows];
+    newRows[index]['status'] = selectedOption.value;
+    setRows(newRows);
+  };
+
+
   const handleChange = (index, key, newValue) => {
     const newRows = [...rows];
     newRows[index][key] = newValue;
@@ -307,12 +351,24 @@ const CustomTableA = ({ rows, setRows }) => {
     try {
       const response = await axios.post('/api/add-unit', rows);
       if (response.data.status === true) {
-        Swal.fire({
-          icon: 'success',
-          title: response.data.message,
-          confirmButtonColor: '#1e88e5',
-          confirmButtonText: 'Ok',
-        });
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-right',
+          iconColor: 'green',
+          customClass: {
+            popup: 'colored-toast',
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        })
+          ; (async () => {
+            await Toast.fire({
+              icon: 'success',
+              title: response.data.message,
+            })
+          })();
         setSuccess(response.data.message);
         setError('');
         setValidationErrors('');
@@ -333,7 +389,8 @@ const CustomTableA = ({ rows, setRows }) => {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         })
           ; (async () => {
@@ -385,28 +442,38 @@ const CustomTableA = ({ rows, setRows }) => {
                     selected={row.date_of_purchase ? new Date(row.date_of_purchase) : null}
                     onChange={(date) => handleChangeA(date, index)}
                     placeholderText=""
-                    className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                    className={validationErrors && validationErrors[`${index}.date_of_purchase`] ? 'bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2' : 'bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'}
                   />
-                  {/* <span className="text-sm">
-                    {validationErrors.firstName && (
-                      <div className="text-red-500">
-                        {validationErrors.firstName.map((error, index) => (
-                          <span key={index}>{error}</span>
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.date_of_purchase`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.date_of_purchase`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
                         ))}
                       </div>
                     )}
-                  </span> */}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
                   <SearchableDropdown
                     options={Category}
                     value={row.category}
                     onChange={(e) => handleChange(index, 'category', e.target.value)}
-                    placeholder=""
+                    placeholder={row.category}
                     onSelect={(option) => {
                       handleChange(index, 'category', option.value);
                     }}
+
                   />
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.category`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.category`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
                   <input
@@ -414,8 +481,17 @@ const CustomTableA = ({ rows, setRows }) => {
                     value={row.description}
                     onChange={(e) => handleChange(index, 'description', e.target.value)}
                     placeholder=""
-                    className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                    className={validationErrors && validationErrors[`${index}.description`] ? 'bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2' : 'bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'}
                   />
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.description`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.description`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
                   <SearchableDropdown
@@ -427,6 +503,15 @@ const CustomTableA = ({ rows, setRows }) => {
                       handleChange(index, 'supplier', option.value);
                     }}
                   />
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.supplier`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.supplier`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
                   <input
@@ -434,17 +519,36 @@ const CustomTableA = ({ rows, setRows }) => {
                     value={row.serial_number}
                     onChange={(e) => handleChange(index, 'serial_number', e.target.value)}
                     placeholder=""
-                    className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                    className={validationErrors && validationErrors[`${index}.serial_number`] ? 'bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2' : 'bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'}
                   />
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.serial_number`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.serial_number`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
-                  <input
-                    type="text"
-                    value={row.status}
-                    onChange={(e) => handleChange(index, 'status', e.target.value)}
-                    placeholder=""
-                    className='bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2'
+                  <Select
+                    options={options}
+                    value={row.status ? options.find(option => option.value === row.status) : null}
+                    onChange={(selectedOption) => handleSelectChange(selectedOption, index)}
+                    placeholder={row.status ? "" : "Select status"}
+                    className={validationErrors && validationErrors[`${index}.status`] ? 'border border-red-500' : ''}
                   />
+
+                  <span className="text-sm text-center">
+                    {validationErrors && validationErrors[`${index}.status`] && (
+                      <div className="text-red-500 text-sm text-center">
+                        {validationErrors[`${index}.status`].map((error, errorIndex) => (
+                          <span key={errorIndex}>{error.replace(`${index}.`, '')}</span>
+                        ))}
+                      </div>
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell align='center'>
                   {index > 0 && (
@@ -468,7 +572,7 @@ const CustomTableA = ({ rows, setRows }) => {
 function Unit() {
   const [category, setCategory] = useState('');
   const [supplier, setSupplier] = useState('');
-  const [rows, setRows] = useState([{ date_of_purchase: '', category: '', description: '', serial_number: '', status: '' }]);
+  const [rows, setRows] = useState([{ date_of_purchase: '', category: '', description: '', supplier: '', serial_number: '', status: '' }]);
   const [sloading, setsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -493,7 +597,8 @@ function Unit() {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         })
           ; (async () => {
@@ -522,7 +627,8 @@ function Unit() {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         })
           ; (async () => {
@@ -557,7 +663,8 @@ function Unit() {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         })
           ; (async () => {
@@ -586,7 +693,8 @@ function Unit() {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         })
           ; (async () => {

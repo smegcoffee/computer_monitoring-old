@@ -50,7 +50,7 @@ class RegisterController extends Controller
             'firstName'         =>          $request->firstName,
             'lastName'          =>          $request->lastName,
             'contactNumber'     =>          $request->contactNumber,
-            'branch_id'         =>          $request->branchCode,
+            'branch_code_id'    =>          $request->branchCode,
             'username'          =>          $request->username,
             'email'             =>          $request->email,
             'password'          =>          bcrypt($request->password)

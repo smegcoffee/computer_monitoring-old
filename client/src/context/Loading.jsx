@@ -1,33 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import smct from '../img/smct.png';
 
 const Loading = () => {
-    const [loading, setLoading] = useState(true);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 3000);
+        const interval = setInterval(() => {
+            if (progress < 100) {
+                setProgress(prevProgress => prevProgress + 10);
+            }
+        }, 100);
 
-        return () => clearTimeout(timer);
-
-    }, []);
-
+        return () => clearInterval(interval);
+    }, [progress]);
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            {loading ? (
-                <>
+        <div className="flex items-center justify-center h-screen">
+            <div className="flex flex-col items-center justify-center p-20">
+                <div className="flex items-center justify-center">
                     <img src={smct} style={{ width: '600px' }} alt='Logo' />
-                    <div className="flex items-center justify-center mt-5 space-x-2">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div className="w-6 h-6 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div className="w-6 h-6 bg-blue-500 rounded-full animate-bounce"></div>
-                    </div>
-                    <p className='text-xl mt-5'><strong>Loading...</strong></p>
-                </>
-            ) : (
-                <p className='text-xl mt-5'><strong>Loaded!</strong></p>
-            )}
+                </div>
+                <div className="w-full bg-gray-200 rounded-lg overflow-hidden h-10 mt-5">
+                    <div
+                        className="bg-blue-500 h-full"
+                        style={{ width: `${progress}%`, transition: 'width 2s ease-out' }}
+                    >
+                        <p className='text-xl text-white text-center pt-1'><strong>Loading...</strong></p></div>
+                </div>
+            </div>
+
         </div>
     );
 };

@@ -152,7 +152,8 @@ function SignUp() {
           icon: "success",
           title: response.data.message,
           confirmButtonColor: "#1e88e5",
-          confirmButtonText: "Done",
+          showCloseButton: true,
+          confirmButtonText: "Ok",
           html: "You will redirected to Login page <br>Thank you!",
         }).then(function () {
           window.location = "/login";
@@ -187,7 +188,8 @@ function SignUp() {
             popup: "colored-toast",
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         });
         (async () => {

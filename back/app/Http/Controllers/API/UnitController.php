@@ -50,7 +50,7 @@ class UnitController extends Controller
             '*.date_of_purchase'                =>              ['required', 'date'],
             '*.description'                     =>              ['required', 'max:5000'],
             '*.serial_number'                   =>              ['required'],
-            '*.status'                          =>              ['required', 'in:Used,Vacant,Defective']
+            '*.status'                          =>              ['required', 'in:Used,Vacant,Defective,Transfer']
         ]);
 
         if ($validation->fails()) {
@@ -81,7 +81,7 @@ class UnitController extends Controller
 
         return response()->json([
             'status'                    =>                  true,
-            'message'                   =>                  count($createdUnits) . " units added successfully.",
+            'message'                   =>                  count($createdUnits) . (count($createdUnits) <= 1 ? " Unit" : " Units") . " added successfully.",
             'data'                      =>                  $createdUnits
         ], 200);
     }

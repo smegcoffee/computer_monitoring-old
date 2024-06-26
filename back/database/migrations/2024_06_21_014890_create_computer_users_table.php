@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('computer_users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('branch_code_id')->nullable();
+            $table->foreignId('position_id')->nullable();
             $table->string('name')->nullable();
-            $table->string('position')->nullable();
-            $table->string('branch_code')->nullable();
             $table->timestamps();
+
+            $table->foreign('branch_code_id')->references('id')->on('branch_codes')->onDelete('restrict');
+            $table->foreign('position_id')->references('id')->on('positions')->onDelete('restrict');
         });
     }
 
