@@ -3,6 +3,7 @@ import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
+  faClose,
   faGears,
   faQrcode,
   faRightFromBracket,
@@ -14,6 +15,7 @@ import axios from "../api/axios";
 import * as material from "@mui/material";
 import { tableData } from "../data/computerData";
 import CloseIcon from "@mui/icons-material/Close";
+import Swal from'sweetalert2';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <material.Slide direction="up" ref={ref} {...props} />;
@@ -69,24 +71,25 @@ export const TableComponent = () => {
   const [specsData, setSpecsData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(tableData);
+  // eslint-disable-next-line
   const [scroll, setScroll] = React.useState("paper");
   const [showAll, setShowAll] = useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
   const [openView, setOpenView] = React.useState(false);
-  const [recent, setRecent] = useState("");
+  const [recent, setRecent] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  const handleClickOpenEdit = (scrollType) => () => {
+  const handleClickOpenEdit = () => {
     setOpenEdit(true);
-    setScroll(scrollType);
   };
 
   const handleCloseEdit = () => {
     setOpenEdit(false);
   };
 
-  const handleClickOpenView = (scrollType) => () => {
+  const handleClickOpenView = (row) => () => {
     setOpenView(true);
-    setScroll(scrollType);
+    setSelectedRow(row);
   };
 
   const handleCloseView = () => {
@@ -129,6 +132,38 @@ export const TableComponent = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const handleDescriptionChange = (newValue) => {
+    setSelectedRow({ ...selectedRow, description: newValue });
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+
+    try{
+      const response = await axios.put('/api/InsertApiForView', { apps: selectedRow.description,
+        recent: recent});
+        if (response.data.status === true) {
+          Swal.fire({
+            title: "Do you want to save the changes?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Save",
+            denyButtonText: `Don't save`
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire("Saved!", "", "success");
+            } else if (result.isDenied) {
+              Swal.fire("Changes are not saved", "", "info");
+            }
+        })
+    }
+  } catch (error){
+    console.error('Error: ', error);
+  } finally {
+
+  }
+};
 
   const openSpecsPopup = (data) => {
     setSpecsData(data);
@@ -244,7 +279,7 @@ export const TableComponent = () => {
                     {row.action.includes("View") && (
                       <material.Button
                         className="hover:text-blue-500"
-                        onClick={handleClickOpenView("paper")}
+                        onClick={handleClickOpenView(row)}
                       >
                         <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                       </material.Button>
@@ -301,403 +336,457 @@ export const TableComponent = () => {
           id="scroll-dialog-title"
           className="bg-blue-500 text-white"
         >
-          VIEW MORE
+          <div className="flex">
+          <material.Typography style={{marginRight: "1110px"}}>VIEW MORE</material.Typography>
+          <material.Button onClick={handleCloseView}><FontAwesomeIcon icon={faClose} className="text-white"/></material.Button>
+          </div>
         </material.DialogTitle>
         <material.DialogContent dividers={scroll === "paper"}>
-          <material.Typography>
-            BRANCH CODE:
-            {tableData.branchCode}
-          </material.Typography>
-          <material.Typography>
-            NAME OF USER:
-            {tableData.name}
-          </material.Typography>
-          <material.Typography>
-            DESIGNATION:
-            {tableData.position}
-          </material.Typography>
-          <material.Typography>
-            COMPUTER ID: {tableData.id}{" "}
-          </material.Typography>
-          <material.Grid container spacing={2} style={{ marginTop: "5px" }}>
-            <material.Grid item xs={6}>
-              <material.TableContainer component={material.Paper}>
-                <material.Table>
-                  <material.TableHead>
-                    <material.TableRow className="bg-blue-300">
-                      <material.TableCell>
-                        <material.Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          UNIT CODE
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        <material.Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          CATEGORY
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        <material.Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          STATUS
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        <material.Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          RECENT USER
-                        </material.Typography>
-                      </material.TableCell>
-                    </material.TableRow>
-                  </material.TableHead>
-                  <material.TableBody>
-                    {tableData &&
-                      tableData.units &&
-                      tableData.units.map((unit, index) => (
-                        <material.TableRow key={index}>
-                          <material.TableCell align="center">
+          {selectedRow && (
+            <>
+              <material.Typography>
+                <b>BRANCH CODE: </b>
+                {selectedRow.branchCode}
+              </material.Typography>
+              <material.Typography>
+                <b>NAME OF USER: </b>
+                {selectedRow.name}
+              </material.Typography>
+              <material.Typography>
+                <b>DESIGNATION: </b>
+                {selectedRow.position}
+              </material.Typography>
+              <material.Typography>
+                <b>COMPUTER ID: </b>
+                {selectedRow.id}{" "}
+              </material.Typography>
+              <material.Grid container spacing={2} style={{ marginTop: "5px" }}>
+                <material.Grid item xs={6}>
+                  <material.TableContainer component={material.Paper}>
+                    <material.Table>
+                      <material.TableHead>
+                        <material.TableRow className="bg-blue-300">
+                          <material.TableCell>
                             <material.Typography
+                              align="center"
                               variant="subtitle1"
-                              fontWeight="medium"
+                              fontWeight="bold"
                             >
-                              {unit.unit}
+                              UNIT CODE
                             </material.Typography>
                           </material.TableCell>
-                          <material.TableCell align="center">
+                          <material.TableCell>
                             <material.Typography
+                              align="center"
                               variant="subtitle1"
-                              fontWeight="medium"
+                              fontWeight="bold"
                             >
-                              {unit.category}
+                              CATEGORY
                             </material.Typography>
                           </material.TableCell>
-                          <material.TableCell align="center">
+                          <material.TableCell>
                             <material.Typography
+                              align="center"
                               variant="subtitle1"
-                              fontWeight="medium"
+                              fontWeight="bold"
                             >
-                              {unit.status}
+                              STATUS
                             </material.Typography>
                           </material.TableCell>
-                          <material.TableCell align="center">
+                          <material.TableCell>
                             <material.Typography
+                              align="center"
                               variant="subtitle1"
-                              fontWeight="medium"
+                              fontWeight="bold"
                             >
-                              {unit.recent}
+                              RECENT USER
                             </material.Typography>
                           </material.TableCell>
                         </material.TableRow>
-                      ))}
-                  </material.TableBody>
-                </material.Table>
-              </material.TableContainer>
-            </material.Grid>
-            <material.Grid item xs={6}>
-              <material.TableContainer component={material.Paper}>
-                <material.Table>
-                  <material.TableHead>
-                    <material.TableRow className="bg-red-300">
-                      <material.TableCell>
-                        <material.Typography
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          DEVICE INFORMATION
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        <material.Typography
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          DETAILS
-                        </material.Typography>
-                      </material.TableCell>
-                    </material.TableRow>
-                  </material.TableHead>
-                  <material.TableBody>
-                    <material.TableRow>
-                      <material.TableCell>
-                        <material.Typography
-                          variant="subtitle1"
-                          fontWeight="medium"
-                        >
-                          {tableData.category2}
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        {Array.isArray(tableData.description) ? (
-                          <div>
-                            <ul>
-                              {showAll
-                                ? tableData.description.map((item, idx) => (
-                                    <li key={idx}>{item}</li>
-                                  ))
-                                : tableData.description
-                                    .slice(0, 3)
-                                    .map((item, idx) => (
-                                      <li key={idx}>{item}</li>
-                                    ))}
-                            </ul>
-                            {tableData.description.length > 3 && !showAll && (
-                              <button onClick={handleViewMore}>
-                                {" "}
-                                <u>View More</u>
-                              </button>
+                      </material.TableHead>
+                      <material.TableBody>
+                        {selectedRow &&
+                          selectedRow.units &&
+                          selectedRow.units.map((unit, index) => (
+                            <material.TableRow key={index}>
+                              <material.TableCell align="center">
+                                <material.Typography
+                                  variant="subtitle1"
+                                  fontWeight="medium"
+                                >
+                                  {unit.unit}
+                                </material.Typography>
+                              </material.TableCell>
+                              <material.TableCell align="center">
+                                <material.Typography
+                                  variant="subtitle1"
+                                  fontWeight="medium"
+                                >
+                                  {unit.category}
+                                </material.Typography>
+                              </material.TableCell>
+                              <material.TableCell align="center">
+                                <material.Typography
+                                  variant="subtitle1"
+                                  fontWeight="medium"
+                                >
+                                  {unit.status}
+                                </material.Typography>
+                              </material.TableCell>
+                              <material.TableCell align="center">
+                                <material.Typography
+                                  variant="subtitle1"
+                                  fontWeight="medium"
+                                >
+                                  {unit.recent}
+                                </material.Typography>
+                              </material.TableCell>
+                            </material.TableRow>
+                          ))}
+                      </material.TableBody>
+                    </material.Table>
+                  </material.TableContainer>
+                </material.Grid>
+                <material.Grid item xs={6}>
+                  <material.TableContainer component={material.Paper}>
+                    <material.Table>
+                      <material.TableHead>
+                        <material.TableRow className="bg-red-300">
+                          <material.TableCell>
+                            <material.Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                            >
+                              DEVICE INFORMATION
+                            </material.Typography>
+                          </material.TableCell>
+                          <material.TableCell>
+                            <material.Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                            >
+                              DETAILS
+                            </material.Typography>
+                          </material.TableCell>
+                        </material.TableRow>
+                      </material.TableHead>
+                      <material.TableBody>
+                        <material.TableRow>
+                          <material.TableCell>
+                            <material.Typography
+                              variant="subtitle1"
+                              fontWeight="medium"
+                            >
+                              {selectedRow.category2}
+                            </material.Typography>
+                          </material.TableCell>
+                          <material.TableCell>
+                            {Array.isArray(selectedRow.description) ? (
+                              <div>
+                                <ul>
+                                  {showAll
+                                    ? selectedRow.description.map(
+                                        (item, idx) => <li key={idx}>{item}</li>
+                                      )
+                                    : selectedRow.description
+                                        .slice(0, 3)
+                                        .map((item, idx) => (
+                                          <li key={idx}>{item}</li>
+                                        ))}
+                                </ul>
+                                {selectedRow.description.length > 3 &&
+                                  !showAll && (
+                                    <button onClick={handleViewMore}>
+                                      {" "}
+                                      <u>View More</u>
+                                    </button>
+                                  )}
+                              </div>
+                            ) : (
+                              <span>{selectedRow.description}</span>
                             )}
-                          </div>
-                        ) : (
-                          <span>{tableData.description}</span>
-                        )}
-                      </material.TableCell>
-                    </material.TableRow>
-                    <material.TableRow>
-                      <material.TableCell>
-                        <material.Typography
-                          variant="subtitle1"
-                          fontWeight="medium"
-                        >
-                          {tableData.remarks}
-                        </material.Typography>
-                      </material.TableCell>
-                      <material.TableCell>
-                        {Array.isArray(tableData.information) ? (
-                          <div>
-                            <ul>
-                              {showAll
-                                ? tableData.information.map((item, idx) => (
-                                    <li key={idx}>{item}</li>
-                                  ))
-                                : tableData.information
-                                    .slice(0, 3)
-                                    .map((item, idx) => (
-                                      <li key={idx}>{item}</li>
-                                    ))}
-                            </ul>
-                            {tableData.information.length > 3 && !showAll && (
-                              <button onClick={handleViewMore}>
-                                {" "}
-                                <u>View More</u>
-                              </button>
+                          </material.TableCell>
+                        </material.TableRow>
+                        <material.TableRow>
+                          <material.TableCell>
+                            <material.Typography
+                              variant="subtitle1"
+                              fontWeight="medium"
+                            >
+                              {selectedRow.remarks}
+                            </material.Typography>
+                          </material.TableCell>
+                          <material.TableCell>
+                            {Array.isArray(selectedRow.information) ? (
+                              <div>
+                                <ul>
+                                  {showAll
+                                    ? selectedRow.information.map(
+                                        (item, idx) => <li key={idx}>{item}</li>
+                                      )
+                                    : selectedRow.information
+                                        .slice(0, 3)
+                                        .map((item, idx) => (
+                                          <li key={idx}>{item}</li>
+                                        ))}
+                                </ul>
+                                {selectedRow.information.length > 3 &&
+                                  !showAll && (
+                                    <button onClick={handleViewMore}>
+                                      {" "}
+                                      <u>View More</u>
+                                    </button>
+                                  )}
+                              </div>
+                            ) : (
+                              <span>{selectedRow.information}</span>
                             )}
-                          </div>
-                        ) : (
-                          <span>{tableData.information}</span>
-                        )}
-                      </material.TableCell>
-                    </material.TableRow>
-                  </material.TableBody>
-                </material.Table>
-              </material.TableContainer>
-            </material.Grid>
-          </material.Grid>
+                          </material.TableCell>
+                        </material.TableRow>
+                      </material.TableBody>
+                    </material.Table>
+                  </material.TableContainer>
+                </material.Grid>
+              </material.Grid>
+            </>
+          )}
         </material.DialogContent>
-        <material.DialogActions>
-          <material.Button onClick={handleClickOpenEdit}>EDIT</material.Button>
-          <material.Button onClick={handleCloseEdit}>PRINT</material.Button>
+        <material.DialogActions style={{ padding: "20px" }}>
+          <material.Button
+            onClick={() => handleClickOpenEdit(selectedRow)}
+            variant="contained"
+            style={{ backgroundColor: "green" }}
+          >
+            EDIT
+          </material.Button>
+          <material.Button onClick={handleCloseView} variant="contained">
+            PRINT
+          </material.Button>
         </material.DialogActions>
       </material.Dialog>
 
       {/* This is the pop up dialog when clicking the Edit,   I deleted the Editview file. */}
+      <form onClick={handleSubmitEdit}>
       <material.Dialog
         fullScreen
         open={openEdit}
         onClose={handleCloseEdit}
         TransitionComponent={Transition}
       >
-        <material.AppBar sx={{ position: "relative" }}>
-          <material.Toolbar>
-            <material.IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleCloseEdit}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </material.IconButton>
-            <material.Typography
-              sx={{ ml: 2, flex: 1 }}
-              variant="h6"
-              component="div"
-            >
-              EDIT
-            </material.Typography>
-            <material.Button
-              autoFocus
-              color="inherit"
-              onClick={handleCloseEdit}
-            >
-              save
-            </material.Button>
-          </material.Toolbar>
-        </material.AppBar>
-        <material.List>
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "20px" }}
-          >
-            Computer ID: <b>{tableData.id}</b>
-          </material.Typography>
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "20px" }}
-          >
-            Branch Code: <b>{tableData.branchCode}</b>
-          </material.Typography>
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "20px" }}
-          >
-            Name of User: <b>{tableData.name}</b>
-          </material.Typography>
-          <material.Typography
-            sx={{ ml: 2, mt: 2, mb: 2 }}
-            style={{ fontSize: "20px" }}
-          >
-            Designation: <b>{tableData.position}</b>
-          </material.Typography>
-          <material.Divider />
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "16px", fontWeight: 600 }}
-          >
-            INSTALLED APPLICATIONS
-          </material.Typography>
-          <material.TextareaAutosize
-            aria-multiline
-            value={tableData.description}
-            style={{
-              border: "1px solid #bdbdbd",
-              borderRadius: "5px",
-              paddingTop: "10px",
-              paddingBottom: "10px",
-              paddingLeft: "10px",
-              width: "100%",
-              maxWidth: "1120px",
-              height: "35px",
-              marginTop: "10px",
-              overflow: "hidden",
-              resize: "none",
-              marginLeft: "20px",
-              marginBottom: "10px",
-            }}
-          />
-          <material.Divider />
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "16px", fontWeight: 600 }}
-          >
-            UNITS
-          </material.Typography>
-          <material.TableContainer className="border border-gray-200 rounded-lg mt-4">
-            <material.Table>
-              <material.TableHead className="bg-blue-200">
-                <material.TableRow>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      UNIT CODE
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      CATEGORY
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      DESCRIPTION
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      SUPPLIER
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      DATE OF PURCHASE
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      SERIAL NUMBER
-                    </material.Typography>
-                  </material.TableCell>
-                  <material.TableCell align="center">
-                    <material.Typography variant="subtitle1" fontWeight="bold">
-                      RECENT USER
-                    </material.Typography>
-                  </material.TableCell>
-                </material.TableRow>
-              </material.TableHead>
-              <material.TableBody>
-                {tableData &&
-                  tableData.units &&
-                  tableData.units.map((unit, index) => (
-                    <material.TableRow key={index}>
-                      <material.TableCell align="center">
-                        {unit.unit}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        {unit.category}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        {unit.description2}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        {unit.supplier}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        {unit.dop}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        {unit.serial}
-                      </material.TableCell>
-                      <material.TableCell align="center">
-                        <material.TextField
-                          placeholder={unit.recent}
-                          value={recent}
-                          onChange={(e) => setRecent(e.target.value)}
-                        />
-                      </material.TableCell>
-                    </material.TableRow>
+        {selectedRow !== null && (
+          <>
+            <material.AppBar sx={{ position: "relative" }}>
+              <material.Toolbar>
+                <material.IconButton
+                  edge="start"
+                  color="inherit"
+                  onClick={handleCloseEdit}
+                  aria-label="close"
+                >
+                  <CloseIcon />
+                </material.IconButton>
+                <material.Typography
+                  sx={{ ml: 2, flex: 1 }}
+                  variant="h6"
+                  component="div"
+                >
+                  EDIT
+                </material.Typography>
+                <material.Button
+                type="submit"
+                  autoFocus
+                  color="inherit"
+                >
+                  save
+                </material.Button>
+              </material.Toolbar>
+            </material.AppBar>
+            <material.List>
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "20px" }}
+              >
+                Computer ID: <b>{selectedRow.id}</b>
+              </material.Typography>
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "20px" }}
+              >
+                Branch Code: <b>{selectedRow.branchCode}</b>
+              </material.Typography>
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "20px" }}
+              >
+                Name of User: <b>{selectedRow.name}</b>
+              </material.Typography>
+              <material.Typography
+                sx={{ ml: 5, mt: 2, mb: 2 }}
+                style={{ fontSize: "20px" }}
+              >
+                Designation: <b>{selectedRow.position}</b>
+              </material.Typography>
+              <material.Divider />
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "16px", fontWeight: 600 }}
+              >
+                INSTALLED APPLICATIONS
+              </material.Typography>
+              <material.TextareaAutosize
+                aria-multiline
+                value={selectedRow.description}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                style={{
+                  border: "1px solid #bdbdbd",
+                  borderRadius: "5px",
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                  paddingLeft: "10px",
+                  width: "100%",
+                  maxWidth: "700px",
+                  height: "35px",
+                  marginTop: "10px",
+                  overflow: "hidden",
+                  resize: "none",
+                  marginLeft: "45px",
+                  marginBottom: "10px",
+                }}
+              />
+              <material.Divider />
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "16px", fontWeight: 600 }}
+              >
+                UNITS
+              </material.Typography>
+              <div className="pr-20 pl-20 mb-10">
+                <material.TableContainer className="border border-gray-200 rounded-lg mt-4">
+                  <material.Table>
+                    <material.TableHead className="bg-red-200">
+                      <material.TableRow>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            UNIT CODE
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            CATEGORY
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            DESCRIPTION
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            SUPPLIER
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            DATE OF PURCHASE
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            SERIAL NUMBER
+                          </material.Typography>
+                        </material.TableCell>
+                        <material.TableCell align="center">
+                          <material.Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            RECENT USER
+                          </material.Typography>
+                        </material.TableCell>
+                      </material.TableRow>
+                    </material.TableHead>
+                    <material.TableBody>
+                      {selectedRow &&
+                        selectedRow.units &&
+                        selectedRow.units.map((unit, index) => (
+                          <material.TableRow key={index}>
+                            <material.TableCell align="center">
+                              {unit.unit}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              {unit.category}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              {unit.description2}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              {unit.supplier}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              {unit.dop}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              {unit.serial}
+                            </material.TableCell>
+                            <material.TableCell align="center">
+                              <material.TextField
+                                placeholder={unit.recent}
+                                value={recent[index] || ""}
+                                onChange={(e) => {
+                                  const newRecent = [...recent];
+                                  newRecent[index] = e.target.value;
+                                  setRecent(newRecent);
+                                }}
+                              />
+                            </material.TableCell>
+                          </material.TableRow>
+                        ))}
+                    </material.TableBody>
+                  </material.Table>
+                </material.TableContainer>
+              </div>
+              <material.Divider />
+              <material.Typography
+                sx={{ ml: 5, mt: 2 }}
+                style={{ fontSize: "16px", fontWeight: 600 }}
+              >
+                REMARKS
+              </material.Typography>
+              <material.List sx={{ ml: 5 }}>
+                {selectedRow &&
+                  selectedRow.information &&
+                  selectedRow.information.map((info, index) => (
+                    <React.Fragment key={index}>
+                      <material.ListItem>
+                        {info.split("-").join("-\n")}
+                      </material.ListItem>
+                      {index !== selectedRow.information.length - 1 && <br />}
+                    </React.Fragment>
                   ))}
-              </material.TableBody>
-            </material.Table>
-          </material.TableContainer>
-          <material.Divider />
-          <material.Typography
-            sx={{ ml: 2, mt: 2 }}
-            style={{ fontSize: "16px", fontWeight: 600 }}
-          >
-            REMARKS
-          </material.Typography>
-          <material.List sx={{ ml: 5 }}>
-            {tableData &&
-              tableData.information &&
-              tableData.units.map((item, index) => (
-                <React.Fragment key={index}>
-                  <material.ListItem>{item}</material.ListItem>
-                  {index !== tableData.information.length - 1 && <br />}
-                </React.Fragment>
-              ))}
-          </material.List>
-        </material.List>
+              </material.List>
+            </material.List>
+          </>
+        )}
       </material.Dialog>
+      </form>
       <Specs
         isOpen={isSpecsPopupOpen}
         onClose={closeSpecsPopup}
