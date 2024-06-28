@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CustomTableB = () => {
   const classes = useStyles();
-  const [unit, setUnit] = useState({ data: [] });
+  const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -141,8 +141,8 @@ const CustomTableB = () => {
                 </div>
               </TableCell>
             </TableRow>
-          ) : (unit.data && unit.data.length > 0 ? (
-            unit.data.map((data, index) => (
+          ) : (unit.vacantDefective && unit.vacantDefective.length > 0 ? (
+            unit.vacantDefective.map((data, index) => (
               <TableRow key={index}>
                 <TableCell align="center">{data.unit_code}</TableCell>
                 <TableCell align="center">{format(new Date(data.date_of_purchase), 'yyyy-MM-dd')}</TableCell>
@@ -269,7 +269,6 @@ const CustomTableA = ({ rows, setRows }) => {
     { value: 'Vacant', label: 'Vacant' },
     { value: 'Used', label: 'Used' },
     { value: 'Defective', label: 'Defective' },
-    { value: 'Transfer', label: 'Transfer' },
   ];
 
   useEffect(() => {
