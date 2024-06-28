@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
-import { Outlet, Navigate } from 'react-router-dom';
-//import smct from '../img/smct.png';
-import Loading from './Loading';
+import { Navigate, Outlet } from 'react-router-dom';
 
 const AuthContext = () => {
     const [user, setUser] = useState(null);
@@ -22,21 +20,33 @@ const AuthContext = () => {
                     }
                 });
                 setUser(response.data);
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchUserProfile();
+        const timer = setTimeout(() => {
+            fetchUserProfile();
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, []);
 
     if (loading) {
-        return <Loading />;
+        return true;
     }
 
-    return user ? <Navigate to="/dashboard" /> : <Outlet />;
+    if (user && user.data.request_new_password === 1) {
+        return <Navigate to="/change-new-password" />;
+    }
+
+    if (user) {
+        return <Navigate to="dashboard" />
+    }
+
+    return <Outlet />;
 };
 
 export default AuthContext;

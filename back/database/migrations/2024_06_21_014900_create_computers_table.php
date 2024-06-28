@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('computers', function (Blueprint $table) {
             $table->id();
-            $table->string('supplier_name')->nullable();
+            $table->foreignId('computer_user_id')->nullable();
+            $table->string('status')->nullable();
+            $table->string('remarks')->nullable();
             $table->timestamps();
+
+
+            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('restrict');
         });
     }
 
@@ -23,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('computers');
     }
 };

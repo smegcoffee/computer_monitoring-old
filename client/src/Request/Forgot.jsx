@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import smct from '../img/smct.png';
 import bg from '../img/bg.png';
 import axios from '../api/axios';
 import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
 
 
 function Placeholder({ texts }) {
@@ -24,7 +24,7 @@ function Placeholder({ texts }) {
     event.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/forgot-password', {
+      const response = await axios.put('/api/forgot-password', {
         email: inputValues[0]
       });
       if (response.data.status === true) {
@@ -32,7 +32,8 @@ function Placeholder({ texts }) {
           icon: 'success',
           title: response.data.message,
           confirmButtonColor: '#1e88e5',
-          confirmButtonTExt: 'Done',
+          showCloseButton: true,
+          confirmButtonText: 'Ok',
           html: "You will redirected to Login page <br>Thank you!"
         }).then(function () {
           window.location = "/login";
@@ -49,6 +50,13 @@ function Placeholder({ texts }) {
         console.log('Backend error response:', error.response.data);
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
+        Swal.fire({
+          icon: 'error',
+          title: error.response.data.message,
+          showCloseButton: true,
+          confirmButtonColor: '#1e88e5',
+          confirmButtonText: 'Ok',
+        });
       } else {
         setError('An unexpected error occurred.');
       }
@@ -62,33 +70,34 @@ function Placeholder({ texts }) {
     <div className="rounded p-4 w-full max-w-md mt-10 border">
       <form onSubmit={handleSubmit}>
         {texts.map((item, index) => (
-          <div key={index} className="flex items-center mb-4">
+          <div key={index} className="flex items-center">
             <span className="mr-2 text-gray-400">{item.icon}</span>
             <input
               type="text"
-              className="w-full h-12 px-4 rounded-md border border-gray-300"
+              className={validationErrors.email ? 'w-full h-12 px-4 rounded-md border border-red-500' : 'w-full h-12 px-4 rounded-md border border-gray-300'}
               placeholder={item.text}
               value={inputValues[index]}
               onChange={(event) => handleChange(index, event)}
             />
           </div>
         ))}
+        <div className="flex items-center">
+          <span className={validationErrors ? 'mr-2 text-gray-400 opacity-0' : 'hidden'}>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span>
+            {validationErrors.email && (
+              <div className="text-red-500">
+                {validationErrors.email.map((error, index) => (
+                  <span key={index}>{error}</span>
+                ))}
+              </div>
+            )}
+          </span>
+        </div>
 
         <div className="flex justify-center">
           <div className="text-center">
-            {error && <div className="text-red-500">{error}</div>}
-            {success && <div className="text-green-500">{success}</div>}
 
-            {Object.keys(validationErrors).length > 0 &&
-              <div className="text-red-500">
-                <ul>
-                  {Object.values(validationErrors).flat().map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            }
-          <button className={loading ? 'mt-10 h-auto rounded-full font-semibold bg-blue-800 text-white' : 'mt-10 h-10 rounded-full font-semibold bg-blue-800 text-white'} style={{ width: '192px' }} disabled={loading}>{loading ? 'Generating New Password...' : 'GET NEW PASSWORD'}</button>
+            <button className={loading ? 'mt-10 h-auto rounded-full font-semibold bg-blue-800 text-white' : 'mt-10 h-10 rounded-full font-semibold bg-blue-800 text-white'} style={{ width: '192px' }} disabled={loading}>{loading ? 'Generating New Password...' : 'GET NEW PASSWORD'}</button>
           </div>
         </div>
       </form>
@@ -113,7 +122,6 @@ function Forgot() {
         <h1 className="text-4xl font-bold mt-5">COMPUTER MONITORING SYSTEM</h1>
         <h1 className="text-4xl font-medium mt-2">Reset Password</h1>
         <Placeholder texts={[{ icon: <FontAwesomeIcon icon={faEnvelope} />, text: 'Email' }]} />
-        {/* <button className='mt-2 h-10 rounded-full font-semibold bg-blue-800 text-white' style={{ width: '192px' }}>GET NEW PASSWORD</button> */}
       </div>
     </div>
   );

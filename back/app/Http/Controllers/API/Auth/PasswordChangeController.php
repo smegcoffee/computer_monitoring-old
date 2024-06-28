@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class PasswordChangeController extends Controller
@@ -22,7 +23,7 @@ class PasswordChangeController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'status'        =>          false,
-                    'message'       =>          '"' . 'Please Input Your Password First' . '"',
+                    'message'       =>          'Something went wrong. Please fix.',
                     'errors'        =>          $validation->errors(),
                 ], 400);
             }
@@ -33,6 +34,13 @@ class PasswordChangeController extends Controller
                     'data'              =>          $user,
                     'id'                =>          $user->id
                 ], 200);
+            }
+
+            if (Hash::check($request->new_password, $user->password)) {
+                return response()->json([
+                    'status'            =>          true,
+                    'message'           =>          'You cannot use the old password. Please choose a different one.',
+                ], 400);
             }
 
             $user->update([

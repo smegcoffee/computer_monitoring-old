@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\API\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -102,7 +102,7 @@ class LoginController extends Controller
                 'status'        =>          false,
                 'message'       =>          'Invalid Credentials'
             ], 400);
-        }elseif ($user->request_new_password == true) {
+        } elseif ($user->request_new_password == true) {
             return response()->json([
                 'status'            =>          true,
                 'message'           =>          'You need to change your password first',
@@ -110,7 +110,6 @@ class LoginController extends Controller
                 'data'              =>          $user,
                 'id'                =>          auth()->user()->id
             ], 409);
-        
         } else {
             return response()->json([
                 'status'        =>      true,

@@ -70,7 +70,8 @@ function LoginForm({ fields }) {
     } catch (error) {
       console.error('Error:', error);
       if (error.response && error.response.status === 409) {
-        navigate('/change-new-password/');
+        localStorage.setItem('token', error.response.data.token);
+        navigate('/change-new-password');
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
@@ -82,7 +83,8 @@ function LoginForm({ fields }) {
             popup: 'colored-toast',
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         });
 
@@ -148,7 +150,7 @@ function LogIn() {
   ];
 
   return (
-    <div>
+    <div className='relative min-h-screen'>
       <Background />
       <div className='flex flex-col items-center pt-20' style={{ zIndex: 1 }}>
         <img src={smct} alt="SMCT Logo" className='w-72 h-32 m-0 block'></img>

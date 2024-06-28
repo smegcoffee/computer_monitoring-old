@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Navigate, Outlet } from 'react-router-dom';
-import Loading from './Loading';
 
-const ProtectedRoutes = () => {
+const ChangePassword = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -30,22 +29,22 @@ const ProtectedRoutes = () => {
 
         const timer = setTimeout(() => {
             fetchUserProfile();
-        }, 2100);
+        }, 100);
 
         return () => clearTimeout(timer);
     }, []);
 
     if (loading) {
-        return <Loading />;
+        return true;
     }
-
     if (!user) {
         return <Navigate to="/login" />;
     }
-    if (user.data.request_new_password === 1) {
-        return <Navigate to="/change-new-password" />;
+    if (user.data.request_new_password === 0) {
+        return <Navigate to="/dashboard" />;
     }
     return <Outlet />;
+
 };
 
-export default ProtectedRoutes;
+export default ChangePassword;

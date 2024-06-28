@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('computer_unit', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('computer_id')->constrained()->onDelete('restrict');
+            $table->foreignId('unit_id')->constrained()->onDelete('restrict');
             $table->timestamps();
         });
     }
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('computer_unit');
     }
 };

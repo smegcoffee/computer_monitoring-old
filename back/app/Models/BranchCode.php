@@ -6,14 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 
-class Supplier extends Model
+class BranchCode extends Model
 {
     use HasFactory, HasApiTokens;
-    
+
     protected $guarded = [];
 
-    public function unit()
+    public function users()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->hasMany(User::class);
+    }
+    public function computerUsers()
+    {
+        return $this->hasMany(ComputerUser::class);
     }
 }
