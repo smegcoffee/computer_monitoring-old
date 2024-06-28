@@ -15,13 +15,31 @@ class BranchCodeController extends Controller
      */
     public function index()
     {
-        $branches = BranchCode::all();
+        $branches = BranchCode::orderBy('id', 'desc')->get();
 
         if ($branches) {
             return response()->json([
                 'status'                =>              true,
                 'message'               =>             'Branch fetched successfully.',
-                'branches'              =>              $branches
+                'branches'              =>              $branches,
+            ], 200);
+        } else {
+            return response()->json([
+                'status'                =>              false,
+                'message'               =>             'No branches found.'
+            ], 200);
+        }
+    }
+
+    public function branchCode()
+    {
+        $branches = BranchCode::orderBy('id', 'desc')->get();
+
+        if ($branches) {
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>             'Branch fetched successfully.',
+                'branches'              =>              $branches,
             ], 200);
         } else {
             return response()->json([
@@ -94,8 +112,31 @@ class BranchCodeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BranchCode $branchCode)
+    public function destroy($id)
     {
-        //
+        $branchCode = BranchCode::find($id);
+
+        if (!$branchCode) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Branch code not found.'
+            ], 404);
+        }
+
+        $users = $branchCode->users()->count();
+
+        if ($users > 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You cannot delete a branch code that is already in use by users.'
+            ], 422);
+        }
+
+        $branchCode->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Branch code deleted successfully.'
+        ], 200);
     }
 }

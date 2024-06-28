@@ -16,4 +16,8 @@ class BranchCode extends Model
     {
         return $this->hasMany(User::class);
     }
+    public function computerUsers()
+    {
+        return $this->hasMany(ComputerUser::class);
+    }
 }

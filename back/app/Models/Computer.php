@@ -9,16 +9,27 @@ use Laravel\Sanctum\HasApiTokens;
 class Computer extends Model
 {
     use HasFactory, HasApiTokens;
-    
+
     protected $guarded = [];
 
-    public function units()
+    public function unit()
     {
-        return $this->hasMany(Unit::class);
+        return $this->belongsTo(Unit::class);
     }
-
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
     public function computerUser()
     {
         return $this->belongsTo(User::class);
+    }
+    public function units()
+    {
+        return $this->belongsToMany(Unit::class, 'computer_unit');
     }
 }

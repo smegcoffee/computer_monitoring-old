@@ -41,4 +41,8 @@ class Unit extends Model
             'date_of_purchase'  =>  'datetime'
         ];
     }
+    public function computers()
+    {
+        return $this->belongsToMany(Computer::class, 'computer_unit');
+    }
 }

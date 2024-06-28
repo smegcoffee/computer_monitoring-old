@@ -5,7 +5,10 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 
 use App\Models\Computer;
+use App\Models\ComputerUser;
+use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ComputerController extends Controller
@@ -15,7 +18,20 @@ class ComputerController extends Controller
      */
     public function index()
     {
-        //
+        $computers = Computer::orderBy('id', 'desc')->with('unit', 'computerUser', 'unit.category', 'unit.supplier')->get();
+
+        if ($computers->count() > 0) {
+            return response()->json([
+                'status'            =>              true,
+                'message'           =>              'Successfully fetched all computer set.',
+                'data'              =>              $computers
+            ], 200);
+        } else {
+            return response()->json([
+                'status'            =>              false,
+                'message'           =>              'No computer set found.'
+            ], 400);
+        }
     }
 
     /**
@@ -32,10 +48,11 @@ class ComputerController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'unit'                           =>              ['required'],
-            'computer_user'                  =>              ['required'],
-            'status'                         =>              ['required', 'in:Formatted,Transfer'],
-            'remarks'                        =>              ['required', 'max:5000'],
+            'checkedRows'                    =>              ['required'],
+            'checkedRows.*'                  =>              ['exists:units,id'],
+            'computer_user'                  =>              ['required', 'exists:computer_users,id'],
+            // 'status'                         =>              ['required', 'in:Formatted,Transfer'],
+            // 'remarks'                        =>              ['required', 'max:5000'],
         ]);
 
         if ($validation->fails()) {
@@ -46,18 +63,31 @@ class ComputerController extends Controller
             ], 422);
         }
 
+        DB::beginTransaction();
+
 
         $computer = Computer::create([
-            'unit_id'                    =>          $request->unit,
+            // 'unit_id'                    =>          $request->checkedRows,
             'computer_user_id'           =>          $request->computer_user,
-            'status'                     =>          $request->status,
-            'remarks'                    =>          $request->remarks,
+            // 'status'                     =>          $request->status,
+            // 'remarks'                    =>          $request->remarks,
         ]);
+        $computer->units()->attach($request->checkedRows);
 
+        foreach ($request->checkedRows as $unitId) {
+            $unit = Unit::find($unitId);
+            if ($unit) {
+                $unit->status = 'Used';
+                $unit->save();
+            }
+        }
 
+        DB::commit();
+
+        $user = ComputerUser::find($request->computer_user);
         return response()->json([
             'status'                =>              true,
-            'message'               =>              $computer->computerUser->name . " computer added successfully.",
+            'message'               =>              $user ? $user->name . " computer added successfully." : "Computer added successfully.",
             'data'                  =>              $computer,
             'id'                    =>              $computer->id
         ], 200);

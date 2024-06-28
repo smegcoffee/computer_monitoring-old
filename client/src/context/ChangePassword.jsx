@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { Navigate, Outlet } from 'react-router-dom';
-import Loading from './Loading';
 
 const ChangePassword = () => {
     const [user, setUser] = useState(null);
@@ -21,27 +20,30 @@ const ChangePassword = () => {
                     }
                 });
                 setUser(response.data);
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchUserProfile();
+        const timer = setTimeout(() => {
+            fetchUserProfile();
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, []);
 
     if (loading) {
-        return <Loading />;
+        return true;
     }
     if (!user) {
         return <Navigate to="/login" />;
     }
-    if (user.data.request_new_password === 1) {
-        return <Outlet />;
-    } else {
+    if (user.data.request_new_password === 0) {
         return <Navigate to="/dashboard" />;
     }
+    return <Outlet />;
 
 };
 

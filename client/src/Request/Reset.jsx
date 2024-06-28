@@ -69,13 +69,14 @@ function Reset() {
 
     try {
       const userId = user ? user.id : null;
-      const response = await axios.post(`/api/change-new-password/${userId}`, inputValues);
+      const response = await axios.put(`/api/change-new-password/${userId}`, inputValues);
       if (response.data.status === true) {
         Swal.fire({
           icon: 'success',
           title: response.data.message,
           confirmButtonColor: '#1e88e5',
-          confirmButtonText: 'Done',
+          showCloseButton: true,
+          confirmButtonText: 'Ok',
           html: "You will redirected to Dashboard <br>Thank you!"
         }).then(function () {
           window.location = "/dashboard";
@@ -97,6 +98,7 @@ function Reset() {
         title: error.response.data.message,
         confirmButtonColor: '#1e88e5',
         confirmButtonText: 'Ok',
+        showCloseButton: true,
       });
     } finally {
       setLoading(false);

@@ -21,14 +21,18 @@ const ProtectedRoutes = () => {
                     }
                 });
                 setUser(response.data);
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchUserProfile();
+        const timer = setTimeout(() => {
+            fetchUserProfile();
+        }, 2100);
+
+        return () => clearTimeout(timer);
     }, []);
 
     if (loading) {

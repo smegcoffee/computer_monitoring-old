@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -13,24 +13,88 @@ import {
   Autocomplete,
 } from "@mui/material";
 import { TablePagination } from "@material-ui/core";
-import { userData } from "../../data/userAddData";
-import { data } from "../../data/vacantUnitsData";
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
+import { format } from "date-fns";
 
-function Add({ isOpen, onClose }) {
+function Add({ isOpen, onClose, onSubmit }) {
   const [user, setUser] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(data);
+  const [vacantUnit, setVacantUnit] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [checkedRows, setCheckedRows] = useState([]);
+  const [computerUser, setComputerUser] = useState({ data: [] });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [computer, setComputer] = useState({
+    computer_user: "",
+  });
+  const [vacant, setVacant] = useState(false);
+  const [vloading, setvLoading] = useState(true);
 
-  const handleCheckboxClick = (index) => {
-    if (checkedRows.includes(index)) {
-      setCheckedRows(checkedRows.filter((item) => item !== index));
+  useEffect(() => {
+    setFilteredData(vacantUnit);
+  }, [vacantUnit]);
+
+  useEffect(() => {
+    const fetchUnit = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/units", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setVacantUnit(response.data.vacant || []);
+        setvLoading(false);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchUnit();
+  }, [vacant]);
+
+  useEffect(() => {
+    const fetchComputerUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/computer-users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setComputerUser(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchComputerUser();
+  }, [computerUser]);
+
+  const ComputerUser =
+    computerUser.data && computerUser.data.length > 0
+      ? computerUser.data.map((cu) => ({
+          id: cu.id,
+          name: cu.name,
+        }))
+      : [];
+
+  const handleCheckboxClick = (unitId) => {
+    if (checkedRows.includes(unitId)) {
+      setCheckedRows(checkedRows.filter((id) => id !== unitId));
     } else {
-      setCheckedRows([...checkedRows, index]);
+      setCheckedRows([...checkedRows, unitId]);
     }
   };
 
@@ -42,31 +106,36 @@ function Add({ isOpen, onClose }) {
 
   const filterData = (value) => {
     if (!value.trim()) {
-      setFilteredData(data);
+      setFilteredData(vacantUnit);
     } else {
-      const filtered = data.filter(
+      const filtered = vacantUnit.filter(
         (item) =>
-          item.category.toLowerCase().includes(value.toLowerCase()) ||
-          item.unit.toLowerCase().includes(value.toLowerCase()) ||
-          item.supplier.toLowerCase().includes(value.toLowerCase()) ||
-          item.description.toLowerCase().includes(value.toLowerCase())
+          item.category.category_name
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          item.unit_code.toLowerCase().includes(value.toLowerCase()) ||
+          item.supplier.supplier_name
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          item.description.toLowerCase().includes(value.toLowerCase()) ||
+          item.serial_number.toLowerCase().includes(value.toLowerCase()) ||
+          item.date_of_purchase.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredData(filtered);
     }
     setPage(0);
   };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+    rowsPerPage -
+    Math.min(rowsPerPage, filteredData.length - page * rowsPerPage);
 
   if (!isOpen) {
     return null;
@@ -74,38 +143,85 @@ function Add({ isOpen, onClose }) {
 
   const handleSubmitAssignedUser = async (event) => {
     event.preventDefault();
+    setVacant(true);
+    onSubmit(true);
     try {
-      const response = await axios.post("api/insertApiForAssignedUser", {
-        assignedUser: user,
-        checkedRows: checkedRows,
-      });
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.post(
+        "api/add-computer",
+        {
+          checkedRows: checkedRows,
+          computer_user: computer.computer_user,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.data.status === true) {
-        Swal.fire({
-          icon: "success",
-          position: "center",
-          title: "New computer set added!",
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
           showConfirmButton: false,
-          timer: 1500,
-        }).then(function () {
-          window.location = "/add";
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
         });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+        setComputer("");
+        setComputerUser("");
       }
       console.log("Adding computer set:", response.data);
     } catch (error) {
       console.error("Error in adding computer set:", error);
       if (error.response && error.response.data) {
         console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
       } else {
         console.log("ERROR!");
       }
     } finally {
+      setVacant(false);
+      onSubmit(false);
     }
   };
 
   return (
-    <div className="z-10 fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div
-        className="bg-white rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl shadow-md"
+        className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl"
         style={{ minWidth: "1100px", maxWidth: "100vh", maxHeight: "100vh" }}
       >
         <div className="text-justify">
@@ -195,32 +311,76 @@ function Add({ isOpen, onClose }) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filteredData
-                      .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-                      .map((data, index) => (
-                        <TableRow key={index}>
-                          <TableCell align="center">{data.unit}</TableCell>
-                          <TableCell align="center">{data.dop}</TableCell>
-                          <TableCell align="center">{data.category}</TableCell>
-                          <TableCell align="center">
-                            {data.description}
-                          </TableCell>
-                          <TableCell align="center">{data.supplier}</TableCell>
-                          <TableCell align="center">{data.serial}</TableCell>
-                          <TableCell align="center">{data.status}</TableCell>
-                          <TableCell align="center">
-                            <Checkbox
-                              checked={checkedRows.includes(index)}
-                              onChange={() => handleCheckboxClick(index)}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 53 * emptyRows }}>
-                        <TableCell colSpan={8} />
+                    {vloading ? (
+                      <TableRow>
+                        <TableCell colSpan={8}>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="w-full p-4 rounded">
+                              <div className="flex space-x-4 animate-pulse">
+                                <div className="flex-1 py-1 space-y-6">
+                                  <div className="h-10 bg-gray-200 rounded shadow"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </TableCell>
                       </TableRow>
+                    ) : (
+                      filteredData
+                        .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+                        .map((un, index) => (
+                          <TableRow key={index}>
+                            <TableCell align="center">{un.unit_code}</TableCell>
+                            <TableCell align="center">
+                              {format(
+                                new Date(un.date_of_purchase),
+                                "yyyy-MM-dd"
+                              )}
+                            </TableCell>
+                            <TableCell align="center">
+                              {un.category.category_name}
+                            </TableCell>
+                            <TableCell align="center">
+                              {un.description}
+                            </TableCell>
+                            <TableCell align="center">
+                              {un.supplier.supplier_name}
+                            </TableCell>
+                            <TableCell align="center">
+                              {un.serial_number}
+                            </TableCell>
+                            <TableCell align="center">{un.status}</TableCell>
+                            <TableCell align="center">
+                              <Checkbox
+                                checked={checkedRows.includes(un.id)}
+                                onChange={() => handleCheckboxClick(un.id)}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))
                     )}
+
+                    {vloading
+                      ? ""
+                      : emptyRows > 0 && (
+                          <TableRow style={{ height: 53 * emptyRows }}>
+                            <TableCell colSpan={8}>
+                              {filteredData.length === 0 ? (
+                                !searchTerm ? (
+                                  <p className="text-xl text-center">
+                                    No vacant units found.
+                                  </p>
+                                ) : (
+                                  <p className="text-xl text-center">
+                                    No "{searchTerm}" result found.
+                                  </p>
+                                )
+                              ) : (
+                                ""
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
                   </TableBody>
                 </Table>
                 <TablePagination
@@ -241,20 +401,24 @@ function Add({ isOpen, onClose }) {
                 />
               </TableContainer>
             </div>
-            <div className="flex justify-center items-center">
+            <div className="flex items-center justify-center">
               <div className="flex-none">
                 <Autocomplete
                   freeSolo
                   id="user"
                   disableClearable
-                  options={userData.map((option) => option.name)}
+                  options={ComputerUser}
+                  getOptionLabel={(option) => (option.name ? option.name : "")}
+                  readOnly={ComputerUser.length === 0}
                   renderInput={(params) => (
                     <TextField
                       required
-                      value={user}
-                      onChange={(e) => setUser(e.target.value)}
                       {...params}
-                      label="Assign User"
+                      label={
+                        ComputerUser.length === 0
+                          ? "No user to select"
+                          : "Assign User"
+                      }
                       InputProps={{
                         ...params.InputProps,
                         type: "search",
@@ -269,21 +433,40 @@ function Add({ isOpen, onClose }) {
                       }}
                     />
                   )}
+                  value={
+                    ComputerUser.find(
+                      (option) => option.id === computer.computer_user
+                    ) || {}
+                  }
+                  onChange={(event, newValue) => {
+                    setComputer({ ...computer, computer_user: newValue.id });
+                  }}
                 />
               </div>
-              <div className="flex-1 justify-center items-center text-center">
+              <div className="items-center justify-center flex-1 text-center">
                 <button
-                  className="bg-gray-200 h-8 w-24 rounded-full font-semibold text-sm"
+                  className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
                   onClick={onClose}
                 >
                   CANCEL
                 </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold"
-                >
-                  ADD
-                </button>
+                {filteredData.length === 0 ? (
+                  <button
+                    disabled
+                    type="submit"
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full cursor-not-allowed"
+                  >
+                    {loading ? "ADDING..." : "ADD"}
+                  </button>
+                ) : (
+                  <button
+                    disabled={loading}
+                    type="submit"
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                  >
+                    {loading ? "ADDING..." : "ADD"}
+                  </button>
+                )}
               </div>
             </div>
           </form>

@@ -12,7 +12,22 @@ class ComputerUserController extends Controller
 {
     public function index()
     {
-        //
+        $allComputerUsers = ComputerUser::orderBy('id', 'asc')->get();
+        $computerSetUsers = ComputerUser::orderBy('id', 'asc')->with('computers', 'computers.units.category', 'computers.units.supplier')->whereHas('computers')->get();
+
+        if ($allComputerUsers->count() > 0) {
+            return response()->json([
+                'status'            =>              true,
+                'message'           =>              'All computer users successfully fetched',
+                'data'              =>              $allComputerUsers,
+                'hasComputerSet'    =>              $computerSetUsers,
+            ], 200);
+        } else {
+            return response()->json([
+                'status'            =>              true,
+                'message'           =>              'No computer users found.'
+            ], 404);
+        }
     }
 
     /**
@@ -29,9 +44,9 @@ class ComputerUserController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'name'                           =>              ['required'],
-            'position'                       =>              ['required'],
-            'branch_code'                    =>              ['required', 'in:BOHL,DSMT,HO']
+            'name'                           =>              ['required', 'unique:computer_users,name'],
+            'position'                       =>              ['required', 'exists:positions,id'],
+            'branch_code'                    =>              ['required', 'exists:branch_codes,id']
         ]);
 
         if ($validation->fails()) {
@@ -45,15 +60,15 @@ class ComputerUserController extends Controller
 
         $user = ComputerUser::create([
             'name'                    =>          $request->name,
-            'position'                =>          $request->position,
-            'branch_code'             =>          $request->branch_code
+            'position_id'             =>          $request->position,
+            'branch_code_id'          =>          $request->branch_code
 
         ]);
 
 
         return response()->json([
             'status'                =>              true,
-            'message'               =>              $user->name . " added successfully as computer user.",
+            'message'               =>              $user->name . " user added successfully.",
             'data'                  =>              $user,
             'id'                    =>              $user->id
         ], 200);
