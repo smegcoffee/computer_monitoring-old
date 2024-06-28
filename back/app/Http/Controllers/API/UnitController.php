@@ -15,13 +15,17 @@ class UnitController extends Controller
      */
     public function index()
     {
-        $allUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->orWhere('status', 'Defective')->with(['category', 'supplier'])->get();
+        $allUnits = Unit::orderBy('id', 'asc')->with(['category', 'supplier'])->get();
+        $vacantDefectiveUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->orWhere('status', 'Defective')->with(['category', 'supplier'])->get();
+        $vacantUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->with(['category', 'supplier'])->get();
 
         if ($allUnits->count() > 0) {
             return response()->json([
                 'status'                =>              true,
                 'message'               =>              "Successfully fetch all units data",
-                'data'                  =>              $allUnits
+                'data'                  =>              $allUnits,
+                'vacantDefective'       =>              $vacantDefectiveUnits,
+                'vacant'                =>              $vacantUnits
             ], 200);
         } else {
             return response()->json([
@@ -45,12 +49,12 @@ class UnitController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            '*.category'                        =>              ['required'],
-            '*.supplier'                        =>              ['required'],
+            '*.category'                        =>              ['required', 'exists:categories,id'],
+            '*.supplier'                        =>              ['required', 'exists:suppliers,id'],
             '*.date_of_purchase'                =>              ['required', 'date'],
             '*.description'                     =>              ['required', 'max:5000'],
             '*.serial_number'                   =>              ['required'],
-            '*.status'                          =>              ['required', 'in:Used,Vacant,Defective,Transfer']
+            '*.status'                          =>              ['required', 'in:Used,Vacant,Defective,Used (Transfer)']
         ]);
 
         if ($validation->fails()) {

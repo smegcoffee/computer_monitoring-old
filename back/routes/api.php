@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 // POST
 Route::post('/register', [RegisterController::class, 'store']);
+Route::get('/branch-code', [BranchCodeController::class, 'branchCode']);
 Route::post('/login', [LoginController::class, 'login']);
 Route::put('/change-new-password/{id}', [PasswordChangeController::class, 'update']);
 Route::put('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
@@ -37,12 +38,13 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/suppliers', [SupplierController::class, 'index']);
     Route::get('/branches', [BranchCodeController::class, 'index']);
     Route::get('/positions', [PositionController::class, 'index']);
+    Route::get('/computer-users', [ComputerUserController::class, 'index']);
+    Route::get('/computers', [ComputerController::class, 'index']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
     Route::post('/add-supplier', [SupplierController::class, 'store']);
     Route::post('/add-unit', [UnitController::class, 'store']);
-    Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
     Route::post('/add-position', [PositionController::class, 'store']);
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
@@ -51,3 +53,15 @@ Route::middleware("auth:sanctum")->group(function () {
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
+
+
+// GET
+    Route::get('/computer-users', [ComputerUserController::class, 'index']);
+    Route::get('/computers', [ComputerController::class, 'index']);
+
+// POST
+    Route::post('/add-computer', [ComputerController::class, 'store']);
+
+// PUT
+
+// DELETE

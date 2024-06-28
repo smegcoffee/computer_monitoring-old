@@ -150,7 +150,7 @@ function LogIn() {
   ];
 
   return (
-    <div>
+    <div className='relative min-h-screen'>
       <Background />
       <div className='flex flex-col items-center pt-20' style={{ zIndex: 1 }}>
         <img src={smct} alt="SMCT Logo" className='w-72 h-32 m-0 block'></img>

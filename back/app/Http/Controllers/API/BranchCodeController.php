@@ -31,6 +31,24 @@ class BranchCodeController extends Controller
         }
     }
 
+    public function branchCode()
+    {
+        $branches = BranchCode::orderBy('id', 'desc')->get();
+
+        if ($branches) {
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>             'Branch fetched successfully.',
+                'branches'              =>              $branches,
+            ], 200);
+        } else {
+            return response()->json([
+                'status'                =>              false,
+                'message'               =>             'No branches found.'
+            ], 200);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */

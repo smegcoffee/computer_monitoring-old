@@ -14,6 +14,6 @@ class ComputerUser extends Model
 
     public function computers()
     {
-        return $this->hasMany(Computer::class);
+        return $this->hasMany(Computer::class)->with('units');
     }
 }
