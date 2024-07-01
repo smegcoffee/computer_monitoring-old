@@ -8,9 +8,9 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import Specs from "./Popup for Computers/Specs";
-import View from "./Popup for Computers/View";
-import QrCode from "./Popup for Computers/Qr";
+import Specs from "./PopupForComputers/Specs";
+import View from "./PopupForComputers/View";
+import QrCode from "./PopupForComputers/Qr";
 import axios from "../api/axios";
 import {
   Table,
