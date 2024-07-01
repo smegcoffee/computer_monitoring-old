@@ -57,26 +57,32 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   };
 
   return (
-    <div ref={dropdownRef} className="flex items-center mt-4 relative">
+    <div ref={dropdownRef} className="relative flex items-center mt-4">
       <input
         type="text"
-        className="w-full h-12 px-4 rounded-md border border-gray-300"
+        className="w-full h-12 px-4 border border-gray-300 rounded-md"
         placeholder={placeholder}
         value={searchTerm}
         onChange={handleInputChange}
         onFocus={handleInputFocus}
       />
-      {isOpen && filteredOptions.length > 0 && (
-        <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md mt-1 top-full max-h-60 overflow-y-auto">
-          {filteredOptions.map((option) => (
-            <li
-              key={option.value}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSelectOption(option)}
-            >
-              {option.label}
+      {isOpen && (
+        <ul className="absolute z-20 w-full mt-1 overflow-y-auto bg-white border border-gray-300 rounded-md top-full max-h-60">
+          {Array.isArray(filteredOptions) && filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <li
+                key={option.value}
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSelectOption(option)}
+              >
+                {option.label}
+              </li>
+            ))
+          ) : (
+            <li className="px-4 py-2 text-gray-500 cursor-default">
+              No branches found
             </li>
-          ))}
+          )}
         </ul>
       )}
     </div>
@@ -88,7 +94,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
 function Backg() {
   return (
     <div
-      className="absolute inset-0 bg-cover bg-center"
+      className="absolute inset-0 bg-center bg-cover"
       style={{ backgroundImage: `url(${bg})`, zIndex: -1 }}
     >
       <div className="absolute inset-0 bg-white opacity-90"></div>
@@ -112,10 +118,10 @@ function SignUp() {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await axios.get('/api/branches');
+        const response = await axios.get("/api/branch-code");
         setBranches(response.data);
       } catch (error) {
-        console.error('Error fetching branches:', error);
+        console.error("Error fetching branches:", error);
       }
     };
 
@@ -127,11 +133,10 @@ function SignUp() {
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
-  const options = branches.branches.map(branch => ({
+  const options = branches.branches.map((branch) => ({
     label: branch.branch_name,
-    value: branch.id
+    value: branch.id,
   }));
-
 
   const handleChange = (e) => {
     setInputValues({ ...inputValues, [e.target.name]: e.target.value });
@@ -147,7 +152,8 @@ function SignUp() {
           icon: "success",
           title: response.data.message,
           confirmButtonColor: "#1e88e5",
-          confirmButtonText: "Done",
+          showCloseButton: true,
+          confirmButtonText: "Ok",
           html: "You will redirected to Login page <br>Thank you!",
         }).then(function () {
           window.location = "/login";
@@ -182,7 +188,8 @@ function SignUp() {
             popup: "colored-toast",
           },
           showConfirmButton: false,
-          timer: 1500,
+          showCloseButton: true,
+          timer: 2500,
           timerProgressBar: true,
         });
         (async () => {
@@ -203,11 +210,11 @@ function SignUp() {
     <div className="relative min-h-screen">
       <Backg />
       <div className="flex flex-col items-center pt-20" style={{ zIndex: 1 }}>
-        <img src={smct} alt="SMCT Logo" className="w-72 h-32 m-0 block"></img>
-        <h1 className="text-4xl font-bold mt-5">COMPUTER MONITORING SYSTEM</h1>
-        <h1 className="text-4xl font-medium mt-2">Sign Up</h1>
+        <img src={smct} alt="SMCT Logo" className="block h-32 m-0 w-72"></img>
+        <h1 className="mt-5 text-4xl font-bold">COMPUTER MONITORING SYSTEM</h1>
+        <h1 className="mt-2 text-4xl font-medium">Sign Up</h1>
         <form onSubmit={handleSubmit}>
-          <div className="rounded p-4 w-full max-w-2xl mt-10">
+          <div className="w-full max-w-2xl p-4 mt-10 rounded">
             <div className="grid grid-cols-2 gap-2 mt-4">
               <div className="col-span-1">
                 <input
@@ -273,7 +280,7 @@ function SignUp() {
                   value={inputValues.contactNumber}
                   onChange={handleChange}
                 />
-                <span className="text-sm flex">
+                <span className="flex text-sm">
                   {validationErrors.contactNumber && (
                     <div className="text-red-500">
                       {validationErrors.contactNumber.map((error, index) => (
@@ -414,7 +421,7 @@ function SignUp() {
 
             <button
               type="submit"
-              className="mt-10 w-32 h-10 rounded-full font-semibold bg-blue-800 text-white"
+              className="w-32 h-10 mt-10 font-semibold text-white bg-blue-800 rounded-full"
               disabled={loading}
             >
               {loading ? "Signing Up..." : "SIGN UP"}

@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 
-class ComputerUser extends Model
+class Position extends Model
 {
     use HasFactory, HasApiTokens;
 
     protected $guarded = [];
 
-    public function computers()
+    public function computerUsers()
     {
-        return $this->hasMany(Computer::class)->with('units');
+        return $this->hasMany(ComputerUser::class);
     }
 }

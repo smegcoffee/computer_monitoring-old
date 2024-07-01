@@ -24,7 +24,7 @@ function Placeholder({ texts }) {
     event.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/forgot-password', {
+      const response = await axios.put('/api/forgot-password', {
         email: inputValues[0]
       });
       if (response.data.status === true) {
@@ -32,7 +32,8 @@ function Placeholder({ texts }) {
           icon: 'success',
           title: response.data.message,
           confirmButtonColor: '#1e88e5',
-          confirmButtonTExt: 'Done',
+          showCloseButton: true,
+          confirmButtonText: 'Ok',
           html: "You will redirected to Login page <br>Thank you!"
         }).then(function () {
           window.location = "/login";
@@ -52,6 +53,7 @@ function Placeholder({ texts }) {
         Swal.fire({
           icon: 'error',
           title: error.response.data.message,
+          showCloseButton: true,
           confirmButtonColor: '#1e88e5',
           confirmButtonText: 'Ok',
         });

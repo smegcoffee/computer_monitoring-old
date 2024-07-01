@@ -83,7 +83,8 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
             position: "center",
             title: "Computer set has been saved!",
             showConfirmButton: false,
-            timer: 1500,
+            showCloseButton: true,
+            timer: 2500,
           }).then(function () {
             window.location = "/add";
           });
