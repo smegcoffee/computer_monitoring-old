@@ -26,10 +26,14 @@ class Computer extends Model
     }
     public function computerUser()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(ComputerUser::class);
     }
     public function units()
     {
-        return $this->belongsToMany(Unit::class, 'computer_unit');
+        return $this->belongsToMany(Unit::class, 'computer_unit')->withTimestamps();
+    }
+    public function recentUsers()
+    {
+        return $this->hasMany(RecentUser::class);
     }
 }

@@ -15,9 +15,9 @@ class PositionController extends Controller
      */
     public function index()
     {
-        $positions = Position::orderBy('id', 'desc')->get();
+        $positions = Position::orderBy('position_name', 'asc')->get();
 
-        if ($positions) {
+        if ($positions->count() > 0) {
             return response()->json([
                 'status'                =>              true,
                 'message'               =>             'Postion fetched successfully.',
