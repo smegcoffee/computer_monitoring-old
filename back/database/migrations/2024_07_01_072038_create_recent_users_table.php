@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('computers', function (Blueprint $table) {
+        Schema::create('recent_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('computer_user_id')->nullable();
-            $table->integer('formatted_status')->nullable();
-            $table->string('remarks')->nullable();
+            $table->foreignId('computer_id')->constrained()->onDelete('restrict');
+            $table->foreignId('unit_id')->constrained()->onDelete('restrict');
+            $table->foreignId('computer_user_id')->constrained()->onDelete('restrict');
             $table->timestamps();
-
-
-            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('restrict');
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('computers');
+        Schema::dropIfExists('recent_users');
     }
 };

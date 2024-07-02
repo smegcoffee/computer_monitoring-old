@@ -43,6 +43,10 @@ class Unit extends Model
     }
     public function computers()
     {
-        return $this->belongsToMany(Computer::class, 'computer_unit');
+        return $this->belongsToMany(Computer::class, 'computer_unit')->withTimestamps();
+    }
+    public function recentUsers()
+    {
+        return $this->hasMany(RecentUser::class);
     }
 }

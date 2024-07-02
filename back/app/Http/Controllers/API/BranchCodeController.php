@@ -15,9 +15,9 @@ class BranchCodeController extends Controller
      */
     public function index()
     {
-        $branches = BranchCode::orderBy('id', 'desc')->get();
+        $branches = BranchCode::orderBy('branch_name', 'asc')->get();
 
-        if ($branches) {
+        if ($branches->count() > 0) {
             return response()->json([
                 'status'                =>              true,
                 'message'               =>             'Branch fetched successfully.',
@@ -33,9 +33,9 @@ class BranchCodeController extends Controller
 
     public function branchCode()
     {
-        $branches = BranchCode::orderBy('id', 'desc')->get();
+        $branches = BranchCode::orderBy('branch_name', 'asc')->get();
 
-        if ($branches) {
+        if ($branches->count() > 0) {
             return response()->json([
                 'status'                =>              true,
                 'message'               =>             'Branch fetched successfully.',

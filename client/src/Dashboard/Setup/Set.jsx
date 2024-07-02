@@ -16,25 +16,37 @@ import Add from "./Add";
 import EditSet from "./Editset";
 import axios from "../../api/axios";
 import { format } from "date-fns";
+import Swal from "sweetalert2";
 
 function Header() {
   const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
+    const result = await Swal.fire({
+      title: "Are you sure you want to logout?",
+      showCancelButton: true,
+      confirmButtonColor: "red",
+      confirmButtonText: "Logout",
+    });
+
+    if (result.isConfirmed) {
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          return;
+        }
+
+        await axios.get("/api/logout", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        localStorage.removeItem("token");
+        window.location = "/login";
+      } catch (error) {
+        console.error("Error logging out:", error);
+        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
       }
-
-      await axios.get("/api/logout", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      localStorage.removeItem("token");
-      window.location = "/login";
-    } catch (error) {
-      console.error("Error logging out:", error);
     }
   };
   return (
@@ -65,7 +77,7 @@ const useStyles = makeStyles({
 function Set() {
   const [isAddPopupOpen, setAddPopupOpen] = useState(false);
   const classes = useStyles();
-  const [isEditPopupOpen, setEditPopupOpen] = useState(false);
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -138,14 +150,31 @@ function Set() {
     setPage(0);
   };
 
-  const openEditPopup = (row) => {
-    setSelectedRow(row.id);
-    setEditPopupOpen(true);
-    setEditPopupData(row);
+  const openEditPopup = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.get(`/api/computer-user-edit/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.status) {
+        setEditPopupData(response.data.computer_user_data);
+        setIsEditPopupOpen(true);
+      }
+
+      console.log(response);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   const closeEditPopup = () => {
-    setEditPopupOpen(false);
+    setIsEditPopupOpen(false);
+    setEditPopupData(false);
   };
 
   const rows = filteredData;
@@ -316,7 +345,7 @@ function Set() {
                               )}
                             </TableCell>
                             <TableCell align="center">
-                              <button onClick={() => openEditPopup(row)}>
+                              <button onClick={() => openEditPopup(row.id)}>
                                 {row.name}
                               </button>
                             </TableCell>

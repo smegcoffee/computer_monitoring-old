@@ -13,22 +13,60 @@ import {
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMinus } from "@fortawesome/free-solid-svg-icons";
-import { userData } from "../../data/userAddData";
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
+import { format } from "date-fns";
 
-function EditSet({ isOpen, onClose, row, editPopupData }) {
-  const units = editPopupData.units;
+function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
   const [user, setUser] = useState("");
   const [rows, setRows] = useState([]);
-
+  const [computerUser, setComputerUser] = useState({ data: [] });
+  const [computer, setComputer] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [computerName, setComputerName] = useState("");
   useEffect(() => {
-    if (Array.isArray(units)) {
-      setRows(units);
-    } else {
-      console.error("Units is not an array");
+    // Flatten units from each computer into rows
+    if (Array.isArray(editPopupData.computers)) {
+      const allUnits = editPopupData.computers.flatMap((computer) =>
+        computer.units.map((unit) => ({
+          ...unit,
+          computerName: computer.name,
+        }))
+      );
+      setRows(allUnits);
+      const name = editPopupData.name;
+      setComputerName(name);
+      setLoading(false);
     }
-  }, [units]);
+  }, [editPopupData]);
+  useEffect(() => {
+    const fetchComputerUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/computer-users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setComputerUser(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchComputerUser();
+  }, [computerUser]);
+
+  const ComputerUser =
+    computerUser.data && computerUser.data.length > 0
+      ? computerUser.data.map((cu) => ({
+          id: cu.id,
+          name: cu.name,
+        }))
+      : [];
 
   // Function to delete a row
   const handleDelete = (index) => {
@@ -46,7 +84,7 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
     return null;
   }
 
-  const handleSubmitEditedSet = async (event) => {
+  const handleSubmitEditedSet = async (event, unitId) => {
     event.preventDefault();
 
     const inputOptions = new Promise((resolve) => {
@@ -71,11 +109,14 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
 
     if (reason) {
       try {
-        const response = await axios.put("api/insertApiForComputerSet", {
-          assignedUser: user,
-          rows: rows,
-          reason: reason,
-        });
+        const response = await axios.delete(
+          `api/computer/${computer.id}/unit/${unitId}`,
+          {
+            assignedUser: user,
+            rows: rows,
+            reason: reason,
+          }
+        );
 
         if (response.data.status === true) {
           Swal.fire({
@@ -143,11 +184,16 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
         <div
-          className="bg-white rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl shadow-md"
+          className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl"
           style={{ minWidth: "1000px", maxWidth: "100vh", maxHeight: "100vh" }}
         >
-          <div className="text-justify">
+          <div className="max-h-screen overflow-y-scroll text-justify">
             <form onSubmit={handleSubmitEditedSet}>
+              <p className="p-5 text-4xl text-center">
+                <u>
+                  <strong>{computerName}</strong> computer units.
+                </u>
+              </p>
               <TableContainer
                 component={Paper}
                 style={{
@@ -197,46 +243,77 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((unit, index) => (
-                      <TableRow key={index}>
-                        <TableCell align="center">{unit.unit}</TableCell>
-                        <TableCell align="center">{unit.dop}</TableCell>
-                        <TableCell align="center">{unit.category}</TableCell>
-                        <TableCell align="center">
-                          {unit.description2}
-                        </TableCell>
-                        <TableCell align="center">{unit.supplier}</TableCell>
-                        <TableCell align="center">{unit.serial}</TableCell>
-                        <TableCell align="center">{unit.status}</TableCell>
-                        <TableCell align="center">
-                          <button
-                            onClick={handleDelete}
-                            className="text-red-600 text-base font-semibold"
-                          >
-                            <FontAwesomeIcon icon={faMinus} />
-                          </button>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={8}>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="w-full p-4 rounded">
+                              <div className="flex space-x-4 animate-pulse">
+                                <div className="flex-1 py-1 space-y-6">
+                                  <div className="h-10 bg-gray-200 rounded shadow"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      rows.map((unit, index) => (
+                        <TableRow key={index}>
+                          <TableCell align="center">{unit.unit_code}</TableCell>
+                          <TableCell align="center">
+                            {format(
+                              new Date(unit.date_of_purchase),
+                              "yyyy-MM-dd"
+                            )}
+                          </TableCell>
+                          <TableCell align="center">
+                            {unit.category.category_name}
+                          </TableCell>
+                          <TableCell align="center">
+                            {unit.description}
+                          </TableCell>
+                          <TableCell align="center">
+                            {unit.supplier.supplier_name}
+                          </TableCell>
+                          <TableCell align="center">
+                            {unit.serial_number}
+                          </TableCell>
+                          <TableCell align="center">{unit.status}</TableCell>
+                          <TableCell align="center">
+                            <button
+                              onClick={handleDelete}
+                              className="text-base font-semibold text-red-600"
+                            >
+                              <FontAwesomeIcon icon={faMinus} />
+                            </button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <div className="flex justify-center items-center">
+              <div className="flex items-center justify-center">
                 <div className="flex-none">
                   <Autocomplete
                     freeSolo
                     id="user"
                     disableClearable
-                    options={userData.map((option) => option.name)}
+                    options={ComputerUser}
+                    getOptionLabel={(option) =>
+                      option.name ? option.name : ""
+                    }
+                    readOnly={ComputerUser.length === 0}
                     renderInput={(params) => (
                       <TextField
-                        value={user}
-                        placeholder={editPopupData.name}
-                        onChange={(event) => {
-                          setUser(event.target.value);
-                        }}
+                        required
                         {...params}
-                        label="Assign New User?"
+                        label={
+                          ComputerUser.length === 0
+                            ? "No user to select"
+                            : "Assign User"
+                        }
                         InputProps={{
                           ...params.InputProps,
                           type: "search",
@@ -251,18 +328,26 @@ function EditSet({ isOpen, onClose, row, editPopupData }) {
                         }}
                       />
                     )}
+                    value={
+                      ComputerUser.find(
+                        (option) => option.id === computer.computer_user
+                      ) || {}
+                    }
+                    onChange={(event, newValue) => {
+                      setComputer({ ...computer, computer_user: newValue.id });
+                    }}
                   />
                 </div>
-                <div className="flex-1 justify-center items-center text-center">
+                <div className="items-center justify-center flex-1 text-center">
                   <button
-                    className="bg-gray-200 h-8 w-24 rounded-full font-semibold text-sm"
+                    className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
                     onClick={onClose}
                   >
                     CANCEL
                   </button>
                   <button
                     type="submit"
-                    className="bg-green-600 h-8 w-24 text-white rounded-full ml-3 text-sm font-semibold"
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
                   >
                     SAVE
                   </button>
