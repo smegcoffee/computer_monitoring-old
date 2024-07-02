@@ -11,6 +11,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ComputerController;
 use App\Http\Controllers\API\ComputerUserController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\EmailController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\UnitController;
@@ -40,6 +41,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/positions', [PositionController::class, 'index']);
     Route::get('/computer-users', [ComputerUserController::class, 'index']);
     Route::get('/computers', [ComputerController::class, 'index']);
+    Route::get('/computer-user-edit/{id}', [ComputerUserController::class, 'edit']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -48,19 +50,19 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
     Route::post('/add-position', [PositionController::class, 'store']);
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
+    Route::post('/add-computer', [ComputerController::class, 'store']);
 
 
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
+Route::delete('/computer/{computerId}/unit/{unitId}', [ComputerController::class, 'destroy']);
 
 
 // GET
-    Route::get('/computer-users', [ComputerUserController::class, 'index']);
-    Route::get('/computers', [ComputerController::class, 'index']);
-
+Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
+Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
 // POST
-    Route::post('/add-computer', [ComputerController::class, 'store']);
 
 // PUT
 

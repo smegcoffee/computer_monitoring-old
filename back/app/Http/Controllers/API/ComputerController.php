@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Computer;
 use App\Models\ComputerUser;
+use App\Models\RecentUser;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,16 +64,16 @@ class ComputerController extends Controller
             ], 422);
         }
 
-        DB::beginTransaction();
+        $computer = Computer::where('computer_user_id', $request->computer_user)->first();
 
-
-        $computer = Computer::create([
-            // 'unit_id'                    =>          $request->checkedRows,
-            'computer_user_id'           =>          $request->computer_user,
-            // 'status'                     =>          $request->status,
-            // 'remarks'                    =>          $request->remarks,
-        ]);
-        $computer->units()->attach($request->checkedRows);
+        if (!$computer) {
+            $computer = Computer::create([
+                'computer_user_id' => $request->computer_user,
+            ]);
+            $computer->units()->attach($request->checkedRows);
+        } else {
+            $computer->units()->attach($request->checkedRows);
+        }
 
         foreach ($request->checkedRows as $unitId) {
             $unit = Unit::find($unitId);
@@ -81,8 +82,6 @@ class ComputerController extends Controller
                 $unit->save();
             }
         }
-
-        DB::commit();
 
         $user = ComputerUser::find($request->computer_user);
         return response()->json([
@@ -120,8 +119,55 @@ class ComputerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Computer $computer)
+    public function destroy(Request $request, Computer $computer, $computerId, $unitId)
     {
-        //
+        try {
+            $computer = Computer::find($computerId);
+
+            if (!$computer) {
+                return response()->json([
+                    'status'            =>              false,
+                    'message'           =>              'Computer not found.',
+                ], 404);
+            }
+
+            $unit = Unit::findOrFail($unitId);
+
+            if (!$unit) {
+                return response()->json([
+                    'status'        =>          false,
+                    'message'       =>          'Unit not found.',
+                ], 404);
+            }
+
+            $unit->status = 'Vacant';
+            $unit->save();
+
+            $computer->units()->detach($unitId);
+
+            if ($computer->units()->count() === 0) {
+                $computer->delete();
+            }
+
+
+            $user = ComputerUser::find($computer->computer_user_id);
+
+            $recentUser = RecentUser::create([
+                'computer_id'        =>          $computerId,
+                'unit_id'            =>          $unitId,
+                'computer_user_id'   =>          $request->computer_user_id
+            ], 200);
+
+            return response()->json([
+                'status'            =>          true,
+                'message'           =>          $user->name . ' computer unit deleted successfully. And automatically transfer to ' . $recentUser->computerUser->name,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'            =>          false,
+                'message'           =>          'Failed to delete unit from computer.',
+                'error'             =>          $e->getMessage(),
+            ], 500);
+        }
     }
 }

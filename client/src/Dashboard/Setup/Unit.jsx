@@ -28,23 +28,33 @@ import Select from "react-select";
 
 function Header() {
   const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      console.log(token);
-      if (!token) {
-        return;
+    const result = await Swal.fire({
+      title: "Are you sure you want to logout?",
+      showCancelButton: true,
+      confirmButtonColor: "red",
+      confirmButtonText: "Logout",
+    });
+
+    if (result.isConfirmed) {
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          return;
+        }
+
+        await axios.get("/api/logout", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        localStorage.removeItem("token");
+        window.location = "/login";
+      } catch (error) {
+        console.error("Error logging out:", error);
+        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
       }
-
-      await axios.get("/api/logout", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      localStorage.removeItem("token");
-      window.location = "/login";
-    } catch (error) {
-      console.error("Error logging out:", error);
     }
   };
   return (

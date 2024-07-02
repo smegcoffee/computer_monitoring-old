@@ -12,7 +12,7 @@ class ComputerUserController extends Controller
 {
     public function index()
     {
-        $allComputerUsers = ComputerUser::orderBy('id', 'asc')->get();
+        $allComputerUsers = ComputerUser::orderBy('id', 'asc')->with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier')->get();
         $computerSetUsers = ComputerUser::orderBy('id', 'asc')->with('computers', 'computers.units.category', 'computers.units.supplier')->whereHas('computers')->get();
 
         if ($allComputerUsers->count() > 0) {
@@ -85,9 +85,39 @@ class ComputerUserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ComputerUser $computerUser)
+    public function edit(ComputerUser $computerUser, $id)
     {
-        //
+        $computer_user = ComputerUser::with('computers', 'computers.units.category', 'computers.units.supplier')->find($id);
+        if (!$computer_user) {
+            return response()->json([
+                'status'            =>          false,
+                'message'           =>          'No user found.'
+            ], 404);
+        } else {
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>              'Successfully fetched ' . $computer_user->name . ' data.',
+                'computer_user_data'    =>              $computer_user,
+                'id'                    =>              $computer_user->id
+            ], 200);
+        }
+    }
+    public function viewSpecs(ComputerUser $computerUser, $id)
+    {
+        $computer_user = ComputerUser::with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier')->find($id);
+        if (!$computer_user) {
+            return response()->json([
+                'status'            =>          false,
+                'message'           =>          'No user found.'
+            ], 404);
+        } else {
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>              'Successfully fetched ' . $computer_user->name . ' computer specs.',
+                'computer_user_specs'   =>              $computer_user,
+                'id'                    =>              $computer_user->id
+            ], 200);
+        }
     }
 
     /**

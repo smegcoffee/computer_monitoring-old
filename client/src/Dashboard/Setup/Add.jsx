@@ -181,6 +181,7 @@ function Add({ isOpen, onClose, onSubmit }) {
             title: response.data.message,
           });
         })();
+        setCheckedRows("");
         setComputer("");
         setComputerUser("");
       }
