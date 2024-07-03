@@ -84,12 +84,13 @@ export const TableComponent = () => {
   const [isQrPopupOpen, setQrPopupOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [qrCodeData, setQrCodeData] = useState(null);
+  const [qrCodeData, setQrCodeData] = useState("");
   const [specsPopupData, setSpecsPopupData] = useState("");
   const [viewPopupData, setViewPopupData] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [computerUser, setComputerUser] = useState([]);
+  const [computerId, setComputerId] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -109,6 +110,11 @@ export const TableComponent = () => {
           ...user,
           action: ["Specs", "View", "Qr"],
         }));
+
+        const compId = response.data.data.flatMap((computer) =>
+          computer.computers.map((comp) => comp.id)
+        );
+        setComputerId(compId);
 
         setComputerUser(userData);
         setFilteredData(userData);
@@ -187,12 +193,25 @@ export const TableComponent = () => {
       console.error("Error fetching data:", error);
     }
   };
-
-  const openQrPopup = (data) => {
-    setQrCodeData(data);
-    setQrPopupOpen(true);
+  const openQrPopup = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.get(`/api/computer-user-specs/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.status) {
+        setQrCodeData(response.data.computer_user_specs);
+        setQrPopupOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
-
   const closeSpecsPopup = () => {
     setSpecsPopupOpen(false);
     setSpecsPopupData(false);
@@ -205,6 +224,7 @@ export const TableComponent = () => {
 
   const closeQrPopup = () => {
     setQrPopupOpen(false);
+    setQrCodeData(false);
   };
 
   const openSpecsData = (computerUser) => {
@@ -229,10 +249,10 @@ export const TableComponent = () => {
     };
   };
 
-  const generateQRCodeData = (computerUser) => {
+  const generateQRCodeData = (computerId) => {
     return {
-      id: computerUser.id,
-      data: `${computerUser.id}`,
+      id: computerId.id,
+      data: `${computerId.id}`,
     };
   };
 
@@ -333,7 +353,7 @@ export const TableComponent = () => {
                       {row.action.includes("Qr") && (
                         <Button
                           className="hover:text-blue-500"
-                          onClick={() => openQrPopup(generateQRCodeData(row))}
+                          onClick={() => openQrPopup(row.id)}
                         >
                           <FontAwesomeIcon icon={faQrcode} />
                         </Button>
@@ -396,6 +416,7 @@ export const TableComponent = () => {
         isOpen={isQrPopupOpen}
         onClose={closeQrPopup}
         qrCodeData={qrCodeData}
+        setQrCodeData={setQrCodeData}
       />
     </>
   );
