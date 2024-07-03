@@ -51,7 +51,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
-        className="overflow-y-scroll bg-white shadow-md rounded-2xl"
+        className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
       >
         <span
@@ -86,7 +86,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
             Computer ID: {id.length === 1 ? id : "NaN"}
           </div>
         </div>
-        <div className="mt-6 mb-4 ml-6 mr-6 text-justify">
+        <div className="overflow-y-scroll mt-6 mb-4 ml-6 mr-6 text-justify" style={{height: "470px"}}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TableContainer component={Paper}>
