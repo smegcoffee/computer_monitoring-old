@@ -36,4 +36,13 @@ class Computer extends Model
     {
         return $this->hasMany(RecentUser::class);
     }
+    public function installedApplications()
+    {
+        return $this->hasMany(InstalledApplication::class);
+    }
+
+    public function remarks()
+    {
+        return $this->hasMany(Remark::class);
+    }
 }

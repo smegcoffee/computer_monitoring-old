@@ -65,39 +65,42 @@ function TopBox() {
   //many = how many computers been formatted in his/her ownership
 
   const dataUsers = userFormatted;
-
   return (
     <div className="topBox ">
       <h1 className="mb-5 text-xl font-bold">
         Top Users with Most Formatted Computers
       </h1>
       <div className="list">
-        {dataUsers.map((user) => (
-          <div
-            className="flex items-center justify-between mb-8 listItem"
-            key={user.id}
-          >
-            <div className="flex gap-5 user">
-              <img
-                className="object-cover w-10 h-10 rounded-full"
-                src={user.img}
-                alt="User"
-              />
-              <div className="flex flex-col gap-1 userText">
-                <span className="text-sm font-medium username">
-                  {user.username}
-                </span>
-                <span className="text-xs email">{user.email}</span>
-              </div>
-            </div>
-            <span
-              className="font-medium bcode"
-              style={{ color: user.many < 5 ? "limegreen" : "tomato" }}
+        {dataUsers.length === 0 ? (
+          <p className="text-center">No users have formatted computers yet.</p>
+        ) : (
+          dataUsers.map((user) => (
+            <div
+              className="flex items-center justify-between mb-8 listItem"
+              key={user.id}
             >
-              {user.many}
-            </span>
-          </div>
-        ))}
+              <div className="flex gap-5 user">
+                <img
+                  className="object-cover w-10 h-10 rounded-full"
+                  src={user.img}
+                  alt="User"
+                />
+                <div className="flex flex-col gap-1 userText">
+                  <span className="text-sm font-medium username">
+                    {user.username}
+                  </span>
+                  <span className="text-xs email">{user.email}</span>
+                </div>
+              </div>
+              <span
+                className="font-medium bcode"
+                style={{ color: user.many < 5 ? "limegreen" : "tomato" }}
+              >
+                {user.many}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -117,9 +120,7 @@ export function ChartBox(props) {
           </span>
         </div>
         <h1 className="text-xl font-bold text-white">{props.number}</h1>
-        <Link to="#" style={{ color: "white" }}>
-          View All
-        </Link>
+        <Link to="#" style={{ color: "white" }}></Link>
       </div>
       <div
         className="flex flex-col justify-between chartInfo"
@@ -162,16 +163,20 @@ function BarChartBox(props) {
     <div className="w-full h-full barChartBox">
       <h1 className="mb-3 text-xl">{props.title}</h1>
       <div className="chart">
-        <ResponsiveContainer width="99%" height={120}>
-          <BarChart data={props.chartData}>
-            <Tooltip
-              contentStyle={{ background: "white", borderRadius: "5px" }}
-              labelStyle={{ display: "none" }}
-              cursor={{ fill: "none" }}
-            />
-            <Bar dataKey={props.dataKey} fill={props.color} />
-          </BarChart>
-        </ResponsiveContainer>
+        {props.hasData ? (
+          <ResponsiveContainer width="99%" height={120}>
+            <BarChart data={props.chartData}>
+              <Tooltip
+                contentStyle={{ background: "white", borderRadius: "5px" }}
+                labelStyle={{ display: "none" }}
+                cursor={{ fill: "none" }}
+              />
+              <Bar dataKey={props.dataKey} fill={props.color} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-center">No data found</p>
+        )}
       </div>
     </div>
   );
@@ -330,6 +335,7 @@ function BigChartBox() {
 
 function Dashboard() {
   const [weeklyRemarks, setWeeklyRemarks] = useState([]);
+  const [hasData, setHasData] = useState([]);
 
   useEffect(() => {
     const fetchWeeklyRemarks = async () => {
@@ -349,6 +355,8 @@ function Dashboard() {
         }));
 
         setWeeklyRemarks(remarksData);
+        const data = remarksData.some((day) => day.Remarks > 0);
+        setHasData(data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -388,6 +396,7 @@ function Dashboard() {
           dataKey="Remarks"
           color="#ff8042"
           chartData={weeklyRemarks}
+          hasData={hasData}
         />
       </div>
     </div>
