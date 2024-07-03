@@ -19,6 +19,7 @@ import {
   ListItem,
   ListItemText,
   TextareaAutosize,
+  Autocomplete,
 } from "@mui/material";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -32,10 +33,9 @@ const Extract = () => {
   const { id } = useParams();
   //const [computer, setComputer] = useState(null);
   const [remark, setRemark] = useState("");
-  const [remarks, setRemarks] = useState("");
-  const [application, setApplication] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [otherApplication, setOtherApplication] = useState("");
+  const [remarksContent, setRemarksContent] = useState("");
+  const [applicationContent, setApplicationContent] = useState("");
+  const [date, setDate] = useState(null);
   const [showAll, setShowAll] = useState(false);
 
   // Sample computer data
@@ -45,25 +45,14 @@ const Extract = () => {
     setShowAll(!showAll);
   };
 
-  const handleChange = (e) => {
-    const { value } = e.target;
-    if (value === "Others") {
-      setApplication("");
-    } else {
-      setOtherApplication("");
-    }
-    setApplication(value);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitted:", {
       id,
       remark,
-      remarks,
-      selectedDate,
-      application,
-      otherApplication,
+      remarksContent,
+      date,
+      applicationContent,
     });
   };
 
@@ -236,29 +225,22 @@ const Extract = () => {
             </Grid>
             <Grid item xs={12}>
               <form onSubmit={handleSubmit}>
-                <TextField
-                  label="Select Installed Application"
-                  value={application}
-                  onChange={handleChange}
-                  select
-                  fullWidth
-                  margin="normal"
-                >
-                  <MenuItem value="">None</MenuItem>
-                  <MenuItem value="Adobe Photoshop">Adobe Photoshop</MenuItem>
-                  <MenuItem value="Microsoft Office">Microsoft Office</MenuItem>
-                  <MenuItem value="Github Desktop">Github Desktop</MenuItem>
-                  <MenuItem value="Others">Others</MenuItem>
-                </TextField>
-                {application === "Others" && (
+              <Autocomplete
+                  multiple
+                  id="tags-outlined"
+                  options={[]}
+                  freeSolo
+                  renderInput={(params) => (
                   <TextField
-                    label="Other Application"
-                    value={otherApplication}
-                    onChange={(e) => setOtherApplication(e.target.value)}
-                    fullWidth
-                    margin="normal"
+                    {...params}
+                    value={applicationContent}
+                    onChange={(e) => setApplicationContent(e.target.value)}
+                    variant="outlined"
+                    label="Installed Applications"
+                    placeholder="Installed Applications"
                   />
-                )}
+                  )}
+                  />
                 <TextField
                   label="Is it Formatted?"
                   value={remark}
@@ -272,8 +254,8 @@ const Extract = () => {
                 </TextField>
                 <TextareaAutosize
                   aria-multiline
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
+                  value={remarksContent}
+                  onChange={(e) => setRemarksContent(e.target.value)}
                   placeholder="Enter Remarks..."
                   style={{
                     border: "1px solid #bdbdbd",
@@ -294,8 +276,8 @@ const Extract = () => {
                     <DateField
                       fullWidth
                       label="Date"
-                      value={selectedDate}
-                      onChange={(newDate) => setSelectedDate(newDate)}
+                      value={date}
+                      onChange={(newDate) => setDate(newDate)}
                     />
                   </DemoContainer>
                 </LocalizationProvider>{" "}
