@@ -33,7 +33,6 @@ Route::middleware("auth:sanctum")->group(function () {
     // GET
     Route::get('/profile', [ProfileController::class, 'index']);
     Route::get('/logout', [LogoutController::class, 'logout']);
-    Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/units', [UnitController::class, 'index']);
     Route::get('/suppliers', [SupplierController::class, 'index']);
@@ -42,6 +41,8 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/computer-users', [ComputerUserController::class, 'index']);
     Route::get('/computers', [ComputerController::class, 'index']);
     Route::get('/computer-user-edit/{id}', [ComputerUserController::class, 'edit']);
+    Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -51,6 +52,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-position', [PositionController::class, 'store']);
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
     Route::post('/add-computer', [ComputerController::class, 'store']);
+    Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
 
 
     // DELETE
@@ -60,10 +62,9 @@ Route::delete('/computer/{computerId}/unit/{unitId}', [ComputerController::class
 
 
 // GET
-Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
-Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
+Route::get('/computers/{id}', [ComputerController::class, 'show']);
 // POST
-
+Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
 // PUT
 
 // DELETE

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Computer;
 use App\Models\ComputerUser;
+use App\Models\InstalledApplication;
 use App\Models\RecentUser;
+use App\Models\Remark;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -95,9 +97,24 @@ class ComputerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Computer $computer)
+    public function show(Computer $computer, $id)
     {
-        //
+
+        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks')->find($id);
+
+        if (!$computer) {
+            return response()->json([
+                'status'                =>              false,
+                'message'               =>              'No computer found.',
+            ], 200);
+        } else {
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>              'Successfully fetched computer data.',
+                'computer'              =>              $computer,
+                'id'                    =>              $computer->id
+            ], 200);
+        }
     }
 
     /**
@@ -168,6 +185,62 @@ class ComputerController extends Controller
                 'message'           =>          'Failed to delete unit from computer.',
                 'error'             =>          $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function installAndRemark(Request $request, $computerId)
+    {
+        $validation = Validator::make($request->all(), [
+            'application_content'           =>              ['required', 'array'],
+            'application_content.*'         =>              ['string'],
+            'remark_content'                =>              ['required'],
+            'date'                          =>              ['required', 'date'],
+            'format'                        =>              ['required']
+        ]);
+
+        if ($validation->fails()) {
+            return response([
+                'status'            =>          false,
+                'message'           =>          'Something went wrong. Please fix.',
+                'errors'            =>          $validation->errors()
+            ], 422);
+        }
+
+        $computer = Computer::find($computerId);
+
+        if (!$computer) {
+
+            return response()->json([
+                'status'            =>              false,
+                'message'           =>              'No computers found'
+            ], 422);
+        } else {
+            $installedApplications = [];
+            foreach ($request->application_content as $content) {
+                $installed = InstalledApplication::create([
+                    'computer_id'                   =>                  $computerId,
+                    'application_content'           =>                  $content,
+                ]);
+                $installedApplications[] = $content;
+            }
+
+            $remark = Remark::create([
+                'computer_id'                   =>                  $computerId,
+                'date'                          =>                  $request->date,
+                'remark_content'                =>                  $request->remark_content,
+            ]);
+
+            if ($request->format === 'Yes') {
+                $computer->increment('formatted_status');
+            }
+            $computer->increment('remarks');
+            $computer->save();
+
+            return response()->json([
+                'status'                    =>          true,
+                'message'                   =>          'Successfully installed ' . implode(', ', $installedApplications) . ', and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.'),
+                'computer'                  =>          $computer
+            ], 201);
         }
     }
 }

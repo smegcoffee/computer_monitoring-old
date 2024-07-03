@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('computers', function (Blueprint $table) {
+        Schema::create('installed_applications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('computer_user_id')->nullable();
-            $table->integer('formatted_status')->default(0)->nullable();
-            $table->integer('remarks')->default(0)->nullable();
+            $table->foreignId('computer_id')->constrained()->onDelete('restrict');
+            $table->string('application_content');
             $table->timestamps();
-
-
-            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('restrict');
         });
     }
 
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('computers');
+        Schema::dropIfExists('installed_applications');
     }
 };
