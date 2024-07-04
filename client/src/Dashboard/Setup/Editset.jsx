@@ -23,10 +23,10 @@ import {
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
 import { format } from "date-fns";
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const style = {
   position: "absolute",
@@ -184,6 +184,11 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
         >
           <div className="max-h-screen overflow-y-auto text-justify">
             <form onSubmit={handleSubmitEditedSet}>
+              <p className="p-5 text-4xl text-center">
+                <u>
+                  <strong>{computerName}&apos;s</strong> computer units.
+                </u>
+              </p>
               <TableContainer
                 component={Paper}
                 style={{
@@ -399,7 +404,7 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                 <p className="p-5 text-xl text-center">
                   <strong>{computerName}'s</strong> Computer Units
                 </p>
-                <div className="items-end justify-end flex-1 text-center ml-48">
+                <div className="items-end justify-end flex-1 ml-48 text-center">
                   <button
                     className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
                     onClick={onClose}

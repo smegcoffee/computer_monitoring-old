@@ -100,7 +100,7 @@ class ComputerController extends Controller
     public function show(Computer $computer, $id)
     {
 
-        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks')->find($id);
+        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks', 'recentUsers.computerUser', 'recentUsers.unit.category')->find($id);
 
         if (!$computer) {
             return response()->json([
@@ -221,7 +221,8 @@ class ComputerController extends Controller
                     'computer_id'                   =>                  $computerId,
                     'application_content'           =>                  $content,
                 ]);
-                $installedApplications[] = $content;
+                $installedApplications[] = $installed;
+                $installedContent[] = $content;
             }
 
             $remark = Remark::create([
@@ -238,7 +239,7 @@ class ComputerController extends Controller
 
             return response()->json([
                 'status'                    =>          true,
-                'message'                   =>          'Successfully installed ' . implode(', ', $installedApplications) . ', and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.'),
+                'message'                   =>          'Successfully installed ' . implode(', ', $installedContent) . ', and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.'),
                 'computer'                  =>          $computer
             ], 201);
         }

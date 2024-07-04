@@ -12,6 +12,7 @@ import {
   Grid,
 } from "@mui/material";
 import EditView from "./Editview";
+import { format } from "date-fns";
 
 function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -42,9 +43,12 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
     return null; // Render nothing if isOpen is false
   }
 
-  const handleEditClick = () => {
+  const handleEditClick = (id) => {
     setIsEditOpen(true);
   };
+  const fstatus = viewPopupData.computers.map(
+    (fstatus) => fstatus.formatted_status
+  );
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40" onClick={onClose}>
@@ -75,10 +79,19 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
             </p>
           </div>
           <div className="flex-1 text-3xl font-medium text-center text-white mt-7">
-            Computer ID: {id.length === 1 ? id : "NaN"}
+            <p>Computer ID: {id.length === 1 ? id : "NaN"}</p>
+            <p className="text-base">
+              Total Format:{" "}
+              {fstatus[0] === 0
+                ? "No formatting has been applied yet."
+                : fstatus}
+            </p>
           </div>
         </div>
-        <div className="overflow-y-scroll mt-6 mb-4 ml-6 mr-6 text-justify" style={{height: "470px"}}>
+        <div
+          className="mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify"
+          style={{ height: "470px" }}
+        >
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TableContainer component={Paper}>
@@ -148,6 +161,41 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
                         </TableCell>
                       </TableRow>
                     ))}
+                    {/* {viewPopupData.computers.flatMap((comp) =>
+                      comp.recent_users.map((recent, index) => (
+                        <TableRow key={index}>
+                          <TableCell align="center">
+                            <Typography variant="subtitle1" fontWeight="medium">
+                              {recent.unit.unit_code}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="subtitle1" fontWeight="medium">
+                              {recent.unit.category.category_name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="subtitle1" fontWeight="medium">
+                              {recent.unit.status}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="subtitle1" fontWeight="medium">
+                              {recent.computer_user.name}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )} */}
+                    <TableRow>
+                      <TableCell align="center" colSpan={4}>
+                        <p className="text-center">
+                          {rows.length === 0
+                            ? "This user has no computer units"
+                            : ""}
+                        </p>
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -173,67 +221,105 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
                     <TableRow>
                       <TableCell>
                         <Typography variant="subtitle1" fontWeight="medium">
-                          {viewPopupData.category2}
+                          Installed Applications
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        {/* {Array.isArray(viewPopupData.description) ? (
+                        {Array.isArray(viewPopupData.computers) ? (
                           <div>
                             <ul>
                               {showAll
-                                ? viewPopupData.description.map((item, idx) => (
-                                    <li key={idx}>{item}</li>
-                                  ))
-                                : viewPopupData.description
+                                ? viewPopupData.computers.flatMap((item, idx) =>
+                                    item.installed_applications.map((item) => (
+                                      <li key={idx}>
+                                        {item.application_content}
+                                      </li>
+                                    ))
+                                  )
+                                : viewPopupData.computers
                                     .slice(0, 3)
-                                    .map((item, idx) => (
-                                      <li key={idx}>{item}</li>
-                                    ))}
+                                    .flatMap((item, idx) =>
+                                      item.installed_applications.map(
+                                        (item) => (
+                                          <li key={idx}>
+                                            {item.application_content}
+                                          </li>
+                                        )
+                                      )
+                                    )}
                             </ul>
-                            {viewPopupData.description.length > 3 &&
-                              !showAll && (
-                                <button onClick={handleViewMore}>
-                                  {" "}
-                                  <u>View More</u>
-                                </button>
-                              )}
+                            {viewPopupData.computers.length > 3 && !showAll && (
+                              <button onClick={handleViewMore}>
+                                <u>View More</u>
+                              </button>
+                            )}
                           </div>
                         ) : (
-                          <span>{viewPopupData.description}</span>
-                        )} */}
+                          <span>{viewPopupData.computers}</span>
+                        )}
+                        <p>
+                          {viewPopupData.computers.flatMap((item, idx) =>
+                            item.installed_applications.length === 0
+                              ? "No installed applications yet."
+                              : ""
+                          )}
+                        </p>
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>
                         <Typography variant="subtitle1" fontWeight="medium">
-                          {viewPopupData.remarks}
+                          Remarks
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        {/* {Array.isArray(viewPopupData.information) ? (
+                        {Array.isArray(viewPopupData.computers) ? (
                           <div>
                             <ul>
                               {showAll
-                                ? viewPopupData.information.map((item, idx) => (
-                                    <li key={idx}>{item}</li>
-                                  ))
-                                : viewPopupData.information
+                                ? viewPopupData.computers.flatMap((item, idx) =>
+                                    item.remarks.map((item) => (
+                                      <li key={idx}>{item.remark_content}</li>
+                                    ))
+                                  )
+                                : viewPopupData.computers
                                     .slice(0, 3)
-                                    .map((item, idx) => (
-                                      <li key={idx}>{item}</li>
-                                    ))}
+                                    .flatMap((item, idx) =>
+                                      item.remarks.map((item) => (
+                                        <li key={idx}>
+                                          <div className="p-2 mb-1 border rounded-lg">
+                                            <div>
+                                              {format(
+                                                new Date(item.date),
+                                                "MMMM dd, yyyy"
+                                              )}
+                                            </div>
+                                            {item.remark_content
+                                              .split("\n")
+                                              .map((line, lineIndex) => (
+                                                <div key={lineIndex}>
+                                                  {line}
+                                                </div>
+                                              ))}
+                                          </div>
+                                        </li>
+                                      ))
+                                    )}
                             </ul>
-                            {viewPopupData.information.length > 3 &&
-                              !showAll && (
-                                <button onClick={handleViewMore}>
-                                  {" "}
-                                  <u>View More</u>
-                                </button>
-                              )}
+                            {viewPopupData.computers.length > 3 && !showAll && (
+                              <button onClick={handleViewMore}>
+                                <u>View More</u>
+                              </button>
+                            )}
                           </div>
                         ) : (
-                          <span>{viewPopupData.information}</span>
-                        )} */}
+                          <span>{viewPopupData.computers}</span>
+                        )}
+                        <p>
+                          {viewPopupData.computers.flatMap((item, idx) =>
+                            item.remarks.length === 0 ? "No remarks yet." : ""
+                          )}
+                        </p>
                       </TableCell>
                     </TableRow>
                   </TableBody>

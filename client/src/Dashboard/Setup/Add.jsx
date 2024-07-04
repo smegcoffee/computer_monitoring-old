@@ -355,7 +355,29 @@ function Add({ isOpen, onClose, onSubmit }) {
                               <Checkbox
                                 checked={checkedRows.includes(un.id)}
                                 onChange={() => handleCheckboxClick(un.id)}
+                                sx={
+                                  validationErrors.checkedRows
+                                    ? {
+                                        "& .MuiSvgIcon-root": {
+                                          border: "2px solid",
+                                          borderColor: "red",
+                                          borderRadius: "4px",
+                                        },
+                                        "&.Mui-checked .MuiSvgIcon-root": {
+                                          borderColor: "secondary.main",
+                                        },
+                                      }
+                                    : {}
+                                }
                               />
+                              <br />
+                              {validationErrors.checkedRows ? (
+                                <p className="text-xs text-red-500">
+                                  Please check one or more first.
+                                </p>
+                              ) : (
+                                ""
+                              )}
                             </TableCell>
                           </TableRow>
                         ))

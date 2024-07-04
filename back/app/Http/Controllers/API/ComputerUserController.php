@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-
 use App\Http\Controllers\Controller;
 use App\Models\ComputerUser;
 use Illuminate\Http\Request;
@@ -104,7 +103,7 @@ class ComputerUserController extends Controller
     }
     public function viewSpecs(ComputerUser $computerUser, $id)
     {
-        $computer_user = ComputerUser::with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier')->find($id);
+        $computer_user = ComputerUser::with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier', 'computers.installedApplications', 'computers.remarks', 'computers.recentUsers.unit.category', 'computers.recentUsers.computerUser')->find($id);
         if (!$computer_user) {
             return response()->json([
                 'status'            =>          false,

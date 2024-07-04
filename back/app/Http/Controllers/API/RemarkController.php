@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Models\InstalledApplication;
+use App\Http\Controllers\Controller;
+
+use App\Models\Remark;
 use Illuminate\Http\Request;
 
-class InstalledApplicationController extends Controller
+class RemarkController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +36,7 @@ class InstalledApplicationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(InstalledApplication $installedApplication)
+    public function show(Remark $remark)
     {
         //
     }
@@ -42,7 +44,7 @@ class InstalledApplicationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(InstalledApplication $installedApplication)
+    public function edit(Remark $remark)
     {
         //
     }
@@ -50,7 +52,7 @@ class InstalledApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, InstalledApplication $installedApplication)
+    public function update(Request $request, Remark $remark)
     {
         //
     }
@@ -58,7 +60,7 @@ class InstalledApplicationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(InstalledApplication $installedApplication)
+    public function destroy(Remark $remark)
     {
         //
     }

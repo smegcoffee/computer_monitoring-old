@@ -43,6 +43,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/computer-user-edit/{id}', [ComputerUserController::class, 'edit']);
     Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/computers/{id}', [ComputerController::class, 'show']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -62,7 +63,7 @@ Route::delete('/computer/{computerId}/unit/{unitId}', [ComputerController::class
 
 
 // GET
-Route::get('/computers/{id}', [ComputerController::class, 'show']);
+Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
 // POST
 Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
 // PUT
