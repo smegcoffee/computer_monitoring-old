@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Models\Remark;
+use App\Http\Controllers\Controller;
+
+use App\Models\TransferUnit;
 use Illuminate\Http\Request;
 
-class RemarkController extends Controller
+class TransferUnitController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +36,7 @@ class RemarkController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Remark $remark)
+    public function show(TransferUnit $transferUnit)
     {
         //
     }
@@ -42,7 +44,7 @@ class RemarkController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Remark $remark)
+    public function edit(TransferUnit $transferUnit)
     {
         //
     }
@@ -50,7 +52,7 @@ class RemarkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Remark $remark)
+    public function update(Request $request, TransferUnit $transferUnit)
     {
         //
     }
@@ -58,7 +60,7 @@ class RemarkController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Remark $remark)
+    public function destroy(TransferUnit $transferUnit)
     {
         //
     }

@@ -191,7 +191,7 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
             <form onSubmit={handleSubmitEditedSet}>
               <p className="p-5 text-4xl text-center">
                 <u>
-                  <strong>{computerName}</strong> computer units.
+                  <strong>{computerName}&apos;s</strong> computer units.
                 </u>
               </p>
               <TableContainer

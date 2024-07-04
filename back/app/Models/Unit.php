@@ -49,4 +49,8 @@ class Unit extends Model
     {
         return $this->hasMany(RecentUser::class);
     }
+    public function transferUnits()
+    {
+        return $this->hasMany(TransferUnit::class);
+    }
 }

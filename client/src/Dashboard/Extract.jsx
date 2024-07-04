@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import axios from "../api/axios";
+import Swal from "sweetalert2";
 import {
+  Chip,
   Card,
   Grid,
   Container,
@@ -25,21 +28,37 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateField } from "@mui/x-date-pickers/DateField";
-import { tableData } from "../data/computerData";
 import "react-datepicker/dist/react-datepicker.css";
-//import axios from 'axios';
+import { format } from "date-fns";
 
 const Extract = () => {
   const { id } = useParams();
-  //const [computer, setComputer] = useState(null);
+  const [computer, setComputer] = useState(null);
   const [remark, setRemark] = useState("");
   const [remarksContent, setRemarksContent] = useState("");
-  const [applicationContent, setApplicationContent] = useState("");
+  const [applicationContent, setApplicationContent] = useState([]);
   const [date, setDate] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const [error, setError] = useState();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  // Sample computer data
-  const computer = tableData.find((computer) => computer.id === parseInt(id));
+  useEffect(() => {
+    const fetchComputerData = async () => {
+      try {
+        const response = await axios.get(`/api/computers/${id}`);
+        if (response.data.status) {
+          setComputer(response.data.computer);
+        } else {
+          console.error("Fetch error:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+
+    fetchComputerData();
+  }, [computer]);
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -47,61 +66,112 @@ const Extract = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted:", {
-      id,
-      remark,
-      remarksContent,
-      date,
-      applicationContent,
-    });
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.post(
+        `api/computers/install-application/add-remarks/${id}`,
+        {
+          application_content: applicationContent,
+          remark_content: remarksContent,
+          date: date,
+          format: remark,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.status === true) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+        setApplicationContent([]);
+        setDate(null);
+        setRemark("");
+        setRemarksContent("");
+      }
+      console.log("Adding computer set:", response.data);
+    } catch (error) {
+      console.error("Error in adding computer set:", error);
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
+      } else {
+        console.log("ERROR!");
+      }
+    } finally {
+      setLoading(false);
+    }
+
+    // Example of sending data to backend:
+    /*
+    try {
+      const response = await axios.post('/api/computers/update', {
+        id,
+        remark,
+        remarks,
+        selectedDate,
+        application,
+        ...(application === 'Others' && {otherApplication}),
+      });
+      if (response.data.status) {
+        console.log('Data updated successfully.');
+      } else {
+        console.error('Update error:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+    }
+    */
   };
 
-  /* useEffect(() => {
-    const fetchComputerData = async () => {
-      try {
-        const response = await fetch(`/api/computers/${id}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setComputer(data);
-        console.log('Fetched data:', data);
-      } catch (error) {
-        console.error('Fetch error:', error);
-      }
-    };
-
-    fetchComputerData();
-  }, [id]);
+  const handleApplications = (e, newValue) => {
+    e.preventDefault();
+    setApplicationContent(newValue);
+  };
 
   if (!computer) {
     return <div>Loading...</div>;
   }
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/api/computers/update', {
-      id,
-      remark,
-      remarks,
-      selectedDate,
-      application,
-      ...(application === 'Others' && {otherApplication}),
-      }, {
-      headers: {
-      'Content-Type': 'application/json',
-      },
-      });
-      if (response.ok) {
-        console.log('Added.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-    */
   return (
     <Container>
       <Card className="mt-20 mb-20">
@@ -113,15 +183,32 @@ const Extract = () => {
                 ID: <b>{computer.id}</b>
               </Typography>
               <Typography variant="body1">
-                Name: <b>{computer.name}</b>
+                Name: <b>{computer.computer_user.name}</b>
               </Typography>
               <Typography variant="body1">
-                Position: <b>{computer.position}</b>
+                Position: <b>{computer.computer_user.position.position_name}</b>
               </Typography>
               <Typography variant="body1">
-                Branch Code: <b>{computer.branchCode}</b>
+                Branch Code:&nbsp;
+                <b>{computer.computer_user.branch_code.branch_name}</b>
               </Typography>
-              <TableContainer className="border border-gray-200 rounded-lg mt-4">
+              <Typography variant="body1">
+                Total Format:&nbsp;
+                {computer.formatted_status === 0 ? (
+                  "No formatting has been applied yet."
+                ) : (
+                  <span
+                    class={
+                      computer.formatted_status >= 10
+                        ? "bg-red-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
+                        : "bg-yellow-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
+                    }
+                  >
+                    {computer.formatted_status}
+                  </span>
+                )}
+              </Typography>
+              <TableContainer className="mt-4 border border-gray-200 rounded-lg">
                 <Table>
                   <TableHead className="bg-blue-200">
                     <TableRow>
@@ -160,14 +247,23 @@ const Extract = () => {
                   <TableBody>
                     {computer.units.map((unit, index) => (
                       <TableRow key={index}>
-                        <TableCell align="center">{unit.unit}</TableCell>
-                        <TableCell align="center">{unit.category}</TableCell>
+                        <TableCell align="center">{unit.unit_code}</TableCell>
                         <TableCell align="center">
-                          {unit.description2}
+                          {unit.category.category_name}
                         </TableCell>
-                        <TableCell align="center">{unit.supplier}</TableCell>
-                        <TableCell align="center">{unit.dop}</TableCell>
-                        <TableCell align="center">{unit.serial}</TableCell>
+                        <TableCell align="center">{unit.description}</TableCell>
+                        <TableCell align="center">
+                          {unit.supplier.supplier_name}
+                        </TableCell>
+                        <TableCell align="center">
+                          {format(
+                            new Date(unit.date_of_purchase),
+                            "yyyy-MM-dd"
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          {unit.serial_number}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -184,17 +280,33 @@ const Extract = () => {
                 <Typography variant="h5" align="center">
                   Installed Applications
                 </Typography>
-                <div style={{ marginLeft: "165px" }}>
+                <div
+                  style={{
+                    marginLeft: "165px",
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                  }}
+                >
                   <List>
-                    {computer.description
-                      .slice(0, showAll ? computer.description.length : 5)
+                    {computer.installed_applications
+                      .slice(
+                        0,
+                        showAll ? computer.installed_applications.length : 5
+                      )
                       .map((item, index) => (
                         <ListItem key={index}>
-                          <ListItemText primary={item} />
+                          <ListItemText primary={item.application_content} />
                         </ListItem>
                       ))}
+                    {computer.installed_applications.length === 0 ? (
+                      <p className="text-center">
+                        No Installed Applications yet.
+                      </p>
+                    ) : (
+                      ""
+                    )}
                   </List>
-                  {computer.description.length > 5 && (
+                  {computer.installed_applications.length > 5 && (
                     <Button onClick={toggleShowAll}>
                       {showAll ? "Show less" : "Show more"}
                     </Button>
@@ -205,17 +317,41 @@ const Extract = () => {
                 <Typography variant="h5" align="center">
                   Remarks
                 </Typography>
-                <div style={{ marginLeft: "185px" }}>
+                <div
+                  style={{
+                    marginLeft: "185px",
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                  }}
+                >
                   <List>
-                    {computer.information
-                      .slice(0, showAll ? computer.information.length : 5)
+                    {computer.remarks
+                      .slice(0, showAll ? computer.remarks.length : 5)
                       .map((item, index) => (
                         <ListItem key={index}>
-                          <ListItemText primary={item} />
+                          <ListItemText
+                            primary={
+                              <div className="p-2 border rounded-lg">
+                                <div>
+                                  {format(new Date(item.date), "MMMM dd, yyyy")}
+                                </div>
+                                {item.remark_content
+                                  .split("\n")
+                                  .map((line, lineIndex) => (
+                                    <div key={lineIndex}>{line}</div>
+                                  ))}
+                              </div>
+                            }
+                          />
                         </ListItem>
                       ))}
+                    {computer.remarks.length === 0 ? (
+                      <p className="text-center">No Remarks yet.</p>
+                    ) : (
+                      ""
+                    )}
                   </List>
-                  {computer.information.length > 5 && (
+                  {computer.remarks.length > 5 && (
                     <Button onClick={toggleShowAll}>
                       {showAll ? "Show less" : "Show more"}
                     </Button>
@@ -225,22 +361,48 @@ const Extract = () => {
             </Grid>
             <Grid item xs={12}>
               <form onSubmit={handleSubmit}>
-              <Autocomplete
+                <Autocomplete
                   multiple
                   id="tags-outlined"
-                  options={[]}
+                  options={[
+                    "Adobe",
+                    "Office",
+                    "Chrome",
+                    "Firefox",
+                    "Visual Studio",
+                  ]}
                   freeSolo
+                  value={applicationContent}
+                  onChange={handleApplications}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        {...getTagProps({ index })}
+                      />
+                    ))
+                  }
                   renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    value={applicationContent}
-                    onChange={(e) => setApplicationContent(e.target.value)}
-                    variant="outlined"
-                    label="Installed Applications"
-                    placeholder="Installed Applications"
-                  />
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      label="Installed Applications"
+                      placeholder="Installed Applications"
+                    />
                   )}
-                  />
+                />
+                {validationErrors.application_content ? (
+                  <p className="text-red-500">
+                    {validationErrors.application_content.map(
+                      (error, index) => (
+                        <span key={index}>{error}</span>
+                      )
+                    )}
+                  </p>
+                ) : (
+                  ""
+                )}
                 <TextField
                   label="Is it Formatted?"
                   value={remark}
@@ -249,9 +411,18 @@ const Extract = () => {
                   fullWidth
                   margin="normal"
                 >
-                  <MenuItem value="">No</MenuItem>
-                  <MenuItem value="Formatted">Formatted</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                  <MenuItem value="Yes">Formatted</MenuItem>
                 </TextField>
+                {validationErrors.format ? (
+                  <p className="text-red-500">
+                    {validationErrors.format.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </p>
+                ) : (
+                  ""
+                )}
                 <TextareaAutosize
                   aria-multiline
                   value={remarksContent}
@@ -271,6 +442,16 @@ const Extract = () => {
                     resize: "none",
                   }}
                 />
+                {validationErrors.remark_content ? (
+                  <p className="text-red-500">
+                    {validationErrors.remark_content.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </p>
+                ) : (
+                  ""
+                )}
+                
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DemoContainer components={["DateField"]}>
                     <DateField
@@ -280,10 +461,24 @@ const Extract = () => {
                       onChange={(newDate) => setDate(newDate)}
                     />
                   </DemoContainer>
-                </LocalizationProvider>{" "}
+                </LocalizationProvider>
+                {validationErrors.date ? (
+                  <p className="text-red-500">
+                    {validationErrors.date.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </p>
+                ) : (
+                  ""
+                )}
                 <br />
-                <Button type="submit" variant="contained" color="primary">
-                  Add
+                <Button
+                  disabled={loading}
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                >
+                  {loading ? "Adding..." : "Add"}
                 </Button>
               </form>
             </Grid>
