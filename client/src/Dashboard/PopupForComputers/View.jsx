@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
 import smct from "./../../img/smct.png";
 import {
   Table,
@@ -49,17 +47,11 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40" onClick={onClose}>
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
       >
-        <span
-          className="absolute p-2 text-white cursor-pointer top-5 right-5"
-          onClick={onClose}
-        >
-          <FontAwesomeIcon icon={faClose} className="w-6 h-6" />
-        </span>
         <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
           <div className="flex-none">
             <img

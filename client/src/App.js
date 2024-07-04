@@ -16,6 +16,7 @@ import Reset from './Request/Reset';
 import ChangePassword from './context/ChangePassword';
 import User from './Dashboard/Setup/User';
 import Add from './Dashboard/Setup/Add';
+import AllUnits from './Dashboard/allUnits';
 
 function App() {
 
@@ -41,6 +42,7 @@ function App() {
           <Route path='/profile' element={<Profile />}></Route>
           <Route path='/computers' element={<Computers />}></Route>
           <Route path='/qr' element={<QrC />}></Route>
+          <Route path='/allunits' element={<AllUnits />}></Route>
           <Route path='/computers/:id' element={<Extract />} />
           <Route path='/user' element={<User/>}/>
           <Route path='/add' element={<Add/>}/>

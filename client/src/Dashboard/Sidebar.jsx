@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import smct from '../img/smct.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faDesktop, faQrcode, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faDesktop, faQrcode, faWrench, faComputer } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 
 function SideBar() {
@@ -18,6 +18,9 @@ function SideBar() {
       case '/qr':
         setActiveItem('qr');
         break;
+        case '/allunits':
+          setActiveItem('allunits');
+          break;
       case '/unit':
         setActiveItem('unit');
         break;
@@ -52,6 +55,11 @@ function SideBar() {
         <Link to="/qr">
           <button className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${activeItem === 'qr' ? 'bg-blue-500 text-white active' : ''} rounded-3xl h-10 cursor-pointer`}>
             <FontAwesomeIcon icon={faQrcode} /> Scan QR Codes
+          </button>
+        </Link>
+        <Link to="/allunits">
+          <button className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${activeItem === 'allunits' ? 'bg-blue-500 text-white active' : ''} rounded-3xl h-10 cursor-pointer`}>
+            <FontAwesomeIcon icon={faComputer} /> All Units
           </button>
         </Link>
         <p className={`text-lg font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10 cursor-default`}>
