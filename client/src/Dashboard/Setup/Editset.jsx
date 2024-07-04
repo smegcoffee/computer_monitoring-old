@@ -10,12 +10,34 @@ import {
   Typography,
   Autocomplete,
   TextField,
+  Button,
+  Modal,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  Grid,
 } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMinus } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
 import { format } from "date-fns";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 2,
+};
 
 function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
   const [user, setUser] = useState("");
@@ -24,6 +46,12 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
   const [computer, setComputer] = useState([]);
   const [loading, setLoading] = useState(true);
   const [computerName, setComputerName] = useState("");
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   useEffect(() => {
     // Flatten units from each computer into rows
     if (Array.isArray(editPopupData.computers)) {
@@ -68,18 +96,6 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
         }))
       : [];
 
-  // Function to delete a row
-  const handleDelete = (index) => {
-    if (!Array.isArray(rows)) {
-      console.error("Rows is not an array");
-      return;
-    }
-
-    const newRows = [...rows];
-    newRows.splice(index, 1);
-    setRows(newRows);
-  };
-
   if (!isOpen) {
     return null;
   }
@@ -87,57 +103,36 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
   const handleSubmitEditedSet = async (event, unitId) => {
     event.preventDefault();
 
-    const inputOptions = new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          Transfer: "Tranfer",
-          Defective: "Defective",
+    try {
+      const response = await axios.delete(
+        `api/computer/${computer.id}/unit/${unitId}`,
+        {
+          assignedUser: user,
+          rows: rows,
+          reason: reason,
+        }
+      );
+
+      if (response.data.status === true) {
+        Swal.fire({
+          icon: "success",
+          position: "center",
+          title: "Computer set has been saved!",
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+        }).then(function () {
+          window.location = "/add";
         });
-      }, 1000);
-    });
-
-    const { value: reason } = await Swal.fire({
-      title: "Why did you delete this unit?",
-      input: "radio",
-      inputOptions,
-      inputValidator: (value) => {
-        if (!value) {
-          return "You need to indicate the reason!";
-        }
-      },
-    });
-
-    if (reason) {
-      try {
-        const response = await axios.delete(
-          `api/computer/${computer.id}/unit/${unitId}`,
-          {
-            assignedUser: user,
-            rows: rows,
-            reason: reason,
-          }
-        );
-
-        if (response.data.status === true) {
-          Swal.fire({
-            icon: "success",
-            position: "center",
-            title: "Computer set has been saved!",
-            showConfirmButton: false,
-            showCloseButton: true,
-            timer: 2500,
-          }).then(function () {
-            window.location = "/add";
-          });
-        }
-        console.log("Saving computer set:", response.data);
-      } catch (error) {
-        console.error("Error in saving computer set:", error);
-        if (error.response && error.response.data) {
-          console.log("Backend error response:", error.response.data);
-        } else {
-          console.log("ERROR!");
-        }
+      } else if (computerUser) {
+      }
+      console.log("Saving computer set:", response.data);
+    } catch (error) {
+      console.error("Error in saving computer set:", error);
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+      } else {
+        console.log("ERROR!");
       }
     }
   };
@@ -187,7 +182,7 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
           className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl"
           style={{ minWidth: "1000px", maxWidth: "100vh", maxHeight: "100vh" }}
         >
-          <div className="max-h-screen overflow-y-scroll text-justify">
+          <div className="max-h-screen overflow-y-auto text-justify">
             <form onSubmit={handleSubmitEditedSet}>
               <p className="p-5 text-4xl text-center">
                 <u>
@@ -281,12 +276,123 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                           </TableCell>
                           <TableCell align="center">{unit.status}</TableCell>
                           <TableCell align="center">
-                            <button
-                              onClick={handleDelete}
-                              className="text-base font-semibold text-red-600"
+                            <Checkbox />
+                            <Modal
+                              open={open}
+                              onClose={handleClose}
+                              aria-labelledby="modal-modal-title"
+                              aria-describedby="modal-modal-description"
                             >
-                              <FontAwesomeIcon icon={faMinus} />
-                            </button>
+                              <Box sx={style}>
+                                <Typography
+                                  id="modal-modal-title"
+                                  variant="h6"
+                                  component="h2"
+                                >
+                                  Why did you remove this unit?
+                                </Typography>
+                                <Box sx={{ minWidth: 120, marginTop: 2 }}>
+                                  <FormControl fullWidth>
+                                    <InputLabel id="demo-simple-select-label">
+                                      State the reason of deletion...
+                                    </InputLabel>
+                                    <Select
+                                      labelId="demo-simple-select-label"
+                                      id="demo-simple-select"
+                                      value={reason}
+                                      label="State the reason of deletion..."
+                                      onChange={(e) =>
+                                        setReason(e.target.value)
+                                      }
+                                    >
+                                      <MenuItem value="Transfer">
+                                        Transfer
+                                      </MenuItem>
+                                      <MenuItem value=" Defective">
+                                        Defective
+                                      </MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Box>
+                                {reason === "Transfer" && (
+                                  <Box style={{ marginTop: "10px" }}>
+                                    <Autocomplete
+                                      freeSolo
+                                      id="user"
+                                      disableClearable
+                                      options={ComputerUser}
+                                      getOptionLabel={(option) =>
+                                        option.name ? option.name : ""
+                                      }
+                                      readOnly={ComputerUser.length === 0}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          required
+                                          {...params}
+                                          label={
+                                            ComputerUser.length === 0
+                                              ? "No user to select"
+                                              : "Assign New User"
+                                          }
+                                          InputProps={{
+                                            ...params.InputProps,
+                                            type: "search",
+                                          }}
+                                          variant="outlined"
+                                          style={{
+                                            marginTop: "10px",
+                                            marginBottom: "10px",
+                                            marginRight: "400px",
+                                          }}
+                                          sx={{ minWidth: 120 }}
+                                        />
+                                      )}
+                                      value={
+                                        ComputerUser.find(
+                                          (option) =>
+                                            option.id === computer.computer_user
+                                        ) || {}
+                                      }
+                                      onChange={(event, newValue) => {
+                                        setComputer({
+                                          ...computer,
+                                          computer_user: newValue.id,
+                                        });
+                                      }}
+                                    />
+                                    <LocalizationProvider
+                                      dateAdapter={AdapterDayjs}
+                                    >
+                                      <DemoContainer
+                                        components={["DatePicker"]}
+                                      >
+                                        <DatePicker label="Date of Transfer" />
+                                      </DemoContainer>
+                                    </LocalizationProvider>
+                                  </Box>
+                                )}
+                                <Grid className="mt-5">
+                                  <Button
+                                    onClick={handleClose}
+                                    variant="contained"
+                                    style={{
+                                      backgroundColor: "gray",
+                                      marginRight: "10px",
+                                    }}
+                                  >
+                                    CANCEL
+                                  </Button>
+                                  <Button
+                                    onClick={handleClose}
+                                    type="submit"
+                                    variant="contained"
+                                    color="success"
+                                  >
+                                    SAVE
+                                  </Button>
+                                </Grid>
+                              </Box>
+                            </Modal>
                           </TableCell>
                         </TableRow>
                       ))
@@ -295,50 +401,10 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                 </Table>
               </TableContainer>
               <div className="flex items-center justify-center">
-                <div className="flex-none">
-                  <Autocomplete
-                    freeSolo
-                    id="user"
-                    disableClearable
-                    options={ComputerUser}
-                    getOptionLabel={(option) =>
-                      option.name ? option.name : ""
-                    }
-                    readOnly={ComputerUser.length === 0}
-                    renderInput={(params) => (
-                      <TextField
-                        required
-                        {...params}
-                        label={
-                          ComputerUser.length === 0
-                            ? "No user to select"
-                            : "Assign User"
-                        }
-                        InputProps={{
-                          ...params.InputProps,
-                          type: "search",
-                        }}
-                        variant="outlined"
-                        style={{
-                          marginLeft: "20px",
-                          marginTop: "20px",
-                          marginBottom: "20px",
-                          marginRight: "400px",
-                          width: "300px",
-                        }}
-                      />
-                    )}
-                    value={
-                      ComputerUser.find(
-                        (option) => option.id === computer.computer_user
-                      ) || {}
-                    }
-                    onChange={(event, newValue) => {
-                      setComputer({ ...computer, computer_user: newValue.id });
-                    }}
-                  />
-                </div>
-                <div className="items-center justify-center flex-1 text-center">
+                <p className="p-5 text-xl text-center">
+                  <strong>{computerName}'s</strong> Computer Units
+                </p>
+                <div className="items-end justify-end flex-1 ml-48 text-center">
                   <button
                     className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
                     onClick={onClose}
@@ -346,10 +412,10 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                     CANCEL
                   </button>
                   <button
-                    type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                    onClick={handleOpen}
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-red-600 rounded-full"
                   >
-                    SAVE
+                    REMOVE
                   </button>
                 </div>
               </div>
