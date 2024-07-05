@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
 import {
@@ -46,7 +46,15 @@ const Extract = () => {
   useEffect(() => {
     const fetchComputerData = async () => {
       try {
-        const response = await axios.get(`/api/computers/${id}`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get(`/api/computers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.data.status) {
           setComputer(response.data.computer);
         } else {
@@ -109,6 +117,7 @@ const Extract = () => {
         setDate(null);
         setRemark("");
         setRemarksContent("");
+        setValidationErrors("");
       }
       console.log("Adding computer set:", response.data);
     } catch (error) {
@@ -170,11 +179,33 @@ const Extract = () => {
   };
 
   if (!computer) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen p-4 bg-gray-100">
+        <div className="p-6 text-center bg-white rounded-lg shadow-lg">
+          <p className="mb-4 text-2xl text-red-700">
+            This user does not exist.
+          </p>
+          <Link
+            className="inline-block px-4 py-2 text-blue-500 transition duration-300 ease-in-out border border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white"
+            to="/qr"
+          >
+            Back to scan
+          </Link>
+        </div>
+      </div>
+    );
   }
   return (
     <Container>
       <Card className="mt-20 mb-20">
+        <div className="flex justify-center mt-4">
+          <Link
+            to="/dashboard"
+            className="inline-block px-4 py-2 text-blue-500 transition duration-300 ease-in-out border border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white"
+          >
+            Back to dashboard
+          </Link>
+        </div>
         <CardContent>
           <Typography variant="h5">Computer Details</Typography>
           <Grid container spacing={2}>
@@ -451,7 +482,7 @@ const Extract = () => {
                 ) : (
                   ""
                 )}
-                
+
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DemoContainer components={["DateField"]}>
                     <DateField

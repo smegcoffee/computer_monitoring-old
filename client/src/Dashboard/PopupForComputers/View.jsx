@@ -13,12 +13,14 @@ import {
 } from "@mui/material";
 import EditView from "./Editview";
 import { format } from "date-fns";
+import axios from "../../api/axios";
 
 function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isEditViewPopupOpen, setEditViewPopupOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
+  const [editViewPopupData, setEditViewPopupData] = useState("");
 
   useEffect(() => {
     if (viewPopupData?.computers) {
@@ -43,15 +45,40 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
     return null; // Render nothing if isOpen is false
   }
 
-  const handleEditClick = (id) => {
-    setIsEditOpen(true);
+  const openEditViewPopup = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.get(`/api/computer-user-specs/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.status) {
+        setEditViewPopupData(response.data.computer_user_specs);
+        setEditViewPopupOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
+
+  const closeEditViewPopup = () => {
+    setEditViewPopupOpen(false);
+    setEditViewPopupData("");
+  };
+
   const fstatus = viewPopupData.computers.map(
     (fstatus) => fstatus.formatted_status
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40" onClick={onClose}>
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40"
+      onClick={onClose}
+    >
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
@@ -331,7 +358,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
         <div className="flex items-center justify-center pt-10 pb-10 text-center">
           <button
             className="mr-16 text-xl text-black bg-gray-300 rounded-3xl h-9 w-36"
-            onClick={handleEditClick}
+            onClick={() => openEditViewPopup(viewPopupData.id)}
           >
             EDIT
           </button>
@@ -339,11 +366,12 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
             PRINT
           </button>
         </div>
-        {isEditOpen && (
+        {isEditViewPopupOpen && (
           <EditView
-            isOpen={isEditOpen}
-            onClose={() => setIsEditOpen(false)}
-            viewPopupData={viewPopupData}
+            isEditOpen={isEditViewPopupOpen}
+            onEditClose={closeEditViewPopup}
+            editViewPopupData={editViewPopupData}
+            setEditViewPopupData={setEditViewPopupData}
           />
         )}
       </div>

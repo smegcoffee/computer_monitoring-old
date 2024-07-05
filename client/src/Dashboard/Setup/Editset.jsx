@@ -184,11 +184,6 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
         >
           <div className="max-h-screen overflow-y-auto text-justify">
             <form onSubmit={handleSubmitEditedSet}>
-              <p className="p-5 text-4xl text-center">
-                <u>
-                  <strong>{computerName}&apos;s</strong> computer units.
-                </u>
-              </p>
               <TableContainer
                 component={Paper}
                 style={{
@@ -397,12 +392,13 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                         </TableRow>
                       ))
                     )}
+
                   </TableBody>
                 </Table>
               </TableContainer>
               <div className="flex items-center justify-center">
                 <p className="p-5 text-xl text-center">
-                  <strong>{computerName}'s</strong> Computer Units
+                  <strong>{computerName}&apos;s</strong> Computer Units
                 </p>
                 <div className="items-end justify-end flex-1 ml-48 text-center">
                   <button

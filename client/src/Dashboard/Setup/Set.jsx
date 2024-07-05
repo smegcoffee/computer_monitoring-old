@@ -28,7 +28,6 @@ function Header() {
     });
 
     if (result.isConfirmed) {
-
       try {
         const token = localStorage.getItem("token");
         if (!token) {

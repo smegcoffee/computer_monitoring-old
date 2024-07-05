@@ -51,6 +51,6 @@ class Unit extends Model
     }
     public function transferUnits()
     {
-        return $this->hasMany(TransferUnit::class);
+        return $this->hasMany(TransferUnit::class)->orderBy('date', 'desc');
     }
 }
