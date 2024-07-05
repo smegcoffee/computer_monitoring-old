@@ -306,6 +306,9 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                                       <MenuItem value=" Defective">
                                         Defective
                                       </MenuItem>
+                                      <MenuItem value=" Delete">
+                                        Delete
+                                      </MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Box>

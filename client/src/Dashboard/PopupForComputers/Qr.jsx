@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { QRCode } from "react-qr-svg";
 import { toPng } from "html-to-image";
+import CloseIcon from "@mui/icons-material/Close";
 
 function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
   const qrCodeRef = useRef(null);
@@ -48,12 +49,6 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
         className="bg-white shadow-md rounded-2xl"
         style={{ width: "700px", maxHeight: "100vh" }}
       >
-        <span
-          className="absolute p-2 text-white cursor-pointer top-5 right-5"
-          onClick={onClose}
-        >
-          <FontAwesomeIcon icon={faClose} className="w-6 h-6" />
-        </span>
         <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
           <div className="flex-none">
             <img
@@ -64,6 +59,9 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
           </div>
           <div className="mt-8 ml-16 text-3xl font-medium text-white flex-2">
             Computer ID: {id.length === 1 ? id : "NaN"}
+          </div>
+          <div className='ml-32'>
+          <CloseIcon onClick={onClose} className="text-white cursor-pointer" />
           </div>
         </div>
         <div className="flex items-center justify-center">

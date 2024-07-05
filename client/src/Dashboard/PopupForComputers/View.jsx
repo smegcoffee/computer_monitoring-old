@@ -10,17 +10,54 @@ import {
   Paper,
   Typography,
   Grid,
+  Button,
+  DialogActions,
+  IconButton,
+  DialogTitle,
+  Dialog,
+  DialogContent,
+  Autocomplete,
+  TextField,
+  Chip,
 } from "@mui/material";
-import EditView from "./Editview";
+import CloseIcon from "@mui/icons-material/Close";
+import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
 import axios from "../../api/axios";
 
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialog-paper": {
+    margin: 'auto',
+    width: '100%',
+  },
+  "& .MuiDialogContent-root": {
+    padding: theme.spacing(2),
+  },
+  "& .MuiDialogActions-root": {
+    padding: theme.spacing(1),
+  },
+}));
+
 function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
-  const [isEditViewPopupOpen, setEditViewPopupOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
-  const [editViewPopupData, setEditViewPopupData] = useState("");
+  const [open, setOpen] = useState(false);
+  const [applicationContent, setApplicationContent] = useState([]);
+  const defaultApplications = ["Adobe", "Office"]; //Sample defaultvalue of the Installed Application for the Edit View Dialog
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleApplications = (event, value) => {
+    event.preventDefault();
+    setApplicationContent(value);
+  };
 
   useEffect(() => {
     if (viewPopupData?.computers) {
@@ -45,40 +82,13 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
     return null; // Render nothing if isOpen is false
   }
 
-  const openEditViewPopup = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.get(`/api/computer-user-specs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data.status) {
-        setEditViewPopupData(response.data.computer_user_specs);
-        setEditViewPopupOpen(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const closeEditViewPopup = () => {
-    setEditViewPopupOpen(false);
-    setEditViewPopupData("");
-  };
 
   const fstatus = viewPopupData.computers.map(
     (fstatus) => fstatus.formatted_status
   );
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
@@ -114,6 +124,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
                 : fstatus}
             </p>
           </div>
+          <CloseIcon onClick={onClose} className="text-white cursor-pointer" />
         </div>
         <div
           className="mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify"
@@ -358,22 +369,109 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
         <div className="flex items-center justify-center pt-10 pb-10 text-center">
           <button
             className="mr-16 text-xl text-black bg-gray-300 rounded-3xl h-9 w-36"
-            onClick={() => openEditViewPopup(viewPopupData.id)}
+            onClick={handleClickOpen}
           >
             EDIT
           </button>
           <button className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36">
             PRINT
           </button>
-        </div>
-        {isEditViewPopupOpen && (
-          <EditView
-            isEditOpen={isEditViewPopupOpen}
-            onEditClose={closeEditViewPopup}
-            editViewPopupData={editViewPopupData}
-            setEditViewPopupData={setEditViewPopupData}
+          <BootstrapDialog
+            onClose={handleClose}
+            aria-labelledby="customized-dialog-title"
+            open={open}
+          >
+            <DialogTitle
+              sx={{ m: 0, p: 2 }}
+              id="customized-dialog-title"
+              className="bg-blue-500 text-white"
+            >
+              EDIT COMPUTER ID. {id.length === 1 ? id : "NaN"}
+            </DialogTitle>
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: "white",
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <DialogContent dividers>
+              <TextField
+                id="outlined-read-only-input"
+                label="Name of User"
+                defaultValue={viewPopupData.name}
+                InputProps={{
+                  readOnly: true,
+                }}
+                style={{marginBottom: "10px", width: "100%"}}
+              />
+              <Autocomplete
+              id="branch-code"
+              freeSolo
+              defaultValue={viewPopupData.branch_code.branch_name}
+              options={["HO", "DSMT"]} //Sample
+              renderInput={(params) => <TextField {...params} label="Branch Code"
+              style={{marginBottom: "10px"}} />}
+            />
+            <Autocomplete
+            id="designation"
+            freeSolo
+            defaultValue={viewPopupData.position.position_name}
+            options={["Driver", "Full Stack Developer"]} //Sample
+            renderInput={(params) => <TextField {...params} label="Designation"
+            style={{marginBottom: "10px"}} />}
           />
-        )}
+              <Autocomplete
+                multiple
+                id="tags-outlined"
+                options={[
+                  "Adobe",
+                  "Office",
+                  "Chrome",
+                  "Firefox",
+                  "Visual Studio",
+                ]}
+                freeSolo
+                value={applicationContent}
+                onChange={handleApplications}
+                renderTags={(tagValue, getTagProps) =>
+                  tagValue.map((option, index) => (
+                    <Chip
+                      key={index}
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    label="Installed Applications"
+                    placeholder="Installed Applications"
+                  />
+                )}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                autoFocus
+                onClick={handleClose}
+                variant="contained"
+                color="success"
+                style={{ margin: "10px" }}
+              >
+                Save changes
+              </Button>
+            </DialogActions>
+          </BootstrapDialog>
+        </div>
       </div>
     </div>
   );
