@@ -36,7 +36,6 @@ function Header() {
     });
 
     if (result.isConfirmed) {
-
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -79,13 +78,18 @@ function Header() {
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    overflowX: "auto",
+    overflowX: "visible",
     marginTop: theme.spacing(3),
-    borderRadius: "12px", // Adjust the value according to your preference
   },
   //table: {
   //minWidth: 650,
   //},
+  container: {
+    overflowX: "visible",
+  },
+  table: {
+    borderRadius: 10,
+  },
 }));
 
 const CustomTableB = () => {
@@ -118,74 +122,78 @@ const CustomTableB = () => {
     <div
       className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
     >
-      <Table className={classes.table}>
-        <TableHead>
-          <TableRow className="bg-red-200">
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">UNIT CODE</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">DATE OF PURCHASE</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">CATEGORY</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
-            </TableCell>
-            <TableCell align="center">
-              <p className="font-semibold text-base mt-1.5">STATUS</p>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={8}>
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="w-full p-4 rounded">
-                    <div className="flex space-x-4 animate-pulse">
-                      <div className="flex-1 py-1 space-y-6">
-                        <div className="h-10 bg-gray-200 rounded shadow"></div>
+      <TableContainer className={classes.container}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow className="bg-red-200">
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">UNIT CODE</p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">
+                  DATE OF PURCHASE
+                </p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">CATEGORY</p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
+              </TableCell>
+              <TableCell align="center">
+                <p className="font-semibold text-base mt-1.5">STATUS</p>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={8}>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="w-full p-4 rounded">
+                      <div className="flex space-x-4 animate-pulse">
+                        <div className="flex-1 py-1 space-y-6">
+                          <div className="h-10 bg-gray-200 rounded shadow"></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </TableCell>
-            </TableRow>
-          ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
-            unit.vacantDefective.map((data, index) => (
-              <TableRow key={index}>
-                <TableCell align="center">{data.unit_code}</TableCell>
-                <TableCell align="center">
-                  {format(new Date(data.date_of_purchase), "yyyy-MM-dd")}
+                  ))}
                 </TableCell>
-                <TableCell align="center">
-                  {data.category ? data.category.category_name : "N/A"}
-                </TableCell>
-                <TableCell align="center">{data.description}</TableCell>
-                <TableCell align="center">
-                  {data.supplier ? data.supplier.supplier_name : "N/A"}
-                </TableCell>
-                <TableCell align="center">{data.serial_number}</TableCell>
-                <TableCell align="center">{data.status}</TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={7} align="center">
-                No vacant/defective units found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
+              unit.vacantDefective.map((data, index) => (
+                <TableRow key={index}>
+                  <TableCell align="center">{data.unit_code}</TableCell>
+                  <TableCell align="center">
+                    {format(new Date(data.date_of_purchase), "yyyy-MM-dd")}
+                  </TableCell>
+                  <TableCell align="center">
+                    {data.category ? data.category.category_name : "N/A"}
+                  </TableCell>
+                  <TableCell align="center">{data.description}</TableCell>
+                  <TableCell align="center">
+                    {data.supplier ? data.supplier.supplier_name : "N/A"}
+                  </TableCell>
+                  <TableCell align="center">{data.serial_number}</TableCell>
+                  <TableCell align="center">{data.status}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  No vacant/defective units found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };
@@ -489,235 +497,239 @@ const CustomTableA = ({ rows, setRows }) => {
       className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
     >
       <form onSubmit={handleAddUnit}>
-        <Table className={classes.table}>
-          <TableHead>
-            <TableRow className="bg-blue-200">
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">
-                  DATE OF PURCHASE
-                </p>
-              </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">CATEGORY</p>
-              </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
-              </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
-              </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
-              </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">STATUS</p>
-              </TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
+        <TableContainer className={classes.container}>
+          <Table className={classes.table}>
+            <TableHead>
+              <TableRow className="bg-blue-200">
                 <TableCell align="center">
-                  <DatePicker
-                    selected={
-                      row.date_of_purchase
-                        ? new Date(row.date_of_purchase)
-                        : null
-                    }
-                    onChange={(date) => handleChangeA(date, index)}
-                    placeholderText=""
-                    className={
-                      validationErrors &&
-                      validationErrors[`${index}.date_of_purchase`]
-                        ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
-                        : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
-                    }
-                  />
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.date_of_purchase`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.date_of_purchase`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">
+                    DATE OF PURCHASE
+                  </p>
                 </TableCell>
                 <TableCell align="center">
-                  <SearchableDropdown
-                    options={Category}
-                    value={row.category}
-                    searchTerm={categorySearchTerms[index]}
-                    setSearchTerm={(term) => {
-                      const newSearchTerms = [...categorySearchTerms];
-                      newSearchTerms[index] = term;
-                      setCategorySearchTerms(newSearchTerms);
-                    }}
-                    placeholder=""
-                    onSelect={(option) => {
-                      handleChange(index, "category", option.value);
-                    }}
-                  />
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.category`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.category`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">CATEGORY</p>
                 </TableCell>
                 <TableCell align="center">
-                  <input
-                    type="text"
-                    value={row.description}
-                    onChange={(e) =>
-                      handleChange(index, "description", e.target.value)
-                    }
-                    placeholder=""
-                    className={
-                      validationErrors &&
-                      validationErrors[`${index}.description`]
-                        ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
-                        : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
-                    }
-                  />
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.description`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.description`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
                 </TableCell>
                 <TableCell align="center">
-                  <SearchableDropdown
-                    options={Supplier}
-                    value={row.supplier}
-                    searchTerm={supplierSearchTerms[index]}
-                    setSearchTerm={(term) => {
-                      const newSearchTerms = [...supplierSearchTerms];
-                      newSearchTerms[index] = term;
-                      setSupplierSearchTerms(newSearchTerms);
-                    }}
-                    placeholder=""
-                    onSelect={(option) => {
-                      handleChange(index, "supplier", option.value);
-                    }}
-                  />
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.supplier`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.supplier`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
                 </TableCell>
                 <TableCell align="center">
-                  <input
-                    type="text"
-                    value={row.serial_number}
-                    onChange={(e) =>
-                      handleChange(index, "serial_number", e.target.value)
-                    }
-                    placeholder=""
-                    className={
-                      validationErrors &&
-                      validationErrors[`${index}.serial_number`]
-                        ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
-                        : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
-                    }
-                  />
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.serial_number`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.serial_number`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
                 </TableCell>
                 <TableCell align="center">
-                  <Select
-                    options={options}
-                    value={
-                      row.status
-                        ? options.find((option) => option.value === row.status)
-                        : null
-                    }
-                    onChange={(selectedOption) =>
-                      handleSelectChange(selectedOption, index)
-                    }
-                    placeholder={row.status ? "" : "Select status"}
-                    className={
-                      validationErrors && validationErrors[`${index}.status`]
-                        ? "border border-red-500"
-                        : ""
-                    }
-                  />
-
-                  <span className="text-sm text-center">
-                    {validationErrors &&
-                      validationErrors[`${index}.status`] && (
-                        <div className="text-sm text-center text-red-500">
-                          {validationErrors[`${index}.status`].map(
-                            (error, errorIndex) => (
-                              <span key={errorIndex}>
-                                {error.replace(`${index}.`, "")}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                  </span>
+                  <p className="font-semibold text-base mt-1.5">STATUS</p>
                 </TableCell>
-                <TableCell align="center">
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => deleteRow(index)}
-                      className="text-base font-semibold text-red-600"
-                    >
-                      <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>
-                    </button>
-                  )}
-                </TableCell>
+                <TableCell></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell align="center">
+                    <DatePicker
+                      selected={
+                        row.date_of_purchase
+                          ? new Date(row.date_of_purchase)
+                          : null
+                      }
+                      onChange={(date) => handleChangeA(date, index)}
+                      placeholderText=""
+                      className={
+                        validationErrors &&
+                        validationErrors[`${index}.date_of_purchase`]
+                          ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                          : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                      }
+                    />
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.date_of_purchase`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.date_of_purchase`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    <SearchableDropdown
+                      options={Category}
+                      value={row.category}
+                      searchTerm={categorySearchTerms[index]}
+                      setSearchTerm={(term) => {
+                        const newSearchTerms = [...categorySearchTerms];
+                        newSearchTerms[index] = term;
+                        setCategorySearchTerms(newSearchTerms);
+                      }}
+                      placeholder=""
+                      onSelect={(option) => {
+                        handleChange(index, "category", option.value);
+                      }}
+                    />
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.category`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.category`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    <input
+                      type="text"
+                      value={row.description}
+                      onChange={(e) =>
+                        handleChange(index, "description", e.target.value)
+                      }
+                      placeholder=""
+                      className={
+                        validationErrors &&
+                        validationErrors[`${index}.description`]
+                          ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                          : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                      }
+                    />
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.description`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.description`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    <SearchableDropdown
+                      options={Supplier}
+                      value={row.supplier}
+                      searchTerm={supplierSearchTerms[index]}
+                      setSearchTerm={(term) => {
+                        const newSearchTerms = [...supplierSearchTerms];
+                        newSearchTerms[index] = term;
+                        setSupplierSearchTerms(newSearchTerms);
+                      }}
+                      placeholder=""
+                      onSelect={(option) => {
+                        handleChange(index, "supplier", option.value);
+                      }}
+                    />
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.supplier`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.supplier`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    <input
+                      type="text"
+                      value={row.serial_number}
+                      onChange={(e) =>
+                        handleChange(index, "serial_number", e.target.value)
+                      }
+                      placeholder=""
+                      className={
+                        validationErrors &&
+                        validationErrors[`${index}.serial_number`]
+                          ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                          : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                      }
+                    />
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.serial_number`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.serial_number`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Select
+                      options={options}
+                      value={
+                        row.status
+                          ? options.find(
+                              (option) => option.value === row.status
+                            )
+                          : null
+                      }
+                      onChange={(selectedOption) =>
+                        handleSelectChange(selectedOption, index)
+                      }
+                      placeholder={row.status ? "" : "Select status"}
+                      className={
+                        validationErrors && validationErrors[`${index}.status`]
+                          ? "border border-red-500"
+                          : ""
+                      }
+                    />
+
+                    <span className="text-sm text-center">
+                      {validationErrors &&
+                        validationErrors[`${index}.status`] && (
+                          <div className="text-sm text-center text-red-500">
+                            {validationErrors[`${index}.status`].map(
+                              (error, errorIndex) => (
+                                <span key={errorIndex}>
+                                  {error.replace(`${index}.`, "")}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                    </span>
+                  </TableCell>
+                  <TableCell align="center">
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => deleteRow(index)}
+                        className="text-base font-semibold text-red-600"
+                      >
+                        <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>
+                      </button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
         <button
           type="button"
           onClick={addRow}
