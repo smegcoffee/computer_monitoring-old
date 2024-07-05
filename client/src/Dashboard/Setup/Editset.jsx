@@ -395,12 +395,13 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                         </TableRow>
                       ))
                     )}
+
                   </TableBody>
                 </Table>
               </TableContainer>
               <div className="flex items-center justify-center">
                 <p className="p-5 text-xl text-center">
-                  <strong>{computerName}'s</strong> Computer Units
+                  <strong>{computerName}&apos;s</strong> Computer Units
                 </p>
                 <div className="items-end justify-end flex-1 ml-48 text-center">
                   <button

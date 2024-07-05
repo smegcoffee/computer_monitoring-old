@@ -23,6 +23,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
+import axios from "../../api/axios";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -80,6 +81,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
   }
+
 
   const fstatus = viewPopupData.computers.map(
     (fstatus) => fstatus.formatted_status
