@@ -223,7 +223,7 @@ function SignUp() {
                   id="firstName"
                   className={
                     validationErrors.firstName
-                      ? " w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? " w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : " w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="First Name"
@@ -247,7 +247,7 @@ function SignUp() {
                   id="lastName"
                   className={
                     validationErrors.lastName
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Last Name"
@@ -273,7 +273,7 @@ function SignUp() {
                   id="contactNumber"
                   className={
                     validationErrors.contactNumber
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md bordermr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Contact Number"
@@ -297,7 +297,7 @@ function SignUp() {
                   id="email"
                   className={
                     validationErrors.email
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Email"
@@ -342,7 +342,7 @@ function SignUp() {
                 id="username"
                 className={
                   validationErrors.username
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Username"
@@ -368,7 +368,7 @@ function SignUp() {
                 id="password"
                 className={
                   validationErrors.password
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Password"
@@ -394,7 +394,7 @@ function SignUp() {
                 id="password_confirmation"
                 className={
                   validationErrors.password_confirmation
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Confirm Password"

@@ -378,7 +378,7 @@ function Dashboard() {
       <div className="p-5 border border-gray-100 rounded-xl bg-rose-500">
         <ChartBoxUnit />
       </div>
-      <div className="col-span-1 row-span-3 p-5 bg-blue-100 border border-gray-100 rounded-xl">
+      <div className="col-span-1 row-span-4 p-5 bg-blue-100 border border-gray-100 rounded-xl">
         <PieChartBox />
       </div>
       <div className="p-5 border border-gray-100 rounded-xl bg-amber-500">

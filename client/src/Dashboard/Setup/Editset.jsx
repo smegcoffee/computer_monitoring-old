@@ -184,11 +184,6 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
         >
           <div className="max-h-screen overflow-y-auto text-justify">
             <form onSubmit={handleSubmitEditedSet}>
-              <p className="p-5 text-4xl text-center">
-                <u>
-                  <strong>{computerName}&apos;s</strong> computer units.
-                </u>
-              </p>
               <TableContainer
                 component={Paper}
                 style={{
@@ -310,6 +305,9 @@ function EditSet({ isOpen, onClose, row, editPopupData, setEditPopupData }) {
                                       </MenuItem>
                                       <MenuItem value=" Defective">
                                         Defective
+                                      </MenuItem>
+                                      <MenuItem value=" Delete">
+                                        Delete
                                       </MenuItem>
                                     </Select>
                                   </FormControl>
