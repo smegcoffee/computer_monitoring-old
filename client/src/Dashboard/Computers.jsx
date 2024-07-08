@@ -125,6 +125,9 @@ export const TableComponent = () => {
     };
 
     fetchComputerUser();
+    const intervalId = setInterval(fetchComputerUser, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleSearchChange = (event) => {
