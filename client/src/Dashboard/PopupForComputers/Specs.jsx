@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
 import smct from "./../../img/smct.png";
 import {
   Table,
@@ -13,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { format } from "date-fns";
+import CloseIcon from "@mui/icons-material/Close";
 
 function Specs({
   isOpen,
@@ -46,13 +45,7 @@ function Specs({
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", maxHeight: "100vh" }}
       >
-        <span
-          className="absolute p-2 text-white cursor-pointer top-5 right-5"
-          onClick={onClose}
-        >
-          <FontAwesomeIcon icon={faClose} className="w-6 h-6" />
-        </span>
-        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
+        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl relative">
           <div className="flex-none">
             <img
               src={smct}
@@ -63,6 +56,7 @@ function Specs({
           <div className="text-3xl font-medium text-white flex-2 ml-28 mt-7">
             Computer ID: {id.length === 1 ? id : "NaN"}
           </div>
+          <CloseIcon onClick={onClose} className="text-white cursor-pointer absolute right-5 top-5" />
         </div>
         <div className="max-h-screen mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify">
           <h2 className="mb-4 text-xl font-semibold">Specifications:</h2>

@@ -86,6 +86,15 @@ function Set() {
   const [computerUser, setComputerUser] = useState([]);
   const [computerSetRefresh, setComputerSetRefresh] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showAllRows, setShowAllRows] = useState([]);
+
+  const toggleShowAllRows = (rowId) => {
+    if (showAllRows.includes(rowId)) {
+      setShowAllRows(showAllRows.filter((id) => id !== rowId));
+    } else {
+      setShowAllRows([...showAllRows, rowId]);
+    }
+  };
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -282,73 +291,151 @@ function Set() {
                       rows
                         .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
                         .map((row, rowIndex) => (
-                          <TableRow key={`${row.id}-${rowIndex}`}>
-                            <TableCell align="center">{row.id}</TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>
-                                      {format(
-                                        new Date(unit.date_of_purchase),
-                                        "yyyy-MM-dd"
-                                      )}
-                                    </div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>{unit.category.category_name}</div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>{unit.description}</div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>{unit.supplier.supplier_name}</div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>{unit.serial_number}</div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {row.computers.map((computer) =>
-                                computer.units.map((unit, index) => (
-                                  <React.Fragment key={index}>
-                                    <div>{unit.status}</div>
-                                  </React.Fragment>
-                                ))
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              <button onClick={() => openEditPopup(row.id)}>
-                                {row.name}
-                              </button>
-                            </TableCell>
-                          </TableRow>
+                          <React.Fragment key={`${row.id}-${rowIndex}`}>
+                            <TableRow>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.id}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? format(
+                                              new Date(unit.date_of_purchase),
+                                              "yyyy-MM-dd"
+                                            )
+                                          : index < 3
+                                          ? format(
+                                              new Date(unit.date_of_purchase),
+                                              "yyyy-MM-dd"
+                                            )
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? unit.category.category_name
+                                          : index < 3
+                                          ? unit.category.category_name
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? unit.description
+                                          : index < 3
+                                          ? unit.description
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? unit.supplier.supplier_name
+                                          : index < 3
+                                          ? unit.supplier.supplier_name
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? unit.serial_number
+                                          : index < 3
+                                          ? unit.serial_number
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.computers.map((computer) =>
+                                  computer.units.map((unit, index) => (
+                                    <React.Fragment key={index}>
+                                      <div>
+                                        {showAllRows.includes(row.id)
+                                          ? unit.status
+                                          : index < 3
+                                          ? unit.status
+                                          : null}
+                                      </div>
+                                    </React.Fragment>
+                                  ))
+                                )}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                <button onClick={() => openEditPopup(row.id)}>
+                                  {row.name}
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                            {/* Show more / Show less button */}
+                            <TableRow>
+                              <TableCell colSpan={8} align="center">
+                                <button
+                                  onClick={() => toggleShowAllRows(row.id)}
+                                  style={{ color: "cornflowerblue" }}
+                                >
+                                  {showAllRows.includes(row.id)
+                                    ? "Show less"
+                                    : "Show more"}
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          </React.Fragment>
                         ))
                     )}
                     {loading
