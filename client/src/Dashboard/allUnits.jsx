@@ -19,6 +19,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   Toolbar,
   Typography,
@@ -80,10 +81,22 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 function AllUnits() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -119,6 +132,11 @@ function AllUnits() {
     setOpen(false);
     setSelectedUnit(null);
   };
+
+  const emptyRows =
+    rowsPerPage -
+    Math.min(rowsPerPage, units.length - page * rowsPerPage);
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header />
@@ -213,8 +231,28 @@ function AllUnits() {
                       </TableCell>
                     </TableRow>
                   )}
+            {emptyRows > 0 && (
+                  <TableRow style={{ height: 53 * emptyRows }}>
+                    <TableCell colSpan={4}>
+                    </TableCell>
+                  </TableRow>
+                )}
                 </TableBody>
               </Table>
+                <TablePagination
+                  rowsPerPageOptions={[ 10, 15, 20]}
+                  component="div"
+                  count={units.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage={
+                    <Typography variant="subtitle" fontWeight={600}>
+                      Entries Per Page:
+                    </Typography>
+                  }
+                />
             </TableContainer>
           </div>
         </div>

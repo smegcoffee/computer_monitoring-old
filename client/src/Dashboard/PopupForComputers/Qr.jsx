@@ -49,7 +49,7 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
         className="bg-white shadow-md rounded-2xl"
         style={{ width: "700px", maxHeight: "100vh" }}
       >
-        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
+        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl relative">
           <div className="flex-none">
             <img
               src={smct}
@@ -60,9 +60,7 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
           <div className="mt-8 ml-16 text-3xl font-medium text-white flex-2">
             Computer ID: {id.length === 1 ? id : "NaN"}
           </div>
-          <div className='ml-32'>
-          <CloseIcon onClick={onClose} className="text-white cursor-pointer" />
-          </div>
+          <CloseIcon onClick={onClose} className="text-white cursor-pointer absolute right-5 top-5" />
         </div>
         <div className="flex items-center justify-center">
           <div className="mt-7 mb-14 size-60">

@@ -96,6 +96,8 @@ const CustomTableB = () => {
   const classes = useStyles();
   const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -118,6 +120,17 @@ const CustomTableB = () => {
 
     fetchUnit();
   }, [unit]);
+
+  
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+  
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
   return (
     <div
       className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
@@ -126,7 +139,7 @@ const CustomTableB = () => {
         <Table className={classes.table}>
           <TableHead>
             <TableRow className="bg-red-200">
-              <TableCell align="center">
+              <TableCell align="center" className="rounded-tl-xl">
                 <p className="font-semibold text-base mt-1.5">UNIT CODE</p>
               </TableCell>
               <TableCell align="center">
@@ -146,7 +159,7 @@ const CustomTableB = () => {
               <TableCell align="center">
                 <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
               </TableCell>
-              <TableCell align="center">
+              <TableCell align="center" className="rounded-tr-xl">
                 <p className="font-semibold text-base mt-1.5">STATUS</p>
               </TableCell>
             </TableRow>
@@ -167,7 +180,9 @@ const CustomTableB = () => {
                 </TableCell>
               </TableRow>
             ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
-              unit.vacantDefective.map((data, index) => (
+                unit.vacantDefective
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((data, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">{data.unit_code}</TableCell>
                   <TableCell align="center">
@@ -193,6 +208,20 @@ const CustomTableB = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 15, 20, 25]}
+          component="div"
+          count={unit.vacantDefective.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage={
+            <Typography variant="subtitle" fontWeight={600}>
+              Entries Per Page:
+            </Typography>
+          }
+        />
       </TableContainer>
     </div>
   );
@@ -501,7 +530,7 @@ const CustomTableA = ({ rows, setRows }) => {
           <Table className={classes.table}>
             <TableHead>
               <TableRow className="bg-blue-200">
-                <TableCell align="center">
+                <TableCell align="center" className="rounded-tl-xl">
                   <p className="font-semibold text-base mt-1.5">
                     DATE OF PURCHASE
                   </p>
@@ -521,7 +550,9 @@ const CustomTableA = ({ rows, setRows }) => {
                 <TableCell align="center">
                   <p className="font-semibold text-base mt-1.5">STATUS</p>
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell align="center" className="rounded-tr-xl">
+                    <FontAwesomeIcon icon={faTrash} className="opacity-0"/>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
