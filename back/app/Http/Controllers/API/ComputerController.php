@@ -352,4 +352,66 @@ class ComputerController extends Controller
             ], 500);
         }
     }
+
+    public function updateApplicationAndUserDetails(Request $request, $computerId, $computerUserId)
+    {
+        $validation = Validator::make($request->all(), [
+            'application_content'               =>              ['required', 'array'],
+            'application_content.*'             =>              ['string'],
+            'position'                          =>              ['required', 'exists:positions,id'],
+            'branch_code'                       =>              ['required', 'exists:branch_codes,id']
+        ]);
+
+        if ($validation->fails()) {
+            return response([
+                'status'            => false,
+                'message'           => 'Something went wrong. Please fix.',
+                'errors'            => $validation->errors()
+            ], 422);
+        }
+
+        $computer = Computer::find($computerId);
+
+        if (!$computer) {
+            return response()->json([
+                'status'            => false,
+                'message'           => 'No computers found'
+            ], 422);
+        } else {
+            if ($request->has('application_content')) {
+                $existingApplications = InstalledApplication::where('computer_id', $computerId)->get();
+                $existingApplications->whereNotIn('application_content', $request->application_content)->each(function ($app) {
+                    $app->delete();
+                });
+
+                foreach ($request->application_content as $content) {
+                    InstalledApplication::updateOrCreate(
+                        ['computer_id' => $computerId, 'application_content' => $content],
+                        ['application_content' => $content]
+                    );
+                }
+            }
+
+            $computerUser = ComputerUser::find($computerUserId);
+
+            if (!$computerUser) {
+                return response([
+                    'status'            => false,
+                    'message'           => 'No computer user found.',
+                    'errors'            => $validation->errors()
+                ], 400);
+            } else {
+                $computerUser->update([
+                    'position_id'             =>          $request->position,
+                    'branch_code_id'          =>          $request->branch_code
+                ]);
+            }
+
+            return response()->json([
+                'status'            =>          true,
+                'message'           =>          'Updated successfully.',
+                'computer'          =>          $computer
+            ], 200);
+        }
+    }
 }
