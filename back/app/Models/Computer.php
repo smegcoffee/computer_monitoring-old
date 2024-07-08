@@ -45,4 +45,15 @@ class Computer extends Model
     {
         return $this->hasMany(Remark::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($computer) {
+            $computer->installedApplications()->delete();
+
+            $computer->remarks()->delete();
+        });
+    }
 }

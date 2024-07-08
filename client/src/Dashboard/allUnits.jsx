@@ -24,6 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { format } from "date-fns";
 
 function Header() {
   const handleLogout = async () => {
@@ -82,6 +83,7 @@ function AllUnits() {
   const [open, setOpen] = React.useState(false);
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -98,6 +100,8 @@ function AllUnits() {
         const unit = response.data.data;
 
         setUnits(unit);
+
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -173,7 +177,21 @@ function AllUnits() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {units && units.length > 0 ? (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="w-full p-4 rounded">
+                            <div className="flex space-x-4 animate-pulse">
+                              <div className="flex-1 py-1 space-y-6">
+                                <div className="h-10 bg-gray-200 rounded shadow"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  ) : units && units.length > 0 ? (
                     units.map((unit, index) => (
                       <TableRow key={index}>
                         <TableCell align="center">{unit.unit_code}</TableCell>
@@ -270,12 +288,10 @@ function AllUnits() {
                     <TableRow key={index}>
                       <TableCell align="center">{transfer.status}</TableCell>
                       <TableCell align="center">
-                        {transfer.recent_user}
+                        {transfer.computer_user.name}
                       </TableCell>
                       <TableCell align="center">
-                        {new Date(
-                          transfer.date_of_transfer
-                        ).toLocaleDateString()}
+                        {format(new Date(transfer.date), "MMMM dd, yyyy")}
                       </TableCell>
                     </TableRow>
                   ))

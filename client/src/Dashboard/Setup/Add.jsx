@@ -59,6 +59,9 @@ function Add({ isOpen, onClose, onSubmit }) {
     };
 
     fetchUnit();
+    const intervalId = setInterval(fetchUnit, 2000);
+
+    return () => clearInterval(intervalId);
   }, [vacant]);
 
   useEffect(() => {
@@ -477,15 +480,19 @@ function Add({ isOpen, onClose, onSubmit }) {
                   <button
                     disabled
                     type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full cursor-not-allowed"
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
                   >
                     {loading ? "ADDING..." : "ADD"}
                   </button>
                 ) : (
                   <button
-                    disabled={loading}
+                    disabled={loading || checkedRows.length === 0}
                     type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                    className={
+                      checkedRows.length === 0
+                        ? "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
+                        : "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                    }
                   >
                     {loading ? "ADDING..." : "ADD"}
                   </button>

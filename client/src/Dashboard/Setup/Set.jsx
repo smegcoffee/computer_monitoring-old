@@ -164,8 +164,6 @@ function Set() {
         setEditPopupData(response.data.computer_user_data);
         setIsEditPopupOpen(true);
       }
-
-      console.log(response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -396,6 +394,7 @@ function Set() {
                   row={selectedRow}
                   editPopupData={editPopupData}
                   setEditPopupData={setEditPopupData}
+                  onSubmit={setComputerSetRefresh}
                 />
               )}
             </div>

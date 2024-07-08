@@ -54,12 +54,12 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
     Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
+    Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
 
 
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
-Route::delete('/computer/{computerId}/unit/{unitId}', [ComputerController::class, 'destroy']);
 
 
 // GET

@@ -9,6 +9,7 @@ use App\Models\ComputerUser;
 use App\Models\InstalledApplication;
 use App\Models\RecentUser;
 use App\Models\Remark;
+use App\Models\TransferUnit;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,8 +55,6 @@ class ComputerController extends Controller
             'checkedRows'                    =>              ['required'],
             'checkedRows.*'                  =>              ['exists:units,id'],
             'computer_user'                  =>              ['required', 'exists:computer_users,id'],
-            // 'status'                         =>              ['required', 'in:Formatted,Transfer'],
-            // 'remarks'                        =>              ['required', 'max:5000'],
         ]);
 
         if ($validation->fails()) {
@@ -82,6 +81,13 @@ class ComputerController extends Controller
             if ($unit) {
                 $unit->status = 'Used';
                 $unit->save();
+
+                TransferUnit::create([
+                    'unit_id'                   =>              $unitId,
+                    'computer_user_id'          =>              $request->computer_user,
+                    'date'                      =>              now(),
+                    'status'                    =>              'Transfer',
+                ]);
             }
         }
 
@@ -138,54 +144,54 @@ class ComputerController extends Controller
      */
     public function destroy(Request $request, Computer $computer, $computerId, $unitId)
     {
-        try {
-            $computer = Computer::find($computerId);
+        // try {
+        //     $computer = Computer::find($computerId);
 
-            if (!$computer) {
-                return response()->json([
-                    'status'            =>              false,
-                    'message'           =>              'Computer not found.',
-                ], 404);
-            }
+        //     if (!$computer) {
+        //         return response()->json([
+        //             'status'            =>              false,
+        //             'message'           =>              'Computer not found.',
+        //         ], 404);
+        //     }
 
-            $unit = Unit::findOrFail($unitId);
+        //     $unit = Unit::findOrFail($unitId);
 
-            if (!$unit) {
-                return response()->json([
-                    'status'        =>          false,
-                    'message'       =>          'Unit not found.',
-                ], 404);
-            }
+        //     if (!$unit) {
+        //         return response()->json([
+        //             'status'        =>          false,
+        //             'message'       =>          'Unit not found.',
+        //         ], 404);
+        //     }
 
-            $unit->status = 'Vacant';
-            $unit->save();
+        //     $unit->status = 'Vacant';
+        //     $unit->save();
 
-            $computer->units()->detach($unitId);
+        //     $computer->units()->detach($unitId);
 
-            if ($computer->units()->count() === 0) {
-                $computer->delete();
-            }
+        //     if ($computer->units()->count() === 0) {
+        //         $computer->delete();
+        //     }
 
 
-            $user = ComputerUser::find($computer->computer_user_id);
+        //     $user = ComputerUser::find($computer->computer_user_id);
 
-            $recentUser = RecentUser::create([
-                'computer_id'        =>          $computerId,
-                'unit_id'            =>          $unitId,
-                'computer_user_id'   =>          $request->computer_user_id
-            ], 200);
+        //     $recentUser = RecentUser::create([
+        //         'computer_id'        =>          $computerId,
+        //         'unit_id'            =>          $unitId,
+        //         'computer_user_id'   =>          $request->computer_user_id
+        //     ], 200);
 
-            return response()->json([
-                'status'            =>          true,
-                'message'           =>          $user->name . ' computer unit deleted successfully. And automatically transfer to ' . $recentUser->computerUser->name,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'            =>          false,
-                'message'           =>          'Failed to delete unit from computer.',
-                'error'             =>          $e->getMessage(),
-            ], 500);
-        }
+        //     return response()->json([
+        //         'status'            =>          true,
+        //         'message'           =>          $user->name . ' computer unit deleted successfully. And automatically transfer to ' . $recentUser->computerUser->name,
+        //     ], 200);
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'status'            =>          false,
+        //         'message'           =>          'Failed to delete unit from computer.',
+        //         'error'             =>          $e->getMessage(),
+        //     ], 500);
+        // }
     }
 
     public function installAndRemark(Request $request, $computerId)
@@ -242,6 +248,108 @@ class ComputerController extends Controller
                 'message'                   =>          'Successfully installed ' . implode(', ', $installedContent) . ', and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.'),
                 'computer'                  =>          $computer
             ], 201);
+        }
+    }
+
+    public function unitAction(Request $request, $computerId, $unitIds)
+    {
+
+        try {
+            $unitIds = explode(',', $unitIds);
+
+            $validation = Validator::make($request->all(), [
+                'action'        =>              ['required']
+            ]);
+
+            if ($validation->fails()) {
+                return response()->json([
+                    'status'            =>          false,
+                    'message'           =>          'Something went wrong. Please fix.',
+                    'errors'            =>          $validation->errors()
+                ], 422);
+            }
+
+            $transfers = [];
+            $units = [];
+
+            foreach ($unitIds as $unitId) {
+                $computer = Computer::findOrFail($computerId);
+                $unit = Unit::findOrFail($unitId);
+
+                if ($request->action === 'Transfer') {
+                    $validation = Validator::make($request->all(), [
+                        'computer_user'         =>              ['required', 'exists:computer_users,id'],
+                        'date'                  =>              ['required', 'date'],
+                    ]);
+
+                    if ($validation->fails()) {
+                        return response()->json([
+                            'status'            =>          false,
+                            'message'           =>          'Something went wrong. Please fix.',
+                            'errors'            =>          $validation->errors()
+                        ], 422);
+                    }
+
+                    $unit->status = 'Used';
+                    $unit->save();
+                    $computer->units()->detach($unitId);
+
+                    if ($computer->units()->count() === 0) {
+                        $computer->delete();
+                    }
+
+                    $newUser = ComputerUser::find($request->computer_user);
+                    $newComputer = Computer::firstOrCreate([
+                        'computer_user_id'          =>          $newUser->id,
+                    ]);
+
+                    $newComputer->units()->attach($unitId);
+
+                    $transfer = TransferUnit::create([
+                        'unit_id'                       =>              $unitId,
+                        'computer_user_id'              =>              $request->computer_user,
+                        'date'                          =>              $request->date,
+                        'status'                        =>              'Transfer'
+                    ]);
+                    $transfers[] = $transfer;
+
+                    return response()->json([
+                        'status'                =>              true,
+                        'message'               =>              'Unit(s) successfully transferred',
+                    ], 200);
+                }
+
+                if ($request->action === 'Defective') {
+                    $unit->status = 'Defective';
+                    $unit->save();
+                    $units[] = $unit;
+
+                    return response()->json([
+                        'status'                =>              true,
+                        'message'               =>              'Unit(s) successfully marked as defective',
+                    ], 200);
+                }
+                if ($request->action ===  'Delete') {
+                    $unit->status = 'Vacant';
+                    $unit->save();
+                    $computer->units()->detach($unitId);
+
+                    if ($computer->units()->count() === 0) {
+                        $computer->delete();
+                    }
+                    $units[] = $unit;
+                    return response()->json([
+                        'status'                =>              true,
+                        'message'               =>              'Unit(s) successfully marked deleted',
+                    ], 200);
+                }
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'                    =>                  false,
+                'message'                   =>                  'Failed to perform action on unit.',
+                'error'                     =>                  $e->getMessage(),
+            ], 500);
         }
     }
 }
