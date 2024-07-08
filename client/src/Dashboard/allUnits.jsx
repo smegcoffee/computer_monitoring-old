@@ -25,6 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { format } from "date-fns";
 
 function Header() {
   const handleLogout = async () => {
@@ -83,9 +84,9 @@ function AllUnits() {
   const [open, setOpen] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -111,6 +112,7 @@ function AllUnits() {
         const unit = response.data.data;
 
         setUnits(unit);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -130,8 +132,7 @@ function AllUnits() {
   };
 
   const emptyRows =
-    rowsPerPage -
-    Math.min(rowsPerPage, units.length - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, units.length - page * rowsPerPage);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -191,23 +192,42 @@ function AllUnits() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {units && units.length > 0 ? (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="w-full p-4 rounded">
+                            <div className="flex space-x-4 animate-pulse">
+                              <div className="flex-1 py-1 space-y-6">
+                                <div className="h-10 bg-gray-200 rounded shadow"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </TableCell>
+                    </TableRow>
+                  ) : units && units.length > 0 ? (
                     units
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((unit, index) => (
-                      <TableRow key={index}>
-                        <TableCell align="center">{unit.unit_code}</TableCell>
-                        <TableCell align="center">
-                          {unit.category.category_name}
-                        </TableCell>
-                        <TableCell align="center">{unit.status}</TableCell>
-                        <TableCell align="center">
-                          <Button onClick={() => handleClickOpen(unit)}>
-                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((unit, index) => (
+                        <TableRow key={index}>
+                          <TableCell align="center">{unit.unit_code}</TableCell>
+                          <TableCell align="center">
+                            {unit.category.category_name}
+                          </TableCell>
+                          <TableCell align="center">{unit.status}</TableCell>
+                          <TableCell align="center">
+                            <Button onClick={() => handleClickOpen(unit)}>
+                              <FontAwesomeIcon
+                                icon={faArrowUpRightFromSquare}
+                              />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} align="center">
@@ -215,28 +235,27 @@ function AllUnits() {
                       </TableCell>
                     </TableRow>
                   )}
-            {emptyRows > 0 && (
-                  <TableRow style={{ height: 53 * emptyRows }}>
-                    <TableCell colSpan={4}>
-                    </TableCell>
-                  </TableRow>
-                )}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={4}></TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
-                <TablePagination
-                  rowsPerPageOptions={[ 10, 15, 20]}
-                  component="div"
-                  count={units.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  labelRowsPerPage={
-                    <Typography variant="subtitle" fontWeight={600}>
-                      Entries Per Page:
-                    </Typography>
-                  }
-                />
+              <TablePagination
+                rowsPerPageOptions={[10, 15, 20]}
+                component="div"
+                count={units.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage={
+                  <Typography variant="subtitle" fontWeight={600}>
+                    Entries Per Page:
+                  </Typography>
+                }
+              />
             </TableContainer>
           </div>
         </div>
@@ -310,12 +329,10 @@ function AllUnits() {
                     <TableRow key={index}>
                       <TableCell align="center">{transfer.status}</TableCell>
                       <TableCell align="center">
-                        {transfer.recent_user}
+                        {transfer.computer_user.name}
                       </TableCell>
                       <TableCell align="center">
-                        {new Date(
-                          transfer.date_of_transfer
-                        ).toLocaleDateString()}
+                        {format(new Date(transfer.date), "MMMM dd, yyyy")}
                       </TableCell>
                     </TableRow>
                   ))

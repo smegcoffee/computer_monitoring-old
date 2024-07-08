@@ -15,7 +15,7 @@ class UnitController extends Controller
      */
     public function index()
     {
-        $allUnits = Unit::orderBy('id', 'asc')->with(['category', 'supplier', 'transferUnits'])->get();
+        $allUnits = Unit::orderBy('id', 'asc')->with(['category', 'supplier', 'transferUnits.computerUser'])->get();
         $vacantDefectiveUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->orWhere('status', 'Defective')->with(['category', 'supplier'])->get();
         $vacantUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->with(['category', 'supplier'])->get();
 
