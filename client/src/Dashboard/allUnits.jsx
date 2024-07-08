@@ -12,6 +12,7 @@ import {
   AppBar,
   Button,
   Dialog,
+  DialogContent,
   IconButton,
   Slide,
   Table,
@@ -21,6 +22,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -87,6 +89,27 @@ function AllUnits() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUnits, setFilteredUnits] = useState([]);
+
+  useEffect(() => {
+    setFilteredUnits(units);
+  }, [units]);
+
+  const handleSearchChange = (event) => {
+    const searchValue = event.target.value.toLowerCase();
+    setSearchTerm(searchValue);
+
+    const filteredData = units.filter(
+      (unit) =>
+        unit.unit_code.toLowerCase().includes(searchValue) ||
+        unit.category.category_name.toLowerCase().includes(searchValue) ||
+        unit.status.toLowerCase().includes(searchValue)
+    );
+
+    setFilteredUnits(filteredData);
+    setPage(0);
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -149,7 +172,21 @@ function AllUnits() {
           </p>
           <br /> <br />
           <div className="h-full ml-10 mr-10">
-            <TableContainer className="bg-white rounded-lg shadow-md">
+            {/* Search bar */}
+            <TextField
+              label="Search..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              variant="outlined"
+              fullWidth
+              sx={{ width: 300 }}
+              size="small"
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TableContainer className="bg-white rounded-lg shadow-md mt-1">
               <Table>
                 <TableHead>
                   <TableRow className="bg-blue-400">
@@ -192,22 +229,14 @@ function AllUnits() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {loading ? (
+                  {filteredUnits.length === 0 || loading ? (
                     <TableRow>
-                      <TableCell colSpan={4}>
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-full p-4 rounded">
-                            <div className="flex space-x-4 animate-pulse">
-                              <div className="flex-1 py-1 space-y-6">
-                                <div className="h-10 bg-gray-200 rounded shadow"></div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                      <TableCell colSpan={4} align="center">
+                        No units found.
                       </TableCell>
                     </TableRow>
-                  ) : units && units.length > 0 ? (
-                    units
+                  ) : (
+                    filteredUnits
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
@@ -228,12 +257,6 @@ function AllUnits() {
                           </TableCell>
                         </TableRow>
                       ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        No units found.
-                      </TableCell>
-                    </TableRow>
                   )}
                   {emptyRows > 0 && (
                     <TableRow style={{ height: 53 * emptyRows }}>
@@ -282,70 +305,77 @@ function AllUnits() {
               </Typography>
             </Toolbar>
           </AppBar>
-          <TableContainer
-            className="w-full bg-white rounded-lg shadow-md"
-            style={{
-              maxWidth: "1000px",
-              margin: "0 auto",
-              textAlign: "center",
-              marginTop: "50px",
-            }}
-          >
-            <Table>
-              <TableHead>
-                <TableRow className="bg-red-400">
-                  <TableCell align="center">
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      color={"white"}
-                    >
-                      STATUS
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      color={"white"}
-                    >
-                      RECENT USER
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      color={"white"}
-                    >
-                      DATE OF TRANSFER
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedUnit && selectedUnit.transfer_units.length > 0 ? (
-                  selectedUnit.transfer_units.map((transfer, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="center">{transfer.status}</TableCell>
+          <DialogContent dividers>
+            <div style={{ overflowY: "auto" }}>
+              <TableContainer
+                className="w-full bg-white rounded-lg shadow-md"
+                style={{
+                  maxWidth: "1000px",
+                  margin: "0 auto",
+                  textAlign: "center",
+                  marginTop: "50px",
+                  marginBottom: "50px",
+                }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow className="bg-red-400">
                       <TableCell align="center">
-                        {transfer.computer_user.name}
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          color={"white"}
+                        >
+                          STATUS
+                        </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        {format(new Date(transfer.date), "MMMM dd, yyyy")}
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          color={"white"}
+                        >
+                          RECENT USER
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="bold"
+                          color={"white"}
+                        >
+                          DATE OF TRANSFER
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell align="center" colSpan={3}>
-                      No data found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {selectedUnit && selectedUnit.transfer_units.length > 0 ? (
+                      selectedUnit.transfer_units.map((transfer, index) => (
+                        <TableRow key={index}>
+                          <TableCell align="center">
+                            {transfer.status}
+                          </TableCell>
+                          <TableCell align="center">
+                            {transfer.computer_user.name}
+                          </TableCell>
+                          <TableCell align="center">
+                            {format(new Date(transfer.date), "MMMM dd, yyyy")}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell align="center" colSpan={3}>
+                          No data found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          </DialogContent>
         </Dialog>
       )}
     </div>
