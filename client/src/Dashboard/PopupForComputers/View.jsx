@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import smct from "./../../img/smct.png";
+import Swal from "sweetalert2";
 import {
   Table,
   TableBody,
@@ -27,8 +28,8 @@ import axios from "../../api/axios";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
-    margin: 'auto',
-    width: '100%',
+    margin: "auto",
+    width: "100%",
   },
   "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
@@ -43,8 +44,41 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [applicationContent, setApplicationContent] = useState([]);
-  const defaultApplications = ["Adobe", "Office"]; //Sample defaultvalue of the Installed Application for the Edit View Dialog
+  const [position, setPosition] = useState({ positions: [] });
+  const [branchcode, setBranchcode] = useState({ branches: [] });
+  const [error, setError] = useState();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [user, setUser] = useState({
+    application_content: applicationContent,
+    position: viewPopupData.position ? viewPopupData.position.id : null,
+    branch_code: viewPopupData.branch_code
+      ? viewPopupData.branch_code.id
+      : null,
+  });
+  useEffect(() => {
+    setUser({
+      application_content: applicationContent,
+      branch_code: viewPopupData.branch_code
+        ? viewPopupData.branch_code.id
+        : null,
+      position: viewPopupData.position ? viewPopupData.position.id : null,
+    });
+  }, [viewPopupData]);
+
+  const handleBranchCodeChange = (event, newValue) => {
+    setUser({
+      ...user,
+      branch_code: newValue ? newValue.id : null,
+    });
+  };
+  const handlePositionChange = (event, newValue) => {
+    setUser({
+      ...user,
+      position: newValue ? newValue.id : null,
+    });
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -54,10 +88,60 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
     setOpen(false);
   };
 
-  const handleApplications = (event, value) => {
+  const handleApplications = (event, newValue) => {
     event.preventDefault();
-    setApplicationContent(value);
+    setApplicationContent(newValue);
   };
+
+  useEffect(() => {
+    const fetchBrancheCode = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/branches", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setBranchcode(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchBrancheCode();
+  }, [branchcode]);
+  useEffect(() => {
+    const fetchPosition = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/positions", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setPosition(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchPosition();
+  }, [position]);
+
+  useEffect(() => {
+    if (viewPopupData?.computers) {
+      const apps = viewPopupData.computers.flatMap((computer) =>
+        computer.installed_applications.map((app) => app.application_content)
+      );
+      setApplicationContent(apps);
+    }
+  }, [viewPopupData]);
 
   useEffect(() => {
     if (viewPopupData?.computers) {
@@ -82,10 +166,112 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
     return null; // Render nothing if isOpen is false
   }
 
-
   const fstatus = viewPopupData.computers.map(
     (fstatus) => fstatus.formatted_status
   );
+
+  const Position =
+    position.positions && position.positions.length > 0
+      ? position.positions.map((pos) => ({
+          id: pos.id,
+          position_name: pos.position_name,
+        }))
+      : [];
+
+  // This is a sample data for Branchcode
+  const Branchcode =
+    branchcode.branches && branchcode.branches.length > 0
+      ? branchcode.branches.map((branch) => ({
+          id: branch.id,
+          branch_name: branch.branch_name,
+        }))
+      : [];
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.put(
+        `api/installed/${id[0]}/computer-user/${viewPopupData.id}`,
+        {
+          application_content: applicationContent,
+          position: user.position,
+          branch_code: user.branch_code,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.status === true) {
+        const updatedResponse = await axios.get(
+          `/api/computer-user-specs/${viewPopupData.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setViewPopupData(updatedResponse.data.computer_user_specs);
+        handleClose();
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+            container: "swalContainer",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+        setValidationErrors("");
+      }
+      console.log("Adding computer set:", response.data);
+    } catch (error) {
+      console.error("Error in adding computer set:", error);
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+            container: "swalContainer",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
+      } else {
+        console.log("ERROR!");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -376,101 +562,169 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
           <button className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36">
             PRINT
           </button>
-          <BootstrapDialog
-            onClose={handleClose}
-            aria-labelledby="customized-dialog-title"
-            open={open}
-          >
-            <DialogTitle
-              sx={{ m: 0, p: 2 }}
-              id="customized-dialog-title"
-              className="bg-blue-500 text-white"
+          <form onSubmit={handleSubmit}>
+            <BootstrapDialog
+              onClose={handleClose}
+              aria-labelledby="customized-dialog-title"
+              open={open}
             >
-              EDIT COMPUTER ID. {id.length === 1 ? id : "NaN"}
-            </DialogTitle>
-            <IconButton
-              aria-label="close"
-              onClick={handleClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            <DialogContent dividers>
-              <TextField
-                id="outlined-read-only-input"
-                label="Name of User"
-                defaultValue={viewPopupData.name}
-                InputProps={{
-                  readOnly: true,
-                }}
-                style={{marginBottom: "10px", width: "100%"}}
-              />
-              <Autocomplete
-              id="branch-code"
-              freeSolo
-              defaultValue={viewPopupData.branch_code.branch_name}
-              options={["HO", "DSMT"]} //Sample
-              renderInput={(params) => <TextField {...params} label="Branch Code"
-              style={{marginBottom: "10px"}} />}
-            />
-            <Autocomplete
-            id="designation"
-            freeSolo
-            defaultValue={viewPopupData.position.position_name}
-            options={["Driver", "Full Stack Developer"]} //Sample
-            renderInput={(params) => <TextField {...params} label="Designation"
-            style={{marginBottom: "10px"}} />}
-          />
-              <Autocomplete
-                multiple
-                id="tags-outlined"
-                options={[
-                  "Adobe",
-                  "Office",
-                  "Chrome",
-                  "Firefox",
-                  "Visual Studio",
-                ]}
-                freeSolo
-                value={applicationContent}
-                onChange={handleApplications}
-                renderTags={(tagValue, getTagProps) =>
-                  tagValue.map((option, index) => (
-                    <Chip
-                      key={index}
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
-                    />
-                  ))
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    label="Installed Applications"
-                    placeholder="Installed Applications"
-                  />
-                )}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                autoFocus
-                onClick={handleClose}
-                variant="contained"
-                color="success"
-                style={{ margin: "10px" }}
+              <DialogTitle
+                sx={{ m: 0, p: 2 }}
+                id="customized-dialog-title"
+                className="text-white bg-blue-500"
               >
-                Save changes
-              </Button>
-            </DialogActions>
-          </BootstrapDialog>
+                EDIT COMPUTER ID. {id.length === 1 ? id : "NaN"}
+              </DialogTitle>
+              <IconButton
+                aria-label="close"
+                onClick={handleClose}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "white",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <DialogContent dividers>
+                <TextField
+                  id="outlined-read-only-input"
+                  label="Name of User"
+                  defaultValue={viewPopupData.name}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  style={{ marginBottom: "10px", width: "100%" }}
+                />
+                <Autocomplete
+                  id="branch-code"
+                  freeSolo
+                  defaultValue={viewPopupData.branch_code.branch_name}
+                  readOnly={Branchcode.length === 0}
+                  options={Branchcode} //Sample
+                  getOptionLabel={(option) =>
+                    option.branch_name ? option.branch_name : ""
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={
+                        Branchcode.length === 0
+                          ? "No branchcode added yet"
+                          : "Branchcode"
+                      }
+                      style={{ marginBottom: "10px" }}
+                    />
+                  )}
+                  value={
+                    Branchcode.find(
+                      (option) => option.id === user.branch_code
+                    ) || {}
+                  }
+                  onChange={handleBranchCodeChange}
+                />
+                {validationErrors.branch_code ? (
+                  <span className="text-red-500">
+                    {validationErrors.branch_code.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </span>
+                ) : (
+                  ""
+                )}
+                <Autocomplete
+                  id="designation"
+                  freeSolo
+                  defaultValue={viewPopupData.position.position_name}
+                  options={Position}
+                  readOnly={Position.length === 0}
+                  getOptionLabel={(option) =>
+                    option.position_name ? option.position_name : ""
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={
+                        Position.length === 0
+                          ? "No position added yet"
+                          : "Position"
+                      }
+                      style={{ marginBottom: "10px" }}
+                    />
+                  )}
+                  value={
+                    Position.find((option) => option.id === user.position) || {}
+                  }
+                  onChange={handlePositionChange}
+                />
+                {validationErrors.position ? (
+                  <span className="text-red-500">
+                    {validationErrors.position.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </span>
+                ) : (
+                  ""
+                )}
+                <Autocomplete
+                  multiple
+                  id="tags-outlined"
+                  options={[
+                    "Adobe",
+                    "Office",
+                    "Chrome",
+                    "Firefox",
+                    "Visual Studio",
+                  ]}
+                  freeSolo
+                  value={applicationContent}
+                  onChange={handleApplications}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        {...getTagProps({ index })}
+                      />
+                    ))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      label="Installed Applications"
+                      placeholder="Installed Applications"
+                    />
+                  )}
+                />
+                {validationErrors.application_content ? (
+                  <span className="text-red-500">
+                    {validationErrors.application_content.map(
+                      (error, index) => (
+                        <span key={index}>{error}</span>
+                      )
+                    )}
+                  </span>
+                ) : (
+                  ""
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  autoFocus
+                  type="submit"
+                  onClick={handleSubmit}
+                  variant="contained"
+                  color="success"
+                  style={{ margin: "10px" }}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save changes"}
+                </Button>
+              </DialogActions>
+            </BootstrapDialog>
+          </form>
         </div>
       </div>
     </div>

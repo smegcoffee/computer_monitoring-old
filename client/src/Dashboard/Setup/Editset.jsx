@@ -77,7 +77,6 @@ function EditSet({
       setCheckedRows([...checkedRows, unitId]);
     }
   };
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -197,6 +196,24 @@ function EditSet({
       }
 
       if (allSuccess && successMessages.length > 0) {
+        const updatedResponse = await axios.get(
+          `/api/computer-user-edit/${editPopupData.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setEditPopupData(updatedResponse.data.computer_user_data);
+        setCheckedRows([]);
+        setTransferDate(null);
+        setReason("");
+        setComputer([]);
+        if (updatedResponse.data.computer_user_data.computers.length === 0) {
+          onClose();
+        } else {
+          setOpen(false);
+        }
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
@@ -228,13 +245,6 @@ function EditSet({
             </ul>
           `,
         });
-
-        setCheckedRows([]);
-        setTransferDate(null);
-        setReason("");
-        setComputer([]);
-        setOpen(false);
-        onClose();
       }
     } catch (error) {
       console.error("Error in adding computer set:", error);

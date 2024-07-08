@@ -14,7 +14,20 @@ class InstalledApplicationController extends Controller
      */
     public function index()
     {
-        //
+        // $applications = InstalledApplication::all();
+
+        // if ($applications->count() > 0) {
+        //     return response()->json([
+        //         'status'                        =>              false,
+        //         'message'                       =>              'No installed applications found.',
+        //     ], 200);
+        // } else {
+        //     return response()->json([
+        //         'status'                        =>              true,
+        //         'message'                       =>              'Installed application successfully fetched.',
+        //         'installed_applications'        =>              $applications
+        //     ], 200);
+        // }
     }
 
     /**

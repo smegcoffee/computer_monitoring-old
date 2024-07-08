@@ -55,6 +55,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
     Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
+    Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
 
 
     // DELETE
@@ -64,7 +65,6 @@ Route::middleware("auth:sanctum")->group(function () {
 
 // GET
 // POST
-Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
 // PUT
-
+Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);
 // DELETE
