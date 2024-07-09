@@ -92,6 +92,7 @@ export const TableComponent = () => {
   const [computerUser, setComputerUser] = useState([]);
   const [computerId, setComputerId] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -125,10 +126,7 @@ export const TableComponent = () => {
     };
 
     fetchComputerUser();
-    const intervalId = setInterval(fetchComputerUser, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [refresh]);
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -414,6 +412,7 @@ export const TableComponent = () => {
         onClose={closeViewPopup}
         viewPopupData={viewPopupData}
         setViewPopupData={setViewPopupData}
+        onSubmit={setRefresh}
       />
       <QrCode
         isOpen={isQrPopupOpen}

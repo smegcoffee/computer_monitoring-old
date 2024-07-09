@@ -39,7 +39,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
+function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   const [showAll, setShowAll] = useState(false);
   const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
@@ -189,6 +189,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
+    onSubmit(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -270,6 +271,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData }) {
       }
     } finally {
       setLoading(false);
+      onSubmit(false);
     }
   };
 
