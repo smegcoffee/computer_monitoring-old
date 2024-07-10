@@ -317,7 +317,6 @@ const Extract = () => {
                     </Typography>
                     <div
                       style={{
-                        marginLeft: "165px",
                         maxHeight: "500px",
                         overflowY: "auto",
                       }}
@@ -330,7 +329,7 @@ const Extract = () => {
                           )
                           .map((item, index) => (
                             <ListItem key={index}>
-                              <ListItemText
+                              <ListItemText className="text-center"
                                 primary={item.application_content}
                               />
                             </ListItem>
@@ -356,7 +355,6 @@ const Extract = () => {
                     </Typography>
                     <div
                       style={{
-                        marginLeft: "185px",
                         maxHeight: "500px",
                         overflowY: "auto",
                       }}
