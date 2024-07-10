@@ -6,15 +6,20 @@ import { Link } from "react-router-dom";
 import axios from "../../api/axios";
 import {
   Autocomplete,
+  Breadcrumbs,
   Button,
   Card,
   CardContent,
   Container,
   Grid,
   TextField,
+  Typography,
 } from "@mui/material";
 import Swal from "sweetalert2";
 import Header from "../../Dashboard/Header";
+import HomeIcon from "@mui/icons-material/Home";
+import SettingsIcon from "@mui/icons-material/Settings";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 function User() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -349,12 +354,34 @@ function User() {
           <p className="pt-10 ml-10 text-2xl font-normal">
             Setup Computer User
           </p>
-          <p className="ml-10 text-lg font-light">
-            <Link to="/dashboard" className="text-blue-800">
-              Home
-            </Link>{" "}
-            &gt; Setup
-          </p>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+              >
+                <SettingsIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup
+              </Typography>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <GroupAddIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup Users
+              </Typography>
+            </Breadcrumbs>
+          </div>
           <br /> <br />
           <div className="flex items-center justify-center ml-10 mr-10">
             <div className="w-1/2 mr-5 border border-transparent shadow-lg rounded-xl max-h-max">

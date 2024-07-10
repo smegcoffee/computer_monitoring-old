@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
 import Header from "./Header";
+import { Breadcrumbs, Typography } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 
 function DashBoard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -53,7 +55,17 @@ function DashBoard() {
           <div className="grid grid-cols-3 gap-5">
             <div className="col-span-2 row-span-1">
               <p className="pt-10 ml-10 text-2xl font-normal">Dashboard</p>
-              <p className="ml-10 text-lg font-light">Home</p>
+              <div className="mt-2 ml-10">
+                <Breadcrumbs aria-label="breadcrumb">
+                  <Typography
+                    sx={{ display: "flex", alignItems: "center" }}
+                    color="text.primary"
+                  >
+                    <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                    Home
+                  </Typography>
+                </Breadcrumbs>
+              </div>
             </div>
             <div className="justify-end col-span-1 row-span-1 text-end">
               {user && user.data && (

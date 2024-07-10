@@ -24,9 +24,12 @@ import {
   Typography,
   TablePagination,
   TextField,
+  Breadcrumbs,
 } from "@mui/material";
 import Swal from "sweetalert2";
 import Header from "./Header";
+import HomeIcon from "@mui/icons-material/Home";
+import ComputerIcon from "@mui/icons-material/Computer";
 
 //THIS IS THE TABLE LIST OF COMPUTERS
 export const TableComponent = () => {
@@ -393,12 +396,27 @@ function Computers() {
         </div>
         <div style={{ flex: 2, paddingBottom: "50px", marginRight: "80px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Managed Computers</p>
-          <p className="ml-10 text-lg font-light">
-            <Link to="/dashboard" className="text-blue-800">
-              Home
-            </Link>{" "}
-            &gt; Computers
-          </p>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <ComputerIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Computers
+              </Typography>
+            </Breadcrumbs>
+          </div>
           <br /> <br />
           <div className="w-full h-full ml-10">
             <div className="w-full max-h-full mt-4">

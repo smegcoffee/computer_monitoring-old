@@ -10,6 +10,7 @@ import axios from "../api/axios";
 import Swal from "sweetalert2";
 import {
   AppBar,
+  Breadcrumbs,
   Button,
   Dialog,
   DialogContent,
@@ -29,6 +30,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { format } from "date-fns";
 import Header from "./Header";
+import HomeIcon from "@mui/icons-material/Home";
+import DevicesIcon from "@mui/icons-material/Devices";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -126,12 +129,27 @@ function AllUnits() {
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">All Units</p>
-          <p className="ml-10 text-lg font-light">
-            <Link to="/dashboard" className="text-blue-800">
-              Home
-            </Link>{" "}
-            &gt; All Units
-          </p>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                All Units
+              </Typography>
+            </Breadcrumbs>
+          </div>
           <br /> <br />
           <div className="h-full ml-10 mr-10">
             {/* Search bar */}
