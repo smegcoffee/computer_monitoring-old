@@ -315,7 +315,7 @@ const Extract = () => {
                     <Typography variant="h5" align="center">
                       Installed Applications
                     </Typography>
-                    <div
+                    <div className="text-center"
                       style={{
                         maxHeight: "500px",
                         overflowY: "auto",
@@ -353,7 +353,7 @@ const Extract = () => {
                     <Typography variant="h5" align="center">
                       Remarks
                     </Typography>
-                    <div
+                    <div className="text-center"
                       style={{
                         maxHeight: "500px",
                         overflowY: "auto",
