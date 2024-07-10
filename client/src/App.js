@@ -17,6 +17,7 @@ import ChangePassword from './context/ChangePassword';
 import User from './Dashboard/Setup/User';
 import Add from './Dashboard/Setup/Add';
 import AllUnits from './Dashboard/allUnits';
+import NotFound from './Dashboard/Notfound';
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
           <Route path='/computers/:id' element={<Extract />} />
           <Route path='/user' element={<User/>}/>
           <Route path='/add' element={<Add/>}/>
+          <Route path='*' element={<NotFound />} />
 
         </Route>
       </Routes>
