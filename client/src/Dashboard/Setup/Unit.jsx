@@ -25,55 +25,7 @@ import { format } from "date-fns";
 import { data } from "../../data/vacantUnitsData";
 import { TableContainer } from "@material-ui/core";
 import Select from "react-select";
-
-function Header() {
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure you want to logout?",
-      showCancelButton: true,
-      confirmButtonColor: "red",
-      confirmButtonText: "Logout",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        await axios.get("/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        localStorage.removeItem("token");
-        window.location = "/login";
-      } catch (error) {
-        console.error("Error logging out:", error);
-        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
-      }
-    }
-  };
-  return (
-    <div>
-      <div className="flex items-center justify-between w-full h-20 bg-blue-800">
-        <div className="flex-grow text-center">
-          <p className="text-4xl font-bold text-white">
-            COMPUTER MONITORING SYSTEM
-          </p>
-        </div>
-        <Link onClick={handleLogout}>
-          <FontAwesomeIcon
-            icon={faRightFromBracket}
-            className="mr-8 text-white"
-          />{" "}
-        </Link>
-      </div>
-    </div>
-  );
-}
+import Header from "../../Dashboard/Header";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -121,12 +73,11 @@ const CustomTableB = () => {
     fetchUnit();
   }, [unit]);
 
-  
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -180,25 +131,25 @@ const CustomTableB = () => {
                 </TableCell>
               </TableRow>
             ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
-                unit.vacantDefective
+              unit.vacantDefective
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((data, index) => (
-                <TableRow key={index}>
-                  <TableCell align="center">{data.unit_code}</TableCell>
-                  <TableCell align="center">
-                    {format(new Date(data.date_of_purchase), "yyyy-MM-dd")}
-                  </TableCell>
-                  <TableCell align="center">
-                    {data.category ? data.category.category_name : "N/A"}
-                  </TableCell>
-                  <TableCell align="center">{data.description}</TableCell>
-                  <TableCell align="center">
-                    {data.supplier ? data.supplier.supplier_name : "N/A"}
-                  </TableCell>
-                  <TableCell align="center">{data.serial_number}</TableCell>
-                  <TableCell align="center">{data.status}</TableCell>
-                </TableRow>
-              ))
+                  <TableRow key={index}>
+                    <TableCell align="center">{data.unit_code}</TableCell>
+                    <TableCell align="center">
+                      {format(new Date(data.date_of_purchase), "yyyy-MM-dd")}
+                    </TableCell>
+                    <TableCell align="center">
+                      {data.category ? data.category.category_name : "N/A"}
+                    </TableCell>
+                    <TableCell align="center">{data.description}</TableCell>
+                    <TableCell align="center">
+                      {data.supplier ? data.supplier.supplier_name : "N/A"}
+                    </TableCell>
+                    <TableCell align="center">{data.serial_number}</TableCell>
+                    <TableCell align="center">{data.status}</TableCell>
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
                 <TableCell colSpan={7} align="center">
@@ -551,7 +502,7 @@ const CustomTableA = ({ rows, setRows }) => {
                   <p className="font-semibold text-base mt-1.5">STATUS</p>
                 </TableCell>
                 <TableCell align="center" className="rounded-tr-xl">
-                    <FontAwesomeIcon icon={faTrash} className="opacity-0"/>
+                  <FontAwesomeIcon icon={faTrash} className="opacity-0" />
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -783,6 +734,11 @@ const CustomTableA = ({ rows, setRows }) => {
 };
 
 function Unit() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const [category, setCategory] = useState("");
   const [supplier, setSupplier] = useState("");
   const [rows, setRows] = useState([
@@ -964,10 +920,13 @@ function Unit() {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
-          <SideBar />
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Setup Unit</p>

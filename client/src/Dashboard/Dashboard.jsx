@@ -7,59 +7,14 @@ import Dashboard from "./Db2";
 import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
-
-function Header() {
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure you want to logout?",
-      showCancelButton: true,
-      confirmButtonColor: "red",
-      confirmButtonText: "Logout",
-    });
-
-    if (result.isConfirmed) {
-
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        await axios.get("/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        localStorage.removeItem("token");
-        window.location = "/login";
-      } catch (error) {
-        console.error("Error logging out:", error);
-        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
-      }
-    }
-  };
-  return (
-    <div>
-      <div className="flex items-center justify-between w-full h-20 bg-blue-800">
-        <div className="flex-grow text-center">
-          <p className="text-4xl font-bold text-white">
-            COMPUTER MONITORING SYSTEM
-          </p>
-        </div>
-
-        <Link onClick={handleLogout}>
-          <FontAwesomeIcon
-            icon={faRightFromBracket}
-            className="mr-8 text-white"
-          />{" "}
-        </Link>
-      </div>
-    </div>
-  );
-}
+import Header from "./Header";
 
 function DashBoard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -86,10 +41,13 @@ function DashBoard() {
   }, []);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
-          <SideBar />
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
           <div className="grid grid-cols-3 gap-5">

@@ -32,7 +32,7 @@ class RegisterController extends Controller
             'firstName'         =>          ['required', 'max:255'],
             'lastName'          =>          ['required', 'max:255'],
             'contactNumber'     =>          ['required', 'numeric', 'digits:11'],
-            'branchCode'        =>          ['required'],
+            'branchCode'        =>          ['required', 'exists:branch_codes,id'],
             'username'          =>          ['required', 'max:255', 'unique:users,username'],
             'email'             =>          ['required', 'email', 'max:255', 'unique:users,email', 'regex:/^\S+@\S+\.\S+$/'],
             'password'          =>          ['required', 'confirmed', 'min:8']

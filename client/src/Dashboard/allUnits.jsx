@@ -28,61 +28,18 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { format } from "date-fns";
-
-function Header() {
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure you want to logout?",
-      showCancelButton: true,
-      confirmButtonColor: "red",
-      confirmButtonText: "Logout",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        await axios.get("/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        localStorage.removeItem("token");
-        window.location = "/login";
-      } catch (error) {
-        console.error("Error logging out:", error);
-        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
-      }
-    }
-  };
-  return (
-    <div>
-      <div className="flex items-center justify-between w-full h-20 bg-blue-800">
-        <div className="flex-grow text-center">
-          <p className="text-4xl font-bold text-white">
-            COMPUTER MONITORING SYSTEM
-          </p>
-        </div>
-        <Link onClick={handleLogout}>
-          <FontAwesomeIcon
-            icon={faRightFromBracket}
-            className="mr-8 text-white"
-          />{" "}
-        </Link>
-      </div>
-    </div>
-  );
-}
+import Header from "./Header";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 function AllUnits() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const [open, setOpen] = useState(false);
   const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -159,9 +116,14 @@ function AllUnits() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div style={{ display: "flex", flex: 1 }}>
-        <SideBar />
+        <div>
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
+        </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">All Units</p>
           <p className="ml-10 text-lg font-light">
@@ -186,7 +148,7 @@ function AllUnits() {
                 shrink: true,
               }}
             />
-            <TableContainer className="bg-white rounded-lg shadow-md mt-1">
+            <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
               <Table>
                 <TableHead>
                   <TableRow className="bg-blue-400">
