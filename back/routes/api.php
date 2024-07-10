@@ -56,8 +56,11 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
     Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
     Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
+    Route::post('/profile/update', [ProfileController::class, 'update']);
 
+    // PUT
 
+    Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
@@ -66,5 +69,4 @@ Route::middleware("auth:sanctum")->group(function () {
 // GET
 // POST
 // PUT
-Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);
 // DELETE

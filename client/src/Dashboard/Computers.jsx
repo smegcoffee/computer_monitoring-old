@@ -26,56 +26,7 @@ import {
   TextField,
 } from "@mui/material";
 import Swal from "sweetalert2";
-
-function Header() {
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure you want to logout?",
-      showCancelButton: true,
-      confirmButtonColor: "red",
-      confirmButtonText: "Logout",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        await axios.get("/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        localStorage.removeItem("token");
-        window.location = "/login";
-      } catch (error) {
-        console.error("Error logging out:", error);
-        Swal.fire("Error!", "Failed to log out. Please try again.", "error");
-      }
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between w-full h-20 bg-blue-800">
-        <div className="flex-grow text-center">
-          <p className="text-4xl font-bold text-white">
-            COMPUTER MONITORING SYSTEM
-          </p>
-        </div>
-        <Link onClick={handleLogout}>
-          <FontAwesomeIcon
-            icon={faRightFromBracket}
-            className="mr-8 text-white"
-          />{" "}
-        </Link>
-      </div>
-    </div>
-  );
-}
+import Header from "./Header";
 
 //THIS IS THE TABLE LIST OF COMPUTERS
 export const TableComponent = () => {
@@ -92,6 +43,7 @@ export const TableComponent = () => {
   const [computerUser, setComputerUser] = useState([]);
   const [computerId, setComputerId] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -125,10 +77,7 @@ export const TableComponent = () => {
     };
 
     fetchComputerUser();
-    const intervalId = setInterval(fetchComputerUser, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [refresh]);
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -414,6 +363,7 @@ export const TableComponent = () => {
         onClose={closeViewPopup}
         viewPopupData={viewPopupData}
         setViewPopupData={setViewPopupData}
+        onSubmit={setRefresh}
       />
       <QrCode
         isOpen={isQrPopupOpen}
@@ -426,12 +376,20 @@ export const TableComponent = () => {
 };
 
 function Computers() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
-          <SideBar />
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px", marginRight: "80px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Managed Computers</p>

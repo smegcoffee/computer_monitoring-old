@@ -366,31 +366,31 @@ function Dashboard() {
   }, []);
   return (
     <div
-      className="grid grid-cols-4 gap-5"
+      className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
       style={{ gridAutoRows: "minmax(180px, auto)" }}
     >
-      <div className="col-span-1 row-span-3 p-5 bg-blue-100 border border-gray-100 rounded-xl">
+      <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-3 rounded-xl">
         <TopBox />
       </div>
-      <div className="p-5 bg-green-500 border border-gray-100 rounded-xl">
+      <div className="col-span-1 p-5 bg-green-500 border border-gray-100 rounded-xl">
         <ChartBoxUser />
       </div>
-      <div className="p-5 border border-gray-100 rounded-xl bg-rose-500">
+      <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-rose-500">
         <ChartBoxUnit />
       </div>
-      <div className="col-span-1 row-span-4 p-5 bg-blue-100 border border-gray-100 rounded-xl">
+      <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-4 rounded-xl">
         <PieChartBox />
       </div>
-      <div className="p-5 border border-gray-100 rounded-xl bg-amber-500">
+      <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-amber-500">
         <ChartBoxComputer />
       </div>
-      <div className="p-5 bg-blue-500 border border-gray-100 rounded-xl">
+      <div className="col-span-1 p-5 bg-blue-500 border border-gray-100 rounded-xl">
         <ChartBoxRemark />
       </div>
-      <div className="col-span-2 row-span-2 p-5 bg-blue-100 border border-gray-100 rounded-xl">
+      <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-2 lg:col-span-2 md:row-span-2 rounded-xl">
         <BigChartBox />
       </div>
-      <div className="p-5 bg-blue-100 border border-gray-100 rounded-xl">
+      <div className="col-span-1 p-5 bg-blue-100 border border-gray-100 rounded-xl">
         <BarChartBox
           title="Weekly Remarks"
           dataKey="Remarks"

@@ -45,7 +45,7 @@ function Specs({
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", maxHeight: "100vh" }}
       >
-        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl relative">
+        <div className="relative flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl">
           <div className="flex-none">
             <img
               src={smct}
@@ -56,7 +56,10 @@ function Specs({
           <div className="text-3xl font-medium text-white flex-2 ml-28 mt-7">
             Computer ID: {id.length === 1 ? id : "NaN"}
           </div>
-          <CloseIcon onClick={onClose} className="text-white cursor-pointer absolute right-5 top-5" />
+          <CloseIcon
+            onClick={onClose}
+            className="absolute text-white cursor-pointer right-5 top-5"
+          />
         </div>
         <div className="max-h-screen mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify">
           <h2 className="mb-4 text-xl font-semibold">Specifications:</h2>
