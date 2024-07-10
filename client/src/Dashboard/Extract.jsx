@@ -203,7 +203,7 @@ const Extract = () => {
             to="/dashboard"
             className="inline-block px-4 py-2 text-blue-500 transition duration-300 ease-in-out border border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white"
           >
-            Back to dashboard
+            Back to Dashboard
           </Link>
         </div>
         <CardContent>
@@ -304,16 +304,14 @@ const Extract = () => {
             <Grid
               container
               spacing={2}
-              justify="center"
-              style={{ marginTop: "10px" }}
+              style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}
             >
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={5} style={{marginLeft: "50px"}}>
                 <Typography variant="h5" align="center">
                   Installed Applications
                 </Typography>
                 <div
                   style={{
-                    marginLeft: "165px",
                     maxHeight: "500px",
                     overflowY: "auto",
                   }}
@@ -344,13 +342,12 @@ const Extract = () => {
                   )}
                 </div>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={5} style={{marginLeft: "50px"}}>
                 <Typography variant="h5" align="center">
                   Remarks
                 </Typography>
                 <div
                   style={{
-                    marginLeft: "185px",
                     maxHeight: "500px",
                     overflowY: "auto",
                   }}
