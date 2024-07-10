@@ -11,13 +11,21 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import { Typography, TablePagination, TextField } from "@mui/material";
+import {
+  Typography,
+  TablePagination,
+  TextField,
+  Breadcrumbs,
+} from "@mui/material";
 import Add from "./Add";
 import EditSet from "./Editset";
 import axios from "../../api/axios";
 import { format } from "date-fns";
 import Swal from "sweetalert2";
 import Header from "../../Dashboard/Header";
+import HomeIcon from "@mui/icons-material/Home";
+import SettingsIcon from "@mui/icons-material/Settings";
+import MouseIcon from "@mui/icons-material/Mouse";
 
 const useStyles = makeStyles({
   table: {
@@ -157,12 +165,34 @@ function Set() {
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Setup Computer Set</p>
-          <p className="ml-10 text-lg font-light">
-            <Link to="/dashboard" className="text-blue-800">
-              Home
-            </Link>{" "}
-            &gt; Setup
-          </p>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+              >
+                <SettingsIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup
+              </Typography>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <MouseIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup Computer Set
+              </Typography>
+            </Breadcrumbs>
+          </div>
           <br /> <br />
           <div className="flex items-center justify-center mr-10">
             <div className="flex justify-end flex-grow">
