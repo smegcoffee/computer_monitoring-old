@@ -51,6 +51,7 @@ function AllUnits() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUnits, setFilteredUnits] = useState([]);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setFilteredUnits(units);
@@ -97,7 +98,11 @@ function AllUnits() {
         setUnits(unit);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error all units:", error);
+        if (error.response.status === 404) {
+          setError(true);
+        }
+        setLoading(false);
       }
     };
 
@@ -209,10 +214,18 @@ function AllUnits() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUnits.length === 0 || loading ? (
+                  {loading ? (
                     <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        No units found.
+                      <TableCell colSpan={4}>
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="w-full p-4 rounded">
+                            <div className="flex space-x-4 animate-pulse">
+                              <div className="flex-1 py-1 space-y-6">
+                                <div className="h-10 bg-gray-200 rounded shadow"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -238,11 +251,27 @@ function AllUnits() {
                         </TableRow>
                       ))
                   )}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={4}></TableCell>
-                    </TableRow>
-                  )}
+                  {loading
+                    ? ""
+                    : emptyRows > 0 && (
+                        <TableRow style={{ height: 53 * emptyRows }}>
+                          <TableCell colSpan={4}>
+                            {filteredUnits.length === 0 ? (
+                              !searchTerm ? (
+                                <p className="text-xl text-center">
+                                  No units to found.
+                                </p>
+                              ) : (
+                                <p className="text-xl text-center">
+                                  No "{searchTerm}" result found.
+                                </p>
+                              )
+                            ) : (
+                              ""
+                            )}{" "}
+                          </TableCell>
+                        </TableRow>
+                      )}
                 </TableBody>
               </Table>
               <TablePagination

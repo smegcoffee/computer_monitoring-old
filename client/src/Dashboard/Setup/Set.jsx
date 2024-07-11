@@ -52,6 +52,7 @@ function Set() {
   const [computerSetRefresh, setComputerSetRefresh] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showAllRows, setShowAllRows] = useState([]);
+  const [error, setError] = useState(false);
 
   const toggleShowAllRows = (rowId) => {
     if (showAllRows.includes(rowId)) {
@@ -78,6 +79,10 @@ function Set() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching computer users:", error);
+        if (error.response.status === 404) {
+          setError(true);
+        }
+        setLoading(false);
       }
     };
 
@@ -140,6 +145,10 @@ function Set() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+      if (error.response.status === 404) {
+        setError(true);
+      }
+      setLoading(false);
     }
   };
 

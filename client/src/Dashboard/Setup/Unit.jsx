@@ -48,12 +48,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomTableB = () => {
+const CustomTableB = (refresh) => {
   const classes = useStyles();
   const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -69,13 +70,18 @@ const CustomTableB = () => {
         });
         setUnit(response.data);
         setLoading(false);
+        setError(false);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching units data:", error);
+        if (error.response.status === 404) {
+          setError(true);
+        }
+        setLoading(false);
       }
     };
 
     fetchUnit();
-  }, [unit]);
+  }, [refresh]);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -271,7 +277,7 @@ const SearchableDropdown = ({
   );
 };
 
-const CustomTableA = ({ rows, setRows }) => {
+const CustomTableA = ({ rows, setRows, onSubmit }) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
@@ -397,6 +403,7 @@ const CustomTableA = ({ rows, setRows }) => {
   const handleAddUnit = async (e) => {
     e.preventDefault();
     setuLoading(true);
+    onSubmit(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -473,6 +480,7 @@ const CustomTableA = ({ rows, setRows }) => {
       }
     } finally {
       setuLoading(false);
+      onSubmit(false);
     }
   };
 
@@ -760,6 +768,7 @@ function Unit() {
   const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
+  const [refresh, setRefresh] = useState(false);
 
   const handleCategory = (e) => {
     setCategory(e.target.value);
@@ -1045,10 +1054,10 @@ function Unit() {
             </div>
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
-            <CustomTableA rows={rows} setRows={setRows} />
+            <CustomTableA rows={rows} setRows={setRows} onSubmit={setRefresh} />
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
-            <CustomTableB rows={rows} />
+            <CustomTableB rows={rows} refresh={refresh} />
           </div>
         </div>
       </div>

@@ -47,6 +47,7 @@ export const TableComponent = () => {
   const [computerId, setComputerId] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -76,6 +77,10 @@ export const TableComponent = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching computer users:", error);
+        if (error.response.status === 404) {
+          setError(true);
+        }
+        setLoading(false);
       }
     };
 
