@@ -276,10 +276,10 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40 z-50">
       <div
         className="bg-white shadow-md rounded-2xl"
-        style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
+        style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh"}}
       >
         <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
           <div className="flex-none">
