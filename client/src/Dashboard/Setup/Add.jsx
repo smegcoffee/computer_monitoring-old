@@ -34,6 +34,7 @@ function Add({ isOpen, onClose, onSubmit }) {
   });
   const [vacant, setVacant] = useState(false);
   const [vloading, setvLoading] = useState(true);
+  const [verror, setvError] = useState(false);
 
   useEffect(() => {
     setFilteredData(vacantUnit);
@@ -54,7 +55,11 @@ function Add({ isOpen, onClose, onSubmit }) {
         setVacantUnit(response.data.vacant || []);
         setvLoading(false);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data:", error);
+        if (error.response.status === 404) {
+          setvError(true);
+        }
+        setvLoading(false);
       }
     };
 
@@ -78,7 +83,7 @@ function Add({ isOpen, onClose, onSubmit }) {
         });
         setComputerUser(response.data);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 

@@ -29,9 +29,9 @@ class UnitController extends Controller
             ], 200);
         } else {
             return response()->json([
-                'status'                =>              false,
+                'status'                =>              true,
                 'message'               =>              "No units found.",
-            ], 200);
+            ], 404);
         }
     }
 
