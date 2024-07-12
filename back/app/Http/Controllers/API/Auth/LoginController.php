@@ -67,12 +67,8 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-
-        $user = User::where('email', $request->email)->first();
-
-
         $validation = Validator::make($request->all(), [
-            'email'         =>          ['required', 'email', 'regex:/^\S+@\S+\.\S+$/'],
+            'login'         =>          ['required'],
             'password'      =>          ['required', 'min:8']
         ]);
 
@@ -84,16 +80,19 @@ class LoginController extends Controller
             ], 400);
         }
 
+        $user = User::where('email', $request->login)
+            ->orWhere('username', $request->login)
+            ->first();
 
         if (!$user) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      "This email is not exists or not verified yet",
+                'message'       =>      "This email or username does not exist or is not verified yet",
             ], 400);
         }
 
         $login = auth()->attempt([
-            'email'         =>          $request->email,
+            'email'         =>          filter_var($request->login, FILTER_VALIDATE_EMAIL) ? $request->login : $user->email,
             'password'      =>          $request->password
         ]);
 
