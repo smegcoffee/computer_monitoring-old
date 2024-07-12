@@ -255,7 +255,7 @@ const SearchableDropdown = ({
         onFocus={handleInputFocus}
       />
       {isOpen && (
-        <ul className="absolute z-20 w-full mt-1 text-justify bg-white border border-gray-300 rounded-xl top-full">
+        <ul className="absolute z-20 w-full mt-1 overflow-y-auto text-justify bg-white border border-gray-300 rounded-xl top-full max-h-60">
           {Array.isArray(filteredOptions) && filteredOptions.length > 0 ? (
             filteredOptions.map((option) => (
               <li
