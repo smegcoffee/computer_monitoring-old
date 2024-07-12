@@ -330,9 +330,13 @@ class ComputerController extends Controller
                     ], 200);
                 }
                 if ($request->action ===  'Delete') {
-                    $unit->status = 'Vacant';
+                    if ($unit->status === 'Defective') {
+
+                        $unit->status = 'Defective';
+                    } else {
+                        $unit->status = 'Vacant';
+                    }
                     $unit->save();
-                    $computer->units()->detach($unitId);
 
                     if ($computer->units()->count() === 0) {
                         $computer->delete();

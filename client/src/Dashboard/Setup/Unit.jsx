@@ -290,7 +290,6 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
   const [supplierSearchTerms, setSupplierSearchTerms] = useState([""]);
   const options = [
     { value: "Vacant", label: "Vacant" },
-    { value: "Used", label: "Used" },
     { value: "Defective", label: "Defective" },
   ];
 
