@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import smct from '../img/smct.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import bg from '../img/bg.png';
 import { Link } from 'react-router-dom';
 import axios from '../api/axios';
@@ -145,7 +145,7 @@ function Background() {
 function LogIn() {
   // Define fields for the login form
   const fields = [
-    { icon: <FontAwesomeIcon icon={faEnvelope} />, text: 'Email' },
+    { icon: <FontAwesomeIcon icon={faUser} />, text: 'Username/Email' },
     { icon: <FontAwesomeIcon icon={faLock} />, text: 'Password' }
   ];
 
