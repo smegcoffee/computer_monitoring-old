@@ -18,6 +18,7 @@ import User from './Dashboard/Setup/User';
 import Add from './Dashboard/Setup/Add';
 import AllUnits from './Dashboard/allUnits';
 import NotFound from './Dashboard/Notfound';
+import PrintInformation from './Dashboard/PopupForComputers/Print';
 
 function App() {
 
@@ -48,6 +49,7 @@ function App() {
           <Route path='/user' element={<User/>}/>
           <Route path='/add' element={<Add/>}/>
           <Route path='*' element={<NotFound />} />
+          <Route path='/print' element={<PrintInformation />} />
 
         </Route>
       </Routes>

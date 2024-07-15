@@ -58,9 +58,16 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
       ? viewPopupData.branch_code.id
       : null,
   });
+  const [redirectToPrint, setRedirectToPrint] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
+  useEffect(() => {
+    if (redirectToPrint) {
+      window.location.href = "/print";
+    }
+  }, [redirectToPrint]);
+
+  const handleClick = () => {
+    setRedirectToPrint(true);
   };
 
   useEffect(() => {
@@ -567,7 +574,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
           >
             EDIT
           </button>
-          <button className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36" onClick={handlePrint}>
+          <button className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36" onClick={handleClick}>
             PRINT
           </button>
           {/* The next div is for printing and hidden */}
