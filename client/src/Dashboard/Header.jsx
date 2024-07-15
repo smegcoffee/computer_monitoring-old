@@ -14,8 +14,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import PersonAdd from "@mui/icons-material/PersonAdd";
-import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
@@ -36,6 +34,7 @@ function Header({ toggleSidebar }) {
   const [noNotification, setNoNotification] = useState(null);
   const [loadingNotificationId, setLoadingNotificationId] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const openProfileMenu = Boolean(profileAnchorEl);
   const openNotificationMenu = Boolean(notificationAnchorEl);
@@ -101,6 +100,8 @@ function Header({ toggleSidebar }) {
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+      } finally {
+        setDataLoading(false);
       }
     };
 
@@ -308,7 +309,7 @@ function Header({ toggleSidebar }) {
         </div>
 
         {user && user.data && (
-          <>
+          <div>
             <Tooltip title="Notifications">
               <IconButton
                 onClick={handleNotificationClick}
@@ -320,11 +321,29 @@ function Header({ toggleSidebar }) {
                 aria-haspopup="true"
                 aria-expanded={openNotificationMenu ? "true" : undefined}
               >
-                <NotificationsIcon />
+                <NotificationsIcon
+                  sx={{
+                    color: "white",
+                    ...(notification
+                      ? {
+                          animation: "wiggle 1s infinite",
+                          "@keyframes wiggle": {
+                            "0%": { transform: "rotate(0deg)" },
+                            "10%": { transform: "rotate(-15deg)" },
+                            "20%": { transform: "rotate(15deg)" },
+                            "30%": { transform: "rotate(-15deg)" },
+                            "40%": { transform: "rotate(15deg)" },
+                            "50%": { transform: "rotate(0deg)" },
+                            "100%": { transform: "rotate(0deg)" },
+                          },
+                        }
+                      : {}),
+                  }}
+                />
                 {notification ? (
                   <span className="absolute top-0 right-0 flex w-4 h-4">
                     <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 font-bold text-white bg-red-500 rounded-full">
                       {notifCount}
                     </span>
                   </span>
@@ -345,7 +364,7 @@ function Header({ toggleSidebar }) {
                 <Avatar alt={user.data.firstName} src={imageUrl} />
               </IconButton>
             </Tooltip>
-          </>
+          </div>
         )}
 
         <Menu
@@ -479,7 +498,40 @@ function Header({ toggleSidebar }) {
             </Typography>
           </div>
           <div className="overflow-y-auto max-h-[600px]">
-            {noNotification ? (
+            {dataLoading ? (
+              <div>
+                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                  <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-full bg-slate-700 h-10 w-10"></div>
+                    <div class="flex-1 space-y-6 py-1">
+                      <div class="h-2 bg-slate-700 rounded"></div>
+                      <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-4">
+                          <div class="h-2 bg-slate-700 rounded col-span-2"></div>
+                          <div class="h-2 bg-slate-700 rounded col-span-1"></div>
+                        </div>
+                        <div class="h-2 bg-slate-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                  <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-full bg-slate-700 h-10 w-10"></div>
+                    <div class="flex-1 space-y-6 py-1">
+                      <div class="h-2 bg-slate-700 rounded"></div>
+                      <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-4">
+                          <div class="h-2 bg-slate-700 rounded col-span-2"></div>
+                          <div class="h-2 bg-slate-700 rounded col-span-1"></div>
+                        </div>
+                        <div class="h-2 bg-slate-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : noNotification ? (
               <Typography
                 variant="body2"
                 className="relative"
@@ -551,14 +603,18 @@ function Header({ toggleSidebar }) {
               ))
             )}
           </div>
-          <MenuItem
-            onClick={handleMarkAllAsRead}
-            sx={{ justifyContent: "center" }}
-          >
-            <Typography variant="body2" color="primary">
-              Mark all as read
-            </Typography>
-          </MenuItem>
+          {notification ? (
+            <MenuItem
+              onClick={notification ? handleMarkAllAsRead : undefined}
+              sx={{ justifyContent: "center" }}
+            >
+              <Typography variant="body2" color="primary">
+                Mark all as read
+              </Typography>
+            </MenuItem>
+          ) : (
+            ""
+          )}
         </Menu>
       </div>
     </div>

@@ -18,7 +18,6 @@ import axios from "../../api/axios";
 import { format } from "date-fns";
 
 function Add({ isOpen, onClose, onSubmit, refresh }) {
-  const [user, setUser] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +31,6 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   const [computer, setComputer] = useState({
     computer_user: "",
   });
-  const [vacant, setVacant] = useState(false);
   const [vloading, setvLoading] = useState(true);
   const [verror, setvError] = useState(false);
 
@@ -148,7 +146,6 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
 
   const handleSubmitAssignedUser = async (event) => {
     event.preventDefault();
-    setVacant(true);
     onSubmit(true);
     setLoading(true);
     try {
@@ -220,7 +217,6 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
         console.log("ERROR!");
       }
     } finally {
-      setVacant(false);
       onSubmit(false);
       setLoading(false);
     }

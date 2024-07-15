@@ -50,19 +50,35 @@ const PrintInformation = () => {
         Total Format: <b></b>
       </p>
       <br />
-      <p className="text-xl font-semibold">SPECIFICATIONS</p> <br/>
+      <p className="text-xl font-semibold">SPECIFICATIONS</p> <br />
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="center">UNIT CODE</TableCell>
-              <TableCell align="center">CATEGORY</TableCell>
-              <TableCell align="center">DESCRIPTION</TableCell>
-              <TableCell align="center">SUPPLIER</TableCell>
-              <TableCell align="center">DATE OF PURCHASE</TableCell>
-              <TableCell align="center">SERIAL NUMBER</TableCell>
-              <TableCell align="center">STATUS</TableCell>
-              <TableCell align="center">RECENT USER</TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                UNIT CODE
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                CATEGORY
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                DESCRIPTION
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                SUPPLIER
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                DATE OF PURCHASE
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                SERIAL NUMBER
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                STATUS
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                RECENT USER
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -79,10 +95,9 @@ const PrintInformation = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      <br/>
+      <br />
       <p className="text-xl font-semibold">INSTALLED APPLICATIONS</p>
-
-      <br/>
+      <br />
       <p className="text-xl font-semibold">REMARKS</p>
     </div>
   );
