@@ -324,7 +324,7 @@ function Header({ toggleSidebar }) {
                 {notification ? (
                   <span className="absolute top-0 right-0 flex w-4 h-4">
                     <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
                       {notifCount}
                     </span>
                   </span>
@@ -478,77 +478,79 @@ function Header({ toggleSidebar }) {
               </span>
             </Typography>
           </div>
-          {noNotification ? (
-            <Typography
-              variant="body2"
-              className="relative"
-              sx={{
-                justifyContent: "center",
-                textAlign: "center",
-                paddingY: 7,
-              }}
-            >
-              <p className="text-xl">
-                <FontAwesomeIcon icon={faBellSlash} />
-              </p>
-              <p className="mt-3 text-xl">No notifications</p>
-            </Typography>
-          ) : (
-            notification?.map((notif, index) => (
-              <div
-                key={index}
-                className={
-                  loadingAll
-                    ? "bg-slate-300"
-                    : loading && loadingNotificationId === notif.id
-                    ? "bg-slate-300"
-                    : ""
-                }
+          <div className="overflow-y-auto max-h-[600px]">
+            {noNotification ? (
+              <Typography
+                variant="body2"
+                className="relative"
+                sx={{
+                  justifyContent: "center",
+                  textAlign: "center",
+                  paddingY: 7,
+                }}
               >
-                <MenuItem
-                  disabled={
-                    loading && loadingAll
-                      ? loadingAll
-                      : loadingNotificationId === notif.id
-                  }
-                  onClick={(event) => {
-                    if (!loading || loadingNotificationId === notif.id) {
-                      handleMarkAsRead(event, notif.id);
-                    }
-                  }}
+                <p className="text-xl">
+                  <FontAwesomeIcon icon={faBellSlash} />
+                </p>
+                <p className="mt-3 text-xl">No notifications</p>
+              </Typography>
+            ) : (
+              notification?.map((notif, index) => (
+                <div
+                  key={index}
                   className={
                     loadingAll
-                      ? "relative animate-bounce"
+                      ? "bg-slate-300"
                       : loading && loadingNotificationId === notif.id
-                      ? "relative animate-bounce"
-                      : "relative"
+                      ? "bg-slate-300"
+                      : ""
                   }
                 >
-                  <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
-                  <Avatar
-                    src={
-                      notif.user.profile_picture
-                        ? `http://localhost:8000/${notif.user.profile_picture}`
-                        : defaultImg
+                  <MenuItem
+                    disabled={
+                      loading && loadingAll
+                        ? loadingAll
+                        : loadingNotificationId === notif.id
                     }
-                    sx={{ mr: 2 }}
-                  />
-                  <div>
-                    <Typography variant="body2">
-                      <b>
-                        {notif.user.firstName} {notif.user.lastName}
-                      </b>
-                    </Typography>
-                    <Typography variant="body2"> {notif.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {timeAgo(notif.created_at)}
-                    </Typography>
-                  </div>
-                </MenuItem>
-                <hr />
-              </div>
-            ))
-          )}
+                    onClick={(event) => {
+                      if (!loading || loadingNotificationId === notif.id) {
+                        handleMarkAsRead(event, notif.id);
+                      }
+                    }}
+                    className={
+                      loadingAll
+                        ? "relative animate-bounce"
+                        : loading && loadingNotificationId === notif.id
+                        ? "relative animate-bounce"
+                        : "relative"
+                    }
+                  >
+                    <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
+                    <Avatar
+                      src={
+                        notif.user.profile_picture
+                          ? `http://localhost:8000/${notif.user.profile_picture}`
+                          : defaultImg
+                      }
+                      sx={{ mr: 2 }}
+                    />
+                    <div>
+                      <Typography variant="body2">
+                        <b>
+                          {notif.user.firstName} {notif.user.lastName}
+                        </b>
+                      </Typography>
+                      <Typography variant="body2"> {notif.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {timeAgo(notif.created_at)}
+                      </Typography>
+                    </div>
+                  </MenuItem>
+                  <hr />
+                </div>
+              ))
+            )}
+          </div>
           <MenuItem
             onClick={handleMarkAllAsRead}
             sx={{ justifyContent: "center" }}
