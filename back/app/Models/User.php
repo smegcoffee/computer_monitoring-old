@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(BranchCode::class);
     }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'user_notifications')->withPivot('read_at')->withTimestamps();
+    }
 }

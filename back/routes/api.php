@@ -12,6 +12,7 @@ use App\Http\Controllers\API\ComputerController;
 use App\Http\Controllers\API\ComputerUserController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\EmailController;
+use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\UnitController;
@@ -44,6 +45,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/computer-user-specs/{id}', [ComputerUserController::class, 'viewSpecs']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/computers/{id}', [ComputerController::class, 'show']);
+    Route::get('/unread-notifications', [NotificationController::class, 'index']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -57,6 +59,8 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
     Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
+    Route::post('/marked-as-read/{notificationId}', [NotificationController::class, 'read']);
+    Route::post('/marked-all-as-read', [NotificationController::class, 'markedAllAsRead']);
 
     // PUT
 

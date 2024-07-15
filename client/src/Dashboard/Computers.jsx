@@ -216,7 +216,7 @@ export const TableComponent = () => {
 
   const emptyRows =
     rowsPerPage -
-    Math.min(rowsPerPage, computerUser.length - page * rowsPerPage);
+    Math.min(rowsPerPage, filteredData.length - page * rowsPerPage);
   return (
     <>
       {/* search thru NAME */}

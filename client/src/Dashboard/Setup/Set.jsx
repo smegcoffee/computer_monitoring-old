@@ -233,6 +233,7 @@ function Set() {
               isOpen={isAddPopupOpen}
               onClose={closeAddPopup}
               onSubmit={setComputerSetRefresh}
+              refresh={computerSetRefresh}
             />
           </div>
           <div className="flex items-center justify-center mt-5 ml-10 mr-10">
