@@ -17,7 +17,7 @@ import Swal from "sweetalert2";
 import axios from "../../api/axios";
 import { format } from "date-fns";
 
-function Add({ isOpen, onClose, onSubmit }) {
+function Add({ isOpen, onClose, onSubmit, refresh }) {
   const [user, setUser] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -64,10 +64,7 @@ function Add({ isOpen, onClose, onSubmit }) {
     };
 
     fetchUnit();
-    const intervalId = setInterval(fetchUnit, 2000);
-
-    return () => clearInterval(intervalId);
-  }, [vacant]);
+  }, [refresh]);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -153,6 +150,7 @@ function Add({ isOpen, onClose, onSubmit }) {
     event.preventDefault();
     setVacant(true);
     onSubmit(true);
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -224,6 +222,7 @@ function Add({ isOpen, onClose, onSubmit }) {
     } finally {
       setVacant(false);
       onSubmit(false);
+      setLoading(false);
     }
   };
 
@@ -494,7 +493,7 @@ function Add({ isOpen, onClose, onSubmit }) {
                     disabled={loading || checkedRows.length === 0}
                     type="submit"
                     className={
-                      checkedRows.length === 0
+                      loading || checkedRows.length === 0
                         ? "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
                         : "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
                     }

@@ -336,6 +336,8 @@ class ComputerController extends Controller
                     } else {
                         $unit->status = 'Vacant';
                     }
+
+                    $computer->units()->detach($unitId);
                     $unit->save();
 
                     if ($computer->units()->count() === 0) {

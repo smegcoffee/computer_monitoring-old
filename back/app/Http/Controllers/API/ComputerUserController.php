@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\ComputerUser;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -56,12 +57,19 @@ class ComputerUserController extends Controller
             ], 422);
         }
 
+        $userAuth = auth()->user();
+
 
         $user = ComputerUser::create([
             'name'                    =>          $request->name,
             'position_id'             =>          $request->position,
             'branch_code_id'          =>          $request->branch_code
 
+        ]);
+
+        Notification::create([
+            'user_id'       =>          $userAuth->id,
+            'title'         =>          ' Added a computer user (' . $user->name . ').',
         ]);
 
 
