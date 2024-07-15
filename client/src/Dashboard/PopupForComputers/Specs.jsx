@@ -22,6 +22,8 @@ function Specs({
 }) {
   const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     // Flatten units from each computer into rows
     if (Array.isArray(specsPopupData.computers)) {
@@ -35,12 +37,13 @@ function Specs({
       const id = specsPopupData.computers.map((comp) => comp.id);
       setId(id);
     }
+    setLoading(false);
   }, [specsPopupData]);
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
   }
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", maxHeight: "100vh" }}
@@ -100,22 +103,47 @@ function Specs({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((unit, index) => (
-                  <TableRow key={index}>
-                    <TableCell align="center">{unit.unit_code}</TableCell>
-                    <TableCell align="center">
-                      {unit.category.category_name}
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="w-full p-4 rounded">
+                          <div className="flex space-x-4 animate-pulse">
+                            <div className="flex-1 py-1 space-y-6">
+                              <div className="h-10 bg-gray-200 rounded shadow"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </TableCell>
-                    <TableCell align="center">{unit.description}</TableCell>
-                    <TableCell align="center">
-                      {unit.supplier.supplier_name}
-                    </TableCell>
-                    <TableCell align="center">
-                      {format(new Date(unit.date_of_purchase), "yyyy-MM-dd")}
-                    </TableCell>
-                    <TableCell align="center">{unit.serial_number}</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  rows.map((unit, index) => (
+                    <TableRow key={index}>
+                      <TableCell align="center">{unit.unit_code}</TableCell>
+                      <TableCell align="center">
+                        {unit.category.category_name}
+                      </TableCell>
+                      <TableCell align="center">{unit.description}</TableCell>
+                      <TableCell align="center">
+                        {unit.supplier.supplier_name}
+                      </TableCell>
+                      <TableCell align="center">
+                        {format(new Date(unit.date_of_purchase), "yyyy-MM-dd")}
+                      </TableCell>
+                      <TableCell align="center">{unit.serial_number}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+                {rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <p className="py-5 text-lg">No records found.</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  ""
+                )}
               </TableBody>
             </Table>
           </TableContainer>
