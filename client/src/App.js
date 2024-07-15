@@ -1,6 +1,6 @@
 import './styles/Tailwind.css';
 import LogIn from './Request/Login';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Forgot from './Request/Forgot';
 import SignUp from './Request/Signup';
 import DashBoard from './Dashboard/Dashboard';
@@ -23,7 +23,7 @@ import PrintInformation from './Dashboard/PopupForComputers/Print';
 function App() {
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<AuthContext />}>
           <Route path='/login' element={<LogIn />}></Route>
@@ -53,7 +53,7 @@ function App() {
 
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

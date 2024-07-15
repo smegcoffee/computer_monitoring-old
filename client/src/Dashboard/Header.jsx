@@ -34,6 +34,7 @@ function Header({ toggleSidebar }) {
   const [noNotification, setNoNotification] = useState(null);
   const [loadingNotificationId, setLoadingNotificationId] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const openProfileMenu = Boolean(profileAnchorEl);
   const openNotificationMenu = Boolean(notificationAnchorEl);
@@ -99,6 +100,8 @@ function Header({ toggleSidebar }) {
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+      } finally {
+        setDataLoading(false);
       }
     };
 
@@ -321,16 +324,20 @@ function Header({ toggleSidebar }) {
                 <NotificationsIcon
                   sx={{
                     color: "white",
-                    animation: "wiggle 1s infinite",
-                    "@keyframes wiggle": {
-                      "0%": { transform: "rotate(0deg)" },
-                      "10%": { transform: "rotate(-15deg)" },
-                      "20%": { transform: "rotate(15deg)" },
-                      "30%": { transform: "rotate(-15deg)" },
-                      "40%": { transform: "rotate(15deg)" },
-                      "50%": { transform: "rotate(0deg)" },
-                      "100%": { transform: "rotate(0deg)" },
-                    },
+                    ...(notification
+                      ? {
+                          animation: "wiggle 1s infinite",
+                          "@keyframes wiggle": {
+                            "0%": { transform: "rotate(0deg)" },
+                            "10%": { transform: "rotate(-15deg)" },
+                            "20%": { transform: "rotate(15deg)" },
+                            "30%": { transform: "rotate(-15deg)" },
+                            "40%": { transform: "rotate(15deg)" },
+                            "50%": { transform: "rotate(0deg)" },
+                            "100%": { transform: "rotate(0deg)" },
+                          },
+                        }
+                      : {}),
                   }}
                 />
                 {notification ? (
@@ -491,7 +498,40 @@ function Header({ toggleSidebar }) {
             </Typography>
           </div>
           <div className="overflow-y-auto max-h-[600px]">
-            {noNotification ? (
+            {dataLoading ? (
+              <div>
+                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                  <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-full bg-slate-700 h-10 w-10"></div>
+                    <div class="flex-1 space-y-6 py-1">
+                      <div class="h-2 bg-slate-700 rounded"></div>
+                      <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-4">
+                          <div class="h-2 bg-slate-700 rounded col-span-2"></div>
+                          <div class="h-2 bg-slate-700 rounded col-span-1"></div>
+                        </div>
+                        <div class="h-2 bg-slate-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                  <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-full bg-slate-700 h-10 w-10"></div>
+                    <div class="flex-1 space-y-6 py-1">
+                      <div class="h-2 bg-slate-700 rounded"></div>
+                      <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-4">
+                          <div class="h-2 bg-slate-700 rounded col-span-2"></div>
+                          <div class="h-2 bg-slate-700 rounded col-span-1"></div>
+                        </div>
+                        <div class="h-2 bg-slate-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : noNotification ? (
               <Typography
                 variant="body2"
                 className="relative"
@@ -563,14 +603,18 @@ function Header({ toggleSidebar }) {
               ))
             )}
           </div>
-          <MenuItem
-            onClick={handleMarkAllAsRead}
-            sx={{ justifyContent: "center" }}
-          >
-            <Typography variant="body2" color="primary">
-              Mark all as read
-            </Typography>
-          </MenuItem>
+          {notification ? (
+            <MenuItem
+              onClick={notification ? handleMarkAllAsRead : undefined}
+              sx={{ justifyContent: "center" }}
+            >
+              <Typography variant="body2" color="primary">
+                Mark all as read
+              </Typography>
+            </MenuItem>
+          ) : (
+            ""
+          )}
         </Menu>
       </div>
     </div>
