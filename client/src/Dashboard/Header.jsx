@@ -14,8 +14,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import PersonAdd from "@mui/icons-material/PersonAdd";
-import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
@@ -308,7 +306,7 @@ function Header({ toggleSidebar }) {
         </div>
 
         {user && user.data && (
-          <>
+          <div>
             <Tooltip title="Notifications">
               <IconButton
                 onClick={handleNotificationClick}
@@ -320,11 +318,25 @@ function Header({ toggleSidebar }) {
                 aria-haspopup="true"
                 aria-expanded={openNotificationMenu ? "true" : undefined}
               >
-                <NotificationsIcon />
+                <NotificationsIcon
+                  sx={{
+                    color: "white",
+                    animation: "wiggle 1s infinite",
+                    "@keyframes wiggle": {
+                      "0%": { transform: "rotate(0deg)" },
+                      "10%": { transform: "rotate(-15deg)" },
+                      "20%": { transform: "rotate(15deg)" },
+                      "30%": { transform: "rotate(-15deg)" },
+                      "40%": { transform: "rotate(15deg)" },
+                      "50%": { transform: "rotate(0deg)" },
+                      "100%": { transform: "rotate(0deg)" },
+                    },
+                  }}
+                />
                 {notification ? (
                   <span className="absolute top-0 right-0 flex w-4 h-4">
                     <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 font-bold text-white bg-red-500 rounded-full">
                       {notifCount}
                     </span>
                   </span>
@@ -345,7 +357,7 @@ function Header({ toggleSidebar }) {
                 <Avatar alt={user.data.firstName} src={imageUrl} />
               </IconButton>
             </Tooltip>
-          </>
+          </div>
         )}
 
         <Menu
