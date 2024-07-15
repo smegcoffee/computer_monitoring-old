@@ -47,8 +47,6 @@ function EditSet({
   setEditPopupData,
   onSubmit,
 }) {
-  const [user, setUser] = useState(false);
-  const [rows, setRows] = useState([]);
   const [computerUser, setComputerUser] = useState({ data: [] });
   const [computer, setComputer] = useState({
     computer_user: "",

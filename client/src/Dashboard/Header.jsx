@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket, faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import {
   Avatar,
@@ -111,7 +111,7 @@ function Header({ toggleSidebar }) {
               aria-haspopup="true"
               aria-expanded={open ? "true" : undefined}
             >
-              <Avatar  alt={user.data.firstName} src={imageUrl} />
+              <Avatar alt={user.data.firstName} src={imageUrl} />
             </IconButton>
           </Tooltip>
         )}
