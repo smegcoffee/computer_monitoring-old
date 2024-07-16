@@ -83,7 +83,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     };
 
     fetchComputerUser();
-  }, [computerUser]);
+  }, []);
 
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
@@ -221,6 +221,8 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
       setLoading(false);
     }
   };
+
+  console.log(ComputerUser)
 
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">

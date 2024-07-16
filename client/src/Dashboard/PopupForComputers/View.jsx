@@ -62,7 +62,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
 
   useEffect(() => {
     if (redirectToPrint) {
-      window.location.href = "/print";
+      window.location.href = `/print/${id}`;
     }
   }, [redirectToPrint]);
 
@@ -289,7 +289,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh"}}

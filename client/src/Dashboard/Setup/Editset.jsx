@@ -121,7 +121,8 @@ function EditSet({
     };
 
     fetchComputerUser();
-  }, [computerUser]);
+  }, []);
+
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
       ? computerUser.data
