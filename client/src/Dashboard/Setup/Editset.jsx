@@ -365,7 +365,13 @@ function EditSet({
                         <TableCell align="center">
                           {unit.category.category_name}
                         </TableCell>
-                        <TableCell align="center">{unit.description}</TableCell>
+                        <TableCell align="center">
+                          {unit.description
+                            .split("\n")
+                            .map((line, lineIndex) => (
+                              <div key={lineIndex}>{line}</div>
+                            ))}
+                        </TableCell>
                         <TableCell align="center">
                           {unit.supplier.supplier_name}
                         </TableCell>
@@ -526,11 +532,9 @@ function EditSet({
                             {validationErrors.date && (
                               <div className="text-red-500">
                                 <ul>
-                                  {validationErrors.date.map(
-                                    (error, index) => (
-                                      <li key={index}>{error}</li>
-                                    )
-                                  )}
+                                  {validationErrors.date.map((error, index) => (
+                                    <li key={index}>{error}</li>
+                                  ))}
                                 </ul>
                               </div>
                             )}

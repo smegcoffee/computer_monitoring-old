@@ -124,7 +124,11 @@ function Specs({
                       <TableCell align="center">
                         {unit.category.category_name}
                       </TableCell>
-                      <TableCell align="center">{unit.description}</TableCell>
+                      <TableCell align="center">
+                        {unit.description.split("\n").map((line, lineIndex) => (
+                          <div key={lineIndex}>{line}</div>
+                        ))}
+                      </TableCell>
                       <TableCell align="center">
                         {unit.supplier.supplier_name}
                       </TableCell>

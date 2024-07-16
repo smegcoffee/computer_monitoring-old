@@ -343,8 +343,20 @@ function Set() {
                                       <div>
                                         {showAllRows.includes(row.id)
                                           ? unit.description
+                                              .split("\n")
+                                              .map((line, lineIndex) => (
+                                                <div key={lineIndex}>
+                                                  {line}
+                                                </div>
+                                              ))
                                           : index < 3
                                           ? unit.description
+                                              .split("\n")
+                                              .map((line, lineIndex) => (
+                                                <div key={lineIndex}>
+                                                  {line}
+                                                </div>
+                                              ))
                                           : null}
                                       </div>
                                     </React.Fragment>

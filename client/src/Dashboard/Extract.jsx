@@ -285,7 +285,11 @@ const Extract = () => {
                               {unit.category.category_name}
                             </TableCell>
                             <TableCell align="center">
-                              {unit.description}
+                              {unit.description
+                                .split("\n")
+                                .map((line, lineIndex) => (
+                                  <div key={lineIndex}>{line}</div>
+                                ))}
                             </TableCell>
                             <TableCell align="center">
                               {unit.supplier.supplier_name}
@@ -315,7 +319,8 @@ const Extract = () => {
                     <Typography variant="h5" align="center">
                       Installed Applications
                     </Typography>
-                    <div className="text-center"
+                    <div
+                      className="text-center"
                       style={{
                         maxHeight: "500px",
                         overflowY: "auto",
@@ -329,7 +334,8 @@ const Extract = () => {
                           )
                           .map((item, index) => (
                             <ListItem key={index}>
-                              <ListItemText className="text-center"
+                              <ListItemText
+                                className="text-center"
                                 primary={item.application_content}
                               />
                             </ListItem>
@@ -353,7 +359,8 @@ const Extract = () => {
                     <Typography variant="h5" align="center">
                       Remarks
                     </Typography>
-                    <div className="text-center"
+                    <div
+                      className="text-center"
                       style={{
                         maxHeight: "500px",
                         overflowY: "auto",
