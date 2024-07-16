@@ -62,7 +62,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
 
   useEffect(() => {
     if (redirectToPrint) {
-      window.location.href = `/print/${id}`;
+      window.open(`/print/${id}`, "_blank");
     }
   }, [redirectToPrint]);
 
@@ -292,7 +292,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
-        style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh"}}
+        style={{ maxWidth: "100vh", minWidth: "1000px", maxHeight: "100vh" }}
       >
         <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl max-h-max">
           <div className="flex-none">
@@ -574,13 +574,16 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
           >
             EDIT
           </button>
-          <button className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36" onClick={handleClick}>
+          <button
+            className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36"
+            onClick={handleClick}
+          >
             PRINT
           </button>
           {/* The next div is for printing and hidden */}
           <div className="hidden">
-        <PrintInformation />
-      </div>
+            <PrintInformation />
+          </div>
           <form onSubmit={handleSubmit}>
             <BootstrapDialog
               onClose={handleClose}

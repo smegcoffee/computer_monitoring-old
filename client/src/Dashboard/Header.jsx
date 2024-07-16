@@ -558,46 +558,51 @@ function Header({ toggleSidebar }) {
                       : ""
                   }
                 >
-                  <MenuItem
-                    disabled={
-                      loading && loadingAll
-                        ? loadingAll
-                        : loadingNotificationId === notif.id
-                    }
-                    onClick={(event) => {
-                      if (!loading || loadingNotificationId === notif.id) {
-                        handleMarkAsRead(event, notif.id);
-                      }
-                    }}
-                    className={
-                      loadingAll
-                        ? "relative animate-bounce"
-                        : loading && loadingNotificationId === notif.id
-                        ? "relative animate-bounce"
-                        : "relative"
-                    }
+                  <Tooltip
+                    title={`${notif.user.firstName} ${notif.user.lastName} notification.`}
                   >
-                    <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
-                    <Avatar
-                      src={
-                        notif.user.profile_picture
-                          ? `http://localhost:8000/${notif.user.profile_picture}`
-                          : defaultImg
+                    <MenuItem
+                      disabled={
+                        loading && loadingAll
+                          ? loadingAll
+                          : loadingNotificationId === notif.id
                       }
-                      sx={{ mr: 2 }}
-                    />
-                    <div>
-                      <Typography variant="body2">
-                        <b>
-                          {notif.user.firstName} {notif.user.lastName}
-                        </b>
-                      </Typography>
-                      <Typography variant="body2"> {notif.title}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {timeAgo(notif.created_at)}
-                      </Typography>
-                    </div>
-                  </MenuItem>
+                      onClick={(event) => {
+                        if (!loading || loadingNotificationId === notif.id) {
+                          handleMarkAsRead(event, notif.id);
+                        }
+                      }}
+                      className={
+                        loadingAll
+                          ? "relative animate-bounce"
+                          : loading && loadingNotificationId === notif.id
+                          ? "relative animate-bounce"
+                          : "relative"
+                      }
+                    >
+                      <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
+                      <Avatar
+                        src={
+                          notif.user.profile_picture
+                            ? `http://localhost:8000/${notif.user.profile_picture}`
+                            : defaultImg
+                        }
+                        sx={{ mr: 2 }}
+                      />
+                      <div>
+                        <Typography variant="body2">
+                          <b>
+                            {notif.user.firstName} {notif.user.lastName}
+                          </b>
+                        </Typography>
+                        <Typography variant="body2"> {notif.title}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {timeAgo(notif.created_at)}
+                        </Typography>
+                      </div>
+                    </MenuItem>
+                  </Tooltip>
+
                   <hr />
                 </div>
               ))
