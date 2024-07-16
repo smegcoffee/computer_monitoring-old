@@ -1,6 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 export default axios.create({
-    baseURL: "http://localhost:8000",
-    withCredentials: true
+  baseURL: "http://10.50.2.220:8000",
+  // baseURL: "http://localhost:8000",
+  withCredentials: true,
 });

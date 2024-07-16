@@ -83,7 +83,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     };
 
     fetchComputerUser();
-  }, [computerUser]);
+  }, []);
 
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
@@ -222,6 +222,8 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     }
   };
 
+  console.log(ComputerUser);
+
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div
@@ -345,7 +347,11 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
                               {un.category.category_name}
                             </TableCell>
                             <TableCell align="center">
-                              {un.description}
+                              {un.description
+                                .split("\n")
+                                .map((line, lineIndex) => (
+                                  <div key={lineIndex}>{line}</div>
+                                ))}
                             </TableCell>
                             <TableCell align="center">
                               {un.supplier.supplier_name}

@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import "../../styles/Printing.css";
 import header from "../../img/headerForPrinting.png";
 import {
@@ -9,9 +10,41 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import axios from "../../api/axios";
+import { format } from "date-fns";
 
 const PrintInformation = () => {
-  
+  const { id } = useParams();
+  const [computer, setComputer] = useState(null);
+
+  useEffect(() => {
+    const fetchComputerData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get(`/api/computers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data.status) {
+          setComputer(response.data.computer);
+        } else {
+          console.error("Fetch error:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      } finally {
+      }
+    };
+
+    fetchComputerData();
+  }, []);
+
+  console.log(computer);
+
   useEffect(() => {
     const handleAfterPrint = () => {
       window.location.href = "/computers";
@@ -32,22 +65,37 @@ const PrintInformation = () => {
     <div>
       <img src={header} alt="Header" />
       <p className="text-xl">
-        User ID: <b></b>
+        User ID: <b>{computer?.computer_user_id}</b>
       </p>
       <p className="text-xl">
-        Branch Code: <b></b>
+        Branch Code: <b>{computer?.computer_user.branch_code.branch_name}</b>
       </p>
       <p className="text-xl">
-        Name of User: <b></b>
+        Name of User: <b>{computer?.computer_user.name}</b>
       </p>
       <p className="text-xl">
-        Position: <b></b>
+        Position: <b>{computer?.computer_user.position.position_name}</b>
       </p>
       <p className="text-xl">
-        Computer ID: <b></b>
+        Computer ID: <b>{computer?.id}</b>
       </p>
       <p className="text-xl">
-        Total Format: <b></b>
+        Total Format:{" "}
+        <b>
+          {computer?.formatted_status === 0 ? (
+            "No formatting has been applied yet."
+          ) : (
+            <span
+              class={
+                computer?.formatted_status >= 10
+                  ? "bg-red-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
+                  : "bg-yellow-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
+              }
+            >
+              {computer?.formatted_status}
+            </span>
+          )}
+        </b>
       </p>
       <br />
       <p className="text-xl font-semibold">SPECIFICATIONS</p> <br />
@@ -76,29 +124,73 @@ const PrintInformation = () => {
               <TableCell align="center" sx={{ fontSize: "10px" }}>
                 STATUS
               </TableCell>
-              <TableCell align="center" sx={{ fontSize: "10px" }}>
-                RECENT USER
-              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
-            </TableRow>
+            {computer?.units.map((unit, index) => (
+              <TableRow key={index}>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.unit_code}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.category.category_name}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.description.split("\n").map((line, lineIndex) => (
+                    <div key={lineIndex}>{line}</div>
+                  ))}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.supplier.supplier_name}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {format(new Date(unit.date_of_purchase), "yyyy-MM-dd")}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.serial_number}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {unit.status}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
       <br />
       <p className="text-xl font-semibold">INSTALLED APPLICATIONS</p>
+      {Array.isArray(computer?.installed_applications) ? (
+        <div>
+          <ul>
+            {computer?.installed_applications.length === 0
+              ? "No records yet."
+              : computer?.installed_applications.map((item, idx) => (
+                  <li key={idx}>{item.application_content}</li>
+                ))}
+          </ul>
+        </div>
+      ) : (
+        <span>{computer?.installed_applications}</span>
+      )}
       <br />
       <p className="text-xl font-semibold">REMARKS</p>
+      {Array.isArray(computer?.remarks) ? (
+        <div>
+          <ul>
+            {computer?.remarks.length === 0
+              ? "No records yet."
+              : computer?.remarks.map((item, idx) => (
+                  <li key={idx}>
+                    {item.remark_content.split("\n").map((line, lineIndex) => (
+                      <div key={lineIndex}>{line}</div>
+                    ))}
+                  </li>
+                ))}
+          </ul>
+        </div>
+      ) : (
+        <span>{computer?.remarks}</span>
+      )}
     </div>
   );
 };

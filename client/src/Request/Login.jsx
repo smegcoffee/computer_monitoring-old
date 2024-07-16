@@ -1,33 +1,35 @@
-import React, { useState } from 'react';
-import smct from '../img/smct.png';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
-import bg from '../img/bg.png';
-import { Link } from 'react-router-dom';
-import axios from '../api/axios';
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import React, { useState } from "react";
+import smct from "../img/smct.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
+import bg from "../img/bg.png";
+import { Link } from "react-router-dom";
+import axios from "../api/axios";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function InputField({ icon, text, value, onChange, errorMessage }) {
-
   return (
     <div className="mb-4">
       <div className="flex items-center">
         <span className="mr-2 text-gray-400">{icon}</span>
         <input
-          type={text === 'Password' ? 'password' : 'text'}
-          className={`w-full h-12 px-4 rounded-md border ${errorMessage ? 'border-red-500' : 'border-gray-300'
-            } focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50`}
+          type={text === "Password" ? "password" : "text"}
+          className={`w-full h-12 px-4 rounded-md border ${
+            errorMessage ? "border-red-500" : "border-gray-300"
+          } focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50`}
           placeholder={text}
           value={value}
           onChange={onChange}
         />
       </div>
-      <div className='flex items-center'>
-        <span className={errorMessage ? 'mr-2 text-gray-400 opacity-0' : 'hidden'}>{icon}</span>
-        {errorMessage && (
-          <span className="text-red-500">{errorMessage}</span>
-        )}
+      <div className="flex items-center">
+        <span
+          className={errorMessage ? "mr-2 text-gray-400 opacity-0" : "hidden"}
+        >
+          {icon}
+        </span>
+        {errorMessage && <span className="text-red-500">{errorMessage}</span>}
       </div>
     </div>
   );
@@ -35,13 +37,13 @@ function InputField({ icon, text, value, onChange, errorMessage }) {
 
 // Component for rendering the login form
 function LoginForm({ fields }) {
-  const [inputValues, setInputValues] = useState(fields.map(() => ''));
+  const [inputValues, setInputValues] = useState(fields.map(() => ""));
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState({});
   //eslint-disable-next-line
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Handler for input change
   const handleChange = (index, event) => {
@@ -57,30 +59,30 @@ function LoginForm({ fields }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/login', { login, password });
+      const response = await axios.post("/api/login", { login, password });
 
       if (response.status === 200) {
-        setSuccess('Login successful!');
-        navigate('/dashboard');
-        localStorage.setItem('token', response.data.token);
+        setSuccess("Login successful!");
+        navigate("/dashboard");
+        localStorage.setItem("token", response.data.token);
       } else {
         setLoading(false);
-        setError('Login failed.');
+        setError("Login failed.");
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       if (error.response && error.response.status === 409) {
-        localStorage.setItem('token', error.response.data.token);
-        navigate('/change-new-password');
+        localStorage.setItem("token", error.response.data.token);
+        navigate("/change-new-password");
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
-          position: 'top-right',
-          iconColor: 'red',
+          position: "top-right",
+          iconColor: "red",
           customClass: {
-            popup: 'colored-toast',
+            popup: "colored-toast",
           },
           showConfirmButton: false,
           showCloseButton: true,
@@ -89,11 +91,11 @@ function LoginForm({ fields }) {
         });
 
         await Toast.fire({
-          icon: 'error',
+          icon: "error",
           title: error.response.data.message,
         });
       } else {
-        setError('An unexpected error occurred.');
+        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
@@ -126,7 +128,7 @@ function LoginForm({ fields }) {
             className="w-32 h-10 mt-8 font-semibold text-white bg-blue-800 rounded-full"
             disabled={loading}
           >
-            {loading ? 'Logging In...' : 'LOG IN'}
+            {loading ? "Logging In..." : "LOG IN"}
           </button>
         </div>
       </div>
@@ -136,8 +138,11 @@ function LoginForm({ fields }) {
 
 function Background() {
   return (
-    <div className='absolute inset-0 bg-center bg-cover' style={{ backgroundImage: `url(${bg})`, zIndex: -1 }}>
-      <div className='absolute inset-0 bg-white opacity-90'></div>
+    <div
+      className="absolute inset-0 bg-center bg-cover"
+      style={{ backgroundImage: `url(${bg})`, zIndex: -1 }}
+    >
+      <div className="absolute inset-0 bg-white opacity-90"></div>
     </div>
   );
 }
@@ -145,19 +150,26 @@ function Background() {
 function LogIn() {
   // Define fields for the login form
   const fields = [
-    { icon: <FontAwesomeIcon icon={faUser} />, text: 'Username/Email' },
-    { icon: <FontAwesomeIcon icon={faLock} />, text: 'Password' }
+    { icon: <FontAwesomeIcon icon={faUser} />, text: "Username/Email" },
+    { icon: <FontAwesomeIcon icon={faLock} />, text: "Password" },
   ];
 
   return (
-    <div className='relative min-h-screen'>
+    <div className="relative min-h-screen">
       <Background />
-      <div className='flex flex-col items-center pt-20' style={{ zIndex: 1 }}>
-        <img src={smct} alt="SMCT Logo" className='block h-32 m-0 w-72'></img>
-        <h1 className="mt-5 text-xl font-bold md:text-4xl">COMPUTER MONITORING SYSTEM</h1>
+      <div className="flex flex-col items-center pt-20" style={{ zIndex: 1 }}>
+        <img src={smct} alt="SMCT Logo" className="block h-32 m-0 w-72"></img>
+        <h1 className="mt-5 text-xl font-bold md:text-4xl">
+          COMPUTER MONITORING SYSTEM
+        </h1>
         <h1 className="mt-2 text-4xl font-medium">Log In</h1>
         <LoginForm fields={fields} />
-        <p className='mt-2'>Don't have an account yet? <Link to="/signup" className='text-blue-800'>Sign Up</Link></p>
+        <p className="mt-2">
+          Don't have an account yet?{" "}
+          <Link to="/signup" className="text-blue-800">
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import SideBar from "../Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCirclePlus,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCirclePlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -150,7 +147,11 @@ const CustomTableB = (refresh) => {
                     <TableCell align="center">
                       {data.category ? data.category.category_name : "N/A"}
                     </TableCell>
-                    <TableCell align="center">{data.description}</TableCell>
+                    <TableCell align="center">
+                      {data.description.split("\n").map((line, lineIndex) => (
+                        <div key={lineIndex}>{line}</div>
+                      ))}
+                    </TableCell>
                     <TableCell align="center">
                       {data.supplier ? data.supplier.supplier_name : "N/A"}
                     </TableCell>
@@ -579,7 +580,8 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
                     </span>
                   </TableCell>
                   <TableCell align="center">
-                    <input
+                    <textarea
+                      rows={5}
                       type="text"
                       value={row.description}
                       onChange={(e) =>
@@ -589,8 +591,8 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
                       className={
                         validationErrors &&
                         validationErrors[`${index}.description`]
-                          ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
-                          : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                          ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 pl-2"
+                          : "bg-gray-200 border border-transparent rounded-xl w-4/4 pl-2"
                       }
                     />
                     <span className="text-sm text-center">
