@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Computer;
 use App\Models\ComputerUser;
 use App\Models\InstalledApplication;
+use App\Models\Notification;
 use App\Models\RecentUser;
 use App\Models\Remark;
 use App\Models\TransferUnit;
@@ -51,6 +52,8 @@ class ComputerController extends Controller
      */
     public function store(Request $request)
     {
+        $authUser = auth()->user();
+
         $validation = Validator::make($request->all(), [
             'checkedRows'                    =>              ['required'],
             'checkedRows.*'                  =>              ['exists:units,id'],
@@ -92,6 +95,14 @@ class ComputerController extends Controller
         }
 
         $user = ComputerUser::find($request->computer_user);
+
+        $title = $authUser->firstName . ' ' . $authUser->lastName . " added computer unit to " . '(' . $user->name . ').';
+
+        Notification::create([
+            'user_id'   =>      $authUser->id,
+            'title'     =>      $title
+        ]);
+
         return response()->json([
             'status'                =>              true,
             'message'               =>              $user ? $user->name . " computer added successfully." : "Computer added successfully.",
