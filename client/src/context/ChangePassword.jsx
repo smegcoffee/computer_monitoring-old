@@ -27,11 +27,13 @@ const ChangePassword = () => {
             }
         };
 
-        const timer = setTimeout(() => {
-            fetchUserProfile();
-        }, 100);
+        // const timer = setTimeout(() => {
+        //     fetchUserProfile();
+        // }, 100);
 
-        return () => clearTimeout(timer);
+        // return () => clearTimeout(timer);
+        
+        fetchUserProfile();
     }, []);
 
     if (loading) {

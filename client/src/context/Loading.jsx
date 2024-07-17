@@ -19,12 +19,12 @@ const Loading = () => {
                 <div className="flex items-center justify-center">
                     <img src={smct} style={{ width: '600px' }} alt='Logo' />
                 </div>
-                <div className="w-full bg-gray-200 rounded-lg overflow-hidden h-10 mt-5">
+                <div className="w-full h-10 mt-5 overflow-hidden bg-gray-200 rounded-lg">
                     <div
-                        className="bg-blue-500 h-full"
+                        className="h-full bg-blue-500"
                         style={{ width: `${progress}%`, transition: 'width 2s ease-out' }}
                     >
-                        <p className='text-xl text-white text-center pt-1'><strong>Loading...</strong></p></div>
+                        <p className='pt-1 text-xl text-center text-white'><strong>Loading...</strong></p></div>
                 </div>
             </div>
 

@@ -74,10 +74,10 @@ function TopBox() {
         {dataUsers.length === 0 ? (
           <p className="text-center">No users have formatted computers yet.</p>
         ) : (
-          dataUsers.map((user) => (
+          dataUsers.map((user, index) => (
             <div
               className="flex items-center justify-between mb-8 listItem"
-              key={user.id}
+              key={index}
             >
               <div className="flex gap-5 user">
                 <img
@@ -213,10 +213,35 @@ function PieChartBox() {
     { name: "Transfer", value: pieData.totalUsedTransfer, color: "#ff8042" },
   ];
   return (
-    <div className="flex flex-col justify-between h-full pieChartBox">
-      <h1 className="text-2xl font-bold">Status</h1>
+    <div className="relative flex flex-col justify-between h-full pieChartBox">
+      <h1 className="mt-5 ml-5 text-2xl font-bold">Status</h1>
       <div className="flex items-center justify-center w-full h-full chart">
-        <ResponsiveContainer width="99%" height={300}>
+        <ResponsiveContainer width="100%" height={300}>
+          <div
+            className="absolute text-xs options"
+            style={{
+              top: "54%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <ul>
+              {data.map((item, index) => (
+                <li key={index}>
+                  <div className="flex flex-col items-center gap-1 option">
+                    <div className="flex items-center gap-1 title">
+                      <div
+                        className="w-3 h-3 rounded-full dot"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                    <span>{item.value}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
           <PieChart>
             <Tooltip
               contentStyle={{ background: "white", borderRadius: "5px" }}
@@ -234,23 +259,6 @@ function PieChartBox() {
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-      </div>
-      <div className="flex justify-between gap-3 text-sm options">
-        {data.map((item) => (
-          <div
-            className="flex flex-col items-center gap-3 option"
-            key={item.name}
-          >
-            <div className="flex items-center gap-3 title">
-              <div
-                className="w-3 h-3 rounded-full dot"
-                style={{ backgroundColor: item.color }}
-              />
-              <span>{item.name}</span>
-            </div>
-            <span>{item.value}</span>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -302,8 +310,8 @@ function BigChartBox() {
               bottom: 0,
             }}
           >
-            <XAxis />
-            <YAxis />
+            <XAxis dataKey="name"/>
+            <YAxis/>
             <Tooltip />
             <Area
               type="monotone"
@@ -378,7 +386,7 @@ function Dashboard() {
       <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-rose-500">
         <ChartBoxUnit />
       </div>
-      <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-4 rounded-xl">
+      <div className="col-span-1 row-span-1 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-4 rounded-xl">
         <PieChartBox />
       </div>
       <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-amber-500">

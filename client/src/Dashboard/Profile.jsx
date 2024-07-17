@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import defaultImg from "../img/profile.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCamera,
-  faCircleCheck,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCamera, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
@@ -145,6 +142,8 @@ function Placeholder() {
   });
   const [image, setImage] = useState("");
   const [preview, setPreview] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -209,6 +208,7 @@ function Placeholder() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
+    setRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -290,9 +290,9 @@ function Placeholder() {
       }
     } finally {
       setLoading(false);
+      setRefresh(false);
     }
   };
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -315,10 +315,10 @@ function Placeholder() {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [refresh]);
 
   const imageUrl = inputValues.profile_picture
-    ? `http://localhost:8000/${inputValues.profile_picture}`
+    ? `http://136.239.196.178:8000/${inputValues.profile_picture}`
     : defaultImg;
   return (
     <div className="w-full max-w-2xl p-4 mt-10 rounded">

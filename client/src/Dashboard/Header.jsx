@@ -77,6 +77,9 @@ function Header({ toggleSidebar }) {
     };
 
     fetchUserProfile();
+    // const intervalId = setInterval(fetchUserProfile, 1000);
+
+    // return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -107,9 +110,9 @@ function Header({ toggleSidebar }) {
 
     fetchNotifications();
 
-    const intervalId = setInterval(fetchNotifications, 1000);
+    // const intervalId = setInterval(fetchNotifications, 1000);
 
-    return () => clearInterval(intervalId);
+    // return () => clearInterval(intervalId);
   }, [refreshNotification]);
 
   const handleLogout = async () => {
@@ -289,7 +292,7 @@ function Header({ toggleSidebar }) {
   };
 
   const imageUrl = profileImg
-    ? `http://localhost:8000/${profileImg}`
+    ? `http://136.239.196.178:8000/${profileImg}`
     : defaultImg;
 
   function timeAgo(date) {
@@ -584,7 +587,7 @@ function Header({ toggleSidebar }) {
                       <Avatar
                         src={
                           notif.user.profile_picture
-                            ? `http://localhost:8000/${notif.user.profile_picture}`
+                            ? `http://136.239.196.178:8000/${notif.user.profile_picture}`
                             : defaultImg
                         }
                         sx={{ mr: 2 }}
