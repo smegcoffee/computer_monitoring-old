@@ -161,7 +161,9 @@ function Set() {
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
+  useEffect(() => {
+    document.title = "Computer Monitoring - Setup Computer Set";
+  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />

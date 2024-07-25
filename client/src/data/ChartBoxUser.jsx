@@ -8,6 +8,7 @@ const ChartBoxUser = () => {
   const [chartDataUser, setChartDataUser] = useState([]);
   const [weeklyUsers, setWeeklyUsers] = useState([]);
   const [userPercent, setUserPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChartDataUser = async () => {
@@ -32,6 +33,8 @@ const ChartBoxUser = () => {
         setUserPercent(response.data.usersPercent);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -42,9 +45,9 @@ const ChartBoxUser = () => {
     color: "#ffff00",
     icon: <FontAwesomeIcon icon={faUsers} />,
     title: "Total Users",
-    number: chartDataUser.totalUsers,
+    number: loading ? "Loading..." : chartDataUser.totalUsers,
     dataKey: "Users",
-    percentage: userPercent,
+    percentage: loading ? "..." : userPercent,
     chartData: weeklyUsers,
   };
 

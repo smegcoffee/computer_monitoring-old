@@ -1,0 +1,8 @@
+* {
+  box-sizing: border-box;
+  font-size: 12px;
+  font-family: "Montserrat", sans-serif;
+}
+.swalContainer {
+  z-index: 9999;
+}

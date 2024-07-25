@@ -54,7 +54,6 @@ function Header({ toggleSidebar }) {
   const handleNotificationClose = () => {
     setNotificationAnchorEl(null);
   };
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -77,6 +76,9 @@ function Header({ toggleSidebar }) {
     };
 
     fetchUserProfile();
+    // const intervalId = setInterval(fetchUserProfile, 1000);
+
+    // return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -107,9 +109,9 @@ function Header({ toggleSidebar }) {
 
     fetchNotifications();
 
-    const intervalId = setInterval(fetchNotifications, 1000);
+    // const intervalId = setInterval(fetchNotifications, 1000);
 
-    return () => clearInterval(intervalId);
+    // return () => clearInterval(intervalId);
   }, [refreshNotification]);
 
   const handleLogout = async () => {
@@ -289,12 +291,16 @@ function Header({ toggleSidebar }) {
   };
 
   const imageUrl = profileImg
-    ? `http://localhost:8000/${profileImg}`
+    ? `http://136.239.196.178:5001/${profileImg}`
     : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
   }
+  const handleMenuItemClick = () => {
+    handleLogout();
+    handleProfileClose();
+  };
 
   return (
     <div>
@@ -447,7 +453,7 @@ function Header({ toggleSidebar }) {
             </MenuItem>
           </Link>
           <Divider />
-          <MenuItem onClick={handleLogout}>
+          <MenuItem onClick={handleMenuItemClick}>
             <ListItemIcon>
               <Logout fontSize="small" />
             </ListItemIcon>
@@ -542,7 +548,7 @@ function Header({ toggleSidebar }) {
                 }}
               >
                 <p className="text-xl">
-                  <FontAwesomeIcon icon={faBellSlash} />
+                  <FontAwesomeIcon className="text-[20px]" icon={faBellSlash} />
                 </p>
                 <p className="mt-3 text-xl">No notifications</p>
               </Typography>
@@ -558,46 +564,51 @@ function Header({ toggleSidebar }) {
                       : ""
                   }
                 >
-                  <MenuItem
-                    disabled={
-                      loading && loadingAll
-                        ? loadingAll
-                        : loadingNotificationId === notif.id
-                    }
-                    onClick={(event) => {
-                      if (!loading || loadingNotificationId === notif.id) {
-                        handleMarkAsRead(event, notif.id);
-                      }
-                    }}
-                    className={
-                      loadingAll
-                        ? "relative animate-bounce"
-                        : loading && loadingNotificationId === notif.id
-                        ? "relative animate-bounce"
-                        : "relative"
-                    }
+                  <Tooltip
+                    title={`${notif.user.firstName} ${notif.user.lastName} notification.`}
                   >
-                    <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
-                    <Avatar
-                      src={
-                        notif.user.profile_picture
-                          ? `http://localhost:8000/${notif.user.profile_picture}`
-                          : defaultImg
+                    <MenuItem
+                      disabled={
+                        loading && loadingAll
+                          ? loadingAll
+                          : loadingNotificationId === notif.id
                       }
-                      sx={{ mr: 2 }}
-                    />
-                    <div>
-                      <Typography variant="body2">
-                        <b>
-                          {notif.user.firstName} {notif.user.lastName}
-                        </b>
-                      </Typography>
-                      <Typography variant="body2"> {notif.title}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {timeAgo(notif.created_at)}
-                      </Typography>
-                    </div>
-                  </MenuItem>
+                      onClick={(event) => {
+                        if (!loading || loadingNotificationId === notif.id) {
+                          handleMarkAsRead(event, notif.id);
+                        }
+                      }}
+                      className={
+                        loadingAll
+                          ? "relative animate-bounce"
+                          : loading && loadingNotificationId === notif.id
+                          ? "relative animate-bounce"
+                          : "relative"
+                      }
+                    >
+                      <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
+                      <Avatar
+                        src={
+                          notif.user.profile_picture
+                            ? `http://136.239.196.178:5001/${notif.user.profile_picture}`
+                            : defaultImg
+                        }
+                        sx={{ mr: 2 }}
+                      />
+                      <div>
+                        <Typography variant="body2">
+                          <b>
+                            {notif.user.firstName} {notif.user.lastName}
+                          </b>
+                        </Typography>
+                        <Typography variant="body2"> {notif.title}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {timeAgo(notif.created_at)}
+                        </Typography>
+                      </div>
+                    </MenuItem>
+                  </Tooltip>
+
                   <hr />
                 </div>
               ))

@@ -387,6 +387,10 @@ function Computers() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  useEffect(() => {
+    document.title = "Computer Monitoring - Monitored Computers";
+  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />

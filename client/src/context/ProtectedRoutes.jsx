@@ -33,6 +33,7 @@ const ProtectedRoutes = () => {
         }, 2100);
 
         return () => clearTimeout(timer);
+        fetchUserProfile();
     }, []);
 
     if (loading) {

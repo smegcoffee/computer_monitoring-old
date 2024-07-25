@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SideBar from "./Sidebar";
 import { Link } from "react-router-dom";
 //import { QrReader } from 'react-qr-reader';
@@ -14,6 +14,9 @@ function QrC() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  useEffect(() => {
+    document.title = "Computer Monitoring - Scan QR Codes";
+  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />

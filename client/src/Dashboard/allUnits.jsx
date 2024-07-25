@@ -120,8 +120,13 @@ function AllUnits() {
   };
 
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
+    rowsPerPage -
+    Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
 
+  useEffect(() => {
+    document.title = "Computer Monitoring - All Units";
+  });
+  
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />

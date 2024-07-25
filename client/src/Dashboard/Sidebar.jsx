@@ -47,7 +47,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
   return (
     <div
       className={`fixed md:static ${
-        isSidebarOpen ? "left-0 w-80 overflow-y-scroll" : "-left-full w-72"
+        isSidebarOpen ? "left-0 w-80 overflow-y-auto" : "-left-full w-72"
       } top-0 h-full bg-white transition-all duration-300 z-50`}
     >
       <div className="h-full w-72">

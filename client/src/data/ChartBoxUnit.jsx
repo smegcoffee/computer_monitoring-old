@@ -8,6 +8,7 @@ const ChartBoxUser = () => {
   const [chartDataUnit, setChartDataUnit] = useState([]);
   const [weeklyUnits, setWeeklyUnits] = useState([]);
   const [unitPercent, setUnitPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChartDataUnit = async () => {
@@ -31,6 +32,8 @@ const ChartBoxUser = () => {
         setUnitPercent(response.data.unitsPercent);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,9 +44,9 @@ const ChartBoxUser = () => {
     color: "#000080",
     icon: <FontAwesomeIcon icon={faDesktop} />,
     title: "Total Units",
-    number: chartDataUnit.totalUnits,
+    number: loading ? "Loading..." : chartDataUnit.totalUnits,
     dataKey: "Units",
-    percentage: unitPercent,
+    percentage: loading ? "..." : unitPercent,
     chartData: weeklyUnits,
   };
 

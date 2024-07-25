@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import defaultImg from "../img/profile.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCamera,
-  faCircleCheck,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCamera, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
@@ -145,6 +142,8 @@ function Placeholder() {
   });
   const [image, setImage] = useState("");
   const [preview, setPreview] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -292,7 +291,6 @@ function Placeholder() {
       setLoading(false);
     }
   };
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -315,11 +313,14 @@ function Placeholder() {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [refresh]);
 
   const imageUrl = inputValues.profile_picture
-    ? `http://localhost:8000/${inputValues.profile_picture}`
+    ? `http://136.239.196.178:5001/${inputValues.profile_picture}`
     : defaultImg;
+  useEffect(() => {
+    document.title = "Computer Monitoring - Profile";
+  });
   return (
     <div className="w-full max-w-2xl p-4 mt-10 rounded">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -626,8 +627,6 @@ const Profile = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  // Example profile picture URL
-  const profilePictureUrl = "/profile.png";
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -68,7 +68,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'login'         =>          ['required'],
+            'username_or_email'         =>          ['required'],
             'password'      =>          ['required', 'min:8']
         ]);
 
@@ -80,8 +80,8 @@ class LoginController extends Controller
             ], 400);
         }
 
-        $user = User::where('email', $request->login)
-            ->orWhere('username', $request->login)
+        $user = User::where('email', $request->username_or_email)
+            ->orWhere('username', $request->username_or_email)
             ->first();
 
         if (!$user) {
@@ -92,7 +92,7 @@ class LoginController extends Controller
         }
 
         $login = auth()->attempt([
-            'email'         =>          filter_var($request->login, FILTER_VALIDATE_EMAIL) ? $request->login : $user->email,
+            'email'         =>          filter_var($request->username_or_email, FILTER_VALIDATE_EMAIL) ? $request->username_or_email : $user->email,
             'password'      =>          $request->password
         ]);
 

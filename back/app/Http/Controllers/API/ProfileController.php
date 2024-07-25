@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -100,7 +101,9 @@ class ProfileController extends Controller
         $user->fill($userData);
 
         if ($request->hasFile('profile_picture')) {
-            if ($user->profile_picture) {
+            $hadProfilePicture = $user->profile_picture != null;
+
+            if ($hadProfilePicture) {
                 $fullPath = public_path($user->profile_picture);
                 if (file_exists($fullPath)) {
                     unlink($fullPath);
@@ -108,12 +111,25 @@ class ProfileController extends Controller
             }
 
             $image = $request->file('profile_picture');
-            $name = time() . '.' . $image->getClientOriginalExtension();
+            $name = $user->firstName . ' ' . $user->LastName . '-' . time() . '.' . $image->getClientOriginalExtension();
             $path = 'users-profile/';
             $image->move($path, $name);
 
             $user->profile_picture = $path . $name;
+
+            if ($hadProfilePicture) {
+                Notification::create([
+                    'user_id'       =>          $user->id,
+                    'title'         =>          $user->firstName . ' ' . $user->lastName . ' updated the profile picture',
+                ]);
+            } else {
+                Notification::create([
+                    'user_id'       =>          $user->id,
+                    'title'         =>          $user->firstName . ' ' . $user->lastName . ' added a new profile picture',
+                ]);
+            }
         }
+
 
         $user->save();
 
