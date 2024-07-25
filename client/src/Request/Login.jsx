@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import smct from "../img/smct.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
@@ -54,12 +54,15 @@ function LoginForm({ fields }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const login = inputValues[0];
+    const username_or_email = inputValues[0];
     const password = inputValues[1];
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/login", { login, password });
+      const response = await axios.post("/api/login", {
+        username_or_email,
+        password,
+      });
 
       if (response.status === 200) {
         setSuccess("Login successful!");
@@ -102,6 +105,9 @@ function LoginForm({ fields }) {
     }
   };
 
+  useEffect(() => {
+    document.title = "Computer Monitoring - Login";
+  });
   return (
     <form className="w-full max-w-md p-4 mt-10 rounded" onSubmit={handleSubmit}>
       {fields.map((item, index) => (
@@ -111,7 +117,11 @@ function LoginForm({ fields }) {
           text={item.text}
           value={inputValues[index]}
           onChange={(event) => handleChange(index, event)}
-          errorMessage={validationErrors[item.text.toLowerCase()]}
+          errorMessage={
+            item.text === "Username/Email"
+              ? validationErrors.username_or_email
+              : validationErrors.password
+          }
         />
       ))}
       {success && <div className="mb-2 text-green-500">{success}</div>}

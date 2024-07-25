@@ -208,7 +208,6 @@ function Placeholder() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -290,7 +289,6 @@ function Placeholder() {
       }
     } finally {
       setLoading(false);
-      setRefresh(false);
     }
   };
 
@@ -318,8 +316,11 @@ function Placeholder() {
   }, [refresh]);
 
   const imageUrl = inputValues.profile_picture
-    ? `http://136.239.196.178:8000/${inputValues.profile_picture}`
+    ? `http://136.239.196.178:5001/${inputValues.profile_picture}`
     : defaultImg;
+  useEffect(() => {
+    document.title = "Computer Monitoring - Profile";
+  });
   return (
     <div className="w-full max-w-2xl p-4 mt-10 rounded">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -626,8 +627,6 @@ const Profile = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  // Example profile picture URL
-  const profilePictureUrl = "/profile.png";
 
   return (
     <div className="flex flex-col min-h-screen">

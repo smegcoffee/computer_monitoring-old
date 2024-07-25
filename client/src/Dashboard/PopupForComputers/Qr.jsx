@@ -3,6 +3,7 @@ import smct from "./../../img/smct.png";
 import { QRCode } from "react-qr-svg";
 import { toPng } from "html-to-image";
 import CloseIcon from "@mui/icons-material/Close";
+import Swal from "sweetalert2";
 
 function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
   const qrCodeRef = useRef(null);
@@ -41,13 +42,34 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
       });
   };
 
+  const errorDownloadQr = () => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-right",
+      iconColor: "red",
+      customClass: {
+        popup: "colored-toast",
+      },
+      showConfirmButton: false,
+      showCloseButton: true,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+    (async () => {
+      await Toast.fire({
+        icon: "error",
+        title: "Error downloading QR. This user hasn't set up a computer yet.",
+      });
+    })();
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
         style={{ width: "700px", maxHeight: "100vh" }}
       >
-        <div className="flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl relative">
+        <div className="relative flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl">
           <div className="flex-none">
             <img
               src={smct}
@@ -58,13 +80,16 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
           <div className="mt-8 ml-16 text-3xl font-medium text-white flex-2">
             Computer ID: {id.length === 1 ? id : "NaN"}
           </div>
-          <CloseIcon onClick={onClose} className="text-white cursor-pointer absolute right-5 top-5" />
+          <CloseIcon
+            onClick={onClose}
+            className="absolute text-white cursor-pointer right-5 top-5"
+          />
         </div>
         <div className="flex items-center justify-center">
           <div className="mt-7 mb-14 size-60">
             <div
               ref={qrCodeRef}
-              onClick={downloadQRCode}
+              onClick={id.length === 1 ? downloadQRCode : errorDownloadQr}
               style={{ cursor: "pointer" }}
             >
               <QRCode value={JSON.stringify(id[0])} />

@@ -26,6 +26,7 @@ import axios from "../api/axios";
 
 function TopBox() {
   const [userFormatted, setUserFormatted] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const getRandomEmail = () => {
     const domains = ["example.com", "mail.com", "test.com"];
@@ -56,6 +57,8 @@ function TopBox() {
         setUserFormatted(computersData);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -71,7 +74,9 @@ function TopBox() {
         Top Users with Most Formatted Computers
       </h1>
       <div className="list">
-        {dataUsers.length === 0 ? (
+        {loading ? (
+          "Loading..."
+        ) : dataUsers.length === 0 ? (
           <p className="text-center">No users have formatted computers yet.</p>
         ) : (
           dataUsers.map((user, index) => (
@@ -184,6 +189,7 @@ function BarChartBox(props) {
 
 function PieChartBox() {
   const [pieData, setPieData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPieData = async () => {
@@ -200,6 +206,8 @@ function PieChartBox() {
         setPieData(response.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -225,39 +233,51 @@ function PieChartBox() {
               transform: "translate(-50%, -50%)",
             }}
           >
-            <ul>
-              {data.map((item, index) => (
-                <li key={index}>
-                  <div className="flex flex-col items-center gap-1 option">
-                    <div className="flex items-center gap-1 title">
-                      <div
-                        className="w-3 h-3 rounded-full dot"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span>{item.name}</span>
+            {loading ? (
+              <div className="flex flex-col items-center gap-1 option">
+                <div className="flex items-center gap-1 title">
+                  <strong>Loading...</strong>
+                </div>
+              </div>
+            ) : (
+              data.map((item, index) => (
+                <ul>
+                  <li key={index}>
+                    <div className="flex flex-col items-center gap-1 option">
+                      <div className="flex items-center gap-1 title">
+                        <div
+                          className="w-3 h-3 rounded-full dot"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span>{item.name}</span>
+                      </div>
+                      <span>{item.value}</span>
                     </div>
-                    <span>{item.value}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                </ul>
+              ))
+            )}
           </div>
-          <PieChart>
-            <Tooltip
-              contentStyle={{ background: "white", borderRadius: "5px" }}
-            />
-            <Pie
-              data={data}
-              innerRadius={"70%"}
-              outerRadius={"90%"}
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {data.map((item) => (
-                <Cell key={item.name} fill={item.color} />
-              ))}
-            </Pie>
-          </PieChart>
+          {loading ? (
+            ""
+          ) : (
+            <PieChart>
+              <Tooltip
+                contentStyle={{ background: "white", borderRadius: "5px" }}
+              />
+              <Pie
+                data={data}
+                innerRadius={"70%"}
+                outerRadius={"90%"}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {data.map((item) => (
+                  <Cell key={item.name} fill={item.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          )}
         </ResponsiveContainer>
       </div>
     </div>
@@ -266,6 +286,7 @@ function PieChartBox() {
 
 function BigChartBox() {
   const [analyticsData, setAnalyticsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
@@ -289,6 +310,8 @@ function BigChartBox() {
         setAnalyticsData(formattedData);
       } catch (error) {
         console.error("Error fetching analytics data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -299,42 +322,48 @@ function BigChartBox() {
       <h1 className="text-2xl font-bold">Analytics</h1>
       <div className="w-full chart h-80">
         <ResponsiveContainer width="99%" height="100%">
-          <AreaChart
-            width={500}
-            height={400}
-            data={analyticsData}
-            margin={{
-              top: 10,
-              right: 30,
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <XAxis dataKey="name"/>
-            <YAxis/>
-            <Tooltip />
-            <Area
-              type="monotone"
-              dataKey="set"
-              stackId="1"
-              stroke="#8884d8"
-              fill="#8884d8"
-            />
-            <Area
-              type="monotone"
-              dataKey="unit"
-              stackId="1"
-              stroke="#82ca9d"
-              fill="#82ca9d"
-            />
-            <Area
-              type="monotone"
-              dataKey="users"
-              stackId="1"
-              stroke="#ffc658"
-              fill="#ffc658"
-            />
-          </AreaChart>
+          {loading ? (
+            <p className="mt-20 text-center">
+              <strong>Loading...</strong>
+            </p>
+          ) : (
+            <AreaChart
+              width={500}
+              height={400}
+              data={analyticsData}
+              margin={{
+                top: 10,
+                right: 30,
+                left: 0,
+                bottom: 0,
+              }}
+            >
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Area
+                type="monotone"
+                dataKey="set"
+                stackId="1"
+                stroke="#8884d8"
+                fill="#8884d8"
+              />
+              <Area
+                type="monotone"
+                dataKey="unit"
+                stackId="1"
+                stroke="#82ca9d"
+                fill="#82ca9d"
+              />
+              <Area
+                type="monotone"
+                dataKey="users"
+                stackId="1"
+                stroke="#ffc658"
+                fill="#ffc658"
+              />
+            </AreaChart>
+          )}
         </ResponsiveContainer>
       </div>
     </div>
@@ -344,6 +373,7 @@ function BigChartBox() {
 function Dashboard() {
   const [weeklyRemarks, setWeeklyRemarks] = useState([]);
   const [hasData, setHasData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWeeklyRemarks = async () => {
@@ -367,6 +397,8 @@ function Dashboard() {
         setHasData(data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -399,13 +431,19 @@ function Dashboard() {
         <BigChartBox />
       </div>
       <div className="col-span-1 p-5 bg-blue-100 border border-gray-100 rounded-xl">
-        <BarChartBox
-          title="Weekly Remarks"
-          dataKey="Remarks"
-          color="#ff8042"
-          chartData={weeklyRemarks}
-          hasData={hasData}
-        />
+        {loading ? (
+          <p className="mt-20 text-center">
+            <strong>Loading...</strong>
+          </p>
+        ) : (
+          <BarChartBox
+            title="Weekly Remarks"
+            dataKey="Remarks"
+            color="#ff8042"
+            chartData={weeklyRemarks}
+            hasData={hasData}
+          />
+        )}
       </div>
     </div>
   );

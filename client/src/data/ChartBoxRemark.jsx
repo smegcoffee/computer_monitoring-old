@@ -8,6 +8,7 @@ const ChartBoxRemark = () => {
   const [chartDataRemark, setChartDataRemark] = useState([]);
   const [weeklyRemarks, setWeeklyRemarks] = useState([]);
   const [remarkPercent, setRemarkPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChartDataRemark = async () => {
@@ -31,6 +32,8 @@ const ChartBoxRemark = () => {
         setRemarkPercent(response.data.remarksPercent);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,9 +44,9 @@ const ChartBoxRemark = () => {
     color: "orange",
     icon: <FontAwesomeIcon icon={faNoteSticky} />,
     title: "Total Remarks",
-    number: chartDataRemark.totalRemarks,
+    number: loading ? "Loading..." : chartDataRemark.totalRemarks,
     dataKey: "Remarks",
-    percentage: remarkPercent,
+    percentage: loading ? "..." : remarkPercent,
     chartData: weeklyRemarks,
   };
 

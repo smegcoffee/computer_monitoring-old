@@ -54,7 +54,6 @@ function Header({ toggleSidebar }) {
   const handleNotificationClose = () => {
     setNotificationAnchorEl(null);
   };
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -292,12 +291,16 @@ function Header({ toggleSidebar }) {
   };
 
   const imageUrl = profileImg
-    ? `http://136.239.196.178:8000/${profileImg}`
+    ? `http://136.239.196.178:5001/${profileImg}`
     : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
   }
+  const handleMenuItemClick = () => {
+    handleLogout();
+    handleProfileClose();
+  };
 
   return (
     <div>
@@ -450,7 +453,7 @@ function Header({ toggleSidebar }) {
             </MenuItem>
           </Link>
           <Divider />
-          <MenuItem onClick={handleLogout}>
+          <MenuItem onClick={handleMenuItemClick}>
             <ListItemIcon>
               <Logout fontSize="small" />
             </ListItemIcon>
@@ -545,7 +548,7 @@ function Header({ toggleSidebar }) {
                 }}
               >
                 <p className="text-xl">
-                  <FontAwesomeIcon icon={faBellSlash} />
+                  <FontAwesomeIcon className="text-[20px]" icon={faBellSlash} />
                 </p>
                 <p className="mt-3 text-xl">No notifications</p>
               </Typography>
@@ -587,7 +590,7 @@ function Header({ toggleSidebar }) {
                       <Avatar
                         src={
                           notif.user.profile_picture
-                            ? `http://136.239.196.178:8000/${notif.user.profile_picture}`
+                            ? `http://136.239.196.178:5001/${notif.user.profile_picture}`
                             : defaultImg
                         }
                         sx={{ mr: 2 }}

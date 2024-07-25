@@ -37,6 +37,10 @@ function DashBoard() {
 
     fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+    document.title = "Computer Monitoring - Dashboard";
+  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />
@@ -67,9 +71,9 @@ function DashBoard() {
               {user && user.data && (
                 <p className="pt-10 text-lg font-normal mr-14">
                   Welcome,{" "}
-                    <b>
-                      {user.data.firstName} {user.data.lastName}
-                    </b>
+                  <b>
+                    {user.data.firstName} {user.data.lastName}
+                  </b>
                 </p>
               )}
             </div>

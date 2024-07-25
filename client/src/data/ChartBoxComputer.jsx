@@ -8,6 +8,7 @@ const ChartBoxComputer = () => {
   const [chartDataComputer, setChartDataComputer] = useState([]);
   const [weeklyComputers, setWeeklyComputers] = useState([]);
   const [computerPercent, setComputerPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChartDataComputer = async () => {
@@ -31,6 +32,8 @@ const ChartBoxComputer = () => {
         setComputerPercent(response.data.computersPercent);
       } catch (error) {
         console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -41,9 +44,9 @@ const ChartBoxComputer = () => {
     color: "brown",
     icon: <FontAwesomeIcon icon={faComputer} />,
     title: "Total Computers",
-    number: chartDataComputer.totalComputers,
+    number: loading ? "Loading..." : chartDataComputer.totalComputers,
     dataKey: "Computers",
-    percentage: computerPercent,
+    percentage: loading ? "..." : computerPercent,
     chartData: weeklyComputers,
   };
 

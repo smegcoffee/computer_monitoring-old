@@ -339,6 +339,10 @@ function User() {
       setbLoading(false);
     }
   };
+
+  useEffect(() => {
+    document.title = "Computer Monitoring - Setup User";
+  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />

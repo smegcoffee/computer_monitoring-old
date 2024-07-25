@@ -16,6 +16,7 @@ import { format } from "date-fns";
 const PrintInformation = () => {
   const { id } = useParams();
   const [computer, setComputer] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchComputerData = async () => {
@@ -37,13 +38,12 @@ const PrintInformation = () => {
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
+        setLoading(false);
       }
     };
 
     fetchComputerData();
   }, []);
-
-  console.log(computer);
 
   useEffect(() => {
     const handleAfterPrint = () => {
@@ -61,6 +61,26 @@ const PrintInformation = () => {
     };
   }, []);
 
+  useEffect(() => {
+    document.title = loading
+      ? "Computer Monitoring - Loading..."
+      : computer
+      ? `Computer Monitoring - ${computer.computer_user.name} Computer Detaills to Print`
+      : "Computer Monitoring - Not Found";
+  });
+
+  if (loading) {
+    return (
+      <div>
+        <div class="flex items-center justify-center min-h-screen bg-gray-100">
+          <div class="w-16 h-16 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
+          <p className="absolute mt-24 text-xl text-center">
+            <strong>Loading...</strong>
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <img src={header} alt="Header" />

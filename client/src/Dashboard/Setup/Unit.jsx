@@ -87,6 +87,10 @@ const CustomTableB = (refresh) => {
     setPage(newPage);
   };
 
+  useEffect(() => {
+    document.title = "Computer Monitoring - Setup Unit";
+  });
+
   return (
     <div
       className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
@@ -581,9 +585,10 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
                   </TableCell>
                   <TableCell align="center">
                     <textarea
-                      rows={5}
+                      rows={3}
                       type="text"
                       value={row.description}
+                      style={{ resize: "none" }}
                       onChange={(e) =>
                         handleChange(index, "description", e.target.value)
                       }

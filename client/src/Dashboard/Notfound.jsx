@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -7,6 +7,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const Notfound = () => {
+  useEffect(() => {
+    document.title = "Computer Monitoring - Not Found";
+  });
   return (
     <div>
       <div className="flex items-center justify-center h-screen">

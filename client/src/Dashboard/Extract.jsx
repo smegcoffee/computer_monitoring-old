@@ -181,6 +181,13 @@ const Extract = () => {
     e.preventDefault();
     setApplicationContent(newValue);
   };
+  useEffect(() => {
+    document.title = cLoading
+      ? "Computer Monitoring - Loading..."
+      : computer
+      ? `Computer Monitoring - ${computer.computer_user.name} Computer Details`
+      : "Computer Monitoring - Not Found";
+  });
   if (cLoading) {
     return (
       <div>
