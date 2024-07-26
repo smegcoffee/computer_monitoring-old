@@ -316,7 +316,7 @@ function Placeholder() {
   }, [refresh]);
 
   const imageUrl = inputValues.profile_picture
-    ? `http://136.239.196.178:5001/${inputValues.profile_picture}`
+    ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
     : defaultImg;
   useEffect(() => {
     document.title = "Computer Monitoring - Profile";

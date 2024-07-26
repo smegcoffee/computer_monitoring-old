@@ -291,7 +291,7 @@ function Header({ toggleSidebar }) {
   };
 
   const imageUrl = profileImg
-    ? `http://136.239.196.178:5001/${profileImg}`
+    ? `https://desstrongmotors.com/monitoringback/${profileImg}`
     : defaultImg;
 
   function timeAgo(date) {
@@ -423,7 +423,7 @@ function Header({ toggleSidebar }) {
             Other Links
           </Divider>
           <Link
-            to="http://122.53.61.91:4000/"
+            to="http://136.239.196.178:4000/"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -590,7 +590,7 @@ function Header({ toggleSidebar }) {
                       <Avatar
                         src={
                           notif.user.profile_picture
-                            ? `http://136.239.196.178:5001/${notif.user.profile_picture}`
+                            ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
                             : defaultImg
                         }
                         sx={{ mr: 2 }}
