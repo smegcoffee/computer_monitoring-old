@@ -23,7 +23,7 @@ import PrintInformation from './Dashboard/PopupForComputers/Print';
 function App() {
 
   return (
-    <Router>
+    <Router basename='/monitoring'>
       <Routes>
         <Route element={<AuthContext />}>
           <Route path='/login' element={<LogIn />}></Route>

@@ -16,7 +16,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
   const [activeItem, setActiveItem] = useState();
 
   useEffect(() => {
-    const hashPath = window.location.pathname;
+    const hashPath = window.location.pathname.replace("/monitoring", "");
     switch (hashPath) {
       case "/dashboard":
         setActiveItem("dashboard");
