@@ -18,25 +18,25 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
   useEffect(() => {
     const hashPath = window.location.pathname;
     switch (hashPath) {
-      case "/dashboard":
+      case "/monitoring/dashboard":
         setActiveItem("dashboard");
         break;
-      case "/computers":
+      case "/monitoring/computers":
         setActiveItem("computers");
         break;
-      case "/qr":
+      case "/monitoring/qr":
         setActiveItem("qr");
         break;
-      case "/allunits":
+      case "/monitoring/allunits":
         setActiveItem("allunits");
         break;
-      case "/unit":
+      case "/monitoring/unit":
         setActiveItem("unit");
         break;
-      case "/set":
+      case "/monitoring/set":
         setActiveItem("set");
         break;
-      case "/user":
+      case "/monitoring/user":
         setActiveItem("user");
         break;
       default:
