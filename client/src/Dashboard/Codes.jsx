@@ -45,6 +45,35 @@ function Codes({ someProp }) {
         <CardContent>
           <Grid container spacing={10} justifyContent="center">
             <Grid item xl={4} lg={4} md={6} sm={12} xs={12}>
+              <h3
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                }}
+              >
+                Qr Code Scan by Camera
+              </h3>
+              <QrReader
+                delay={300}
+                style={{ width: "100%" }}
+                onError={handleErrorWebCam}
+                onScan={handleScanWebCam}
+              />
+
+              <h3 className="mt-3">
+                Computer ID:
+                <br />
+              </h3>
+              {scanResultWebCam && (
+                <Link to={`/computers/${scanResultWebCam}`}>
+                  <Button>
+                    <b>{scanResultWebCam}</b>
+                  </Button>
+                </Link>
+              )}
+            </Grid>
+            <Grid item xl={4} lg={4} md={6} sm={12} xs={12}>
               <Button
                 className={classes.btn}
                 variant="contained"
@@ -79,35 +108,6 @@ function Codes({ someProp }) {
                       <b>No computer id found.</b>
                     </Button>
                   )}
-            </Grid>
-            <Grid item xl={4} lg={4} md={6} sm={12} xs={12}>
-              <h3
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  marginBottom: "8px",
-                }}
-              >
-                Qr Code Scan by Camera
-              </h3>
-              <QrReader
-                delay={300}
-                style={{ width: "100%" }}
-                onError={handleErrorWebCam}
-                onScan={handleScanWebCam}
-              />
-
-              <h3 className="mt-3">
-                Computer ID:
-                <br />
-              </h3>
-              {scanResultWebCam && (
-                <Link to={`/computers/${scanResultWebCam}`}>
-                  <Button>
-                    <b>{scanResultWebCam}</b>
-                  </Button>
-                </Link>
-              )}
             </Grid>
           </Grid>
         </CardContent>
