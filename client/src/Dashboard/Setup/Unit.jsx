@@ -113,7 +113,11 @@ const CustomTableB = (refresh) => {
           throw new Error("Token not found");
         }
 
-        const response = await axios.delete(`/api/unit-delete/${dataId}`);
+        const response = await axios.delete(`/api/unit-delete/${dataId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.data.status === true) {
           const Toast = Swal.mixin({
