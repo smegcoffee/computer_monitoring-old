@@ -50,7 +50,6 @@ Route::middleware("auth:sanctum")->group(function () {
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
     Route::post('/add-supplier', [SupplierController::class, 'store']);
-    Route::post('/add-unit', [UnitController::class, 'store']);
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
     Route::post('/add-position', [PositionController::class, 'store']);
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
@@ -69,6 +68,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
 });
 
+Route::post('/add-unit', [UnitController::class, 'store']);
 
 // GET
 // POST

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('category_id')->nullable();
             $table->foreignId('supplier_id')->nullable();
             $table->string('unit_code')->nullable();
-            $table->date('date_of_purchase')->nullable();
+            $table->string('date_of_purchase')->nullable();
             $table->longText('description')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('status')->nullable();

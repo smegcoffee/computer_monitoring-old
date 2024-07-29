@@ -211,7 +211,7 @@ class ComputerController extends Controller
             'application_content'           =>              ['required', 'array'],
             'application_content.*'         =>              ['string'],
             'remark_content'                =>              ['required'],
-            'date'                          =>              ['required', 'date'],
+            'date'                          =>              ['required'],
             'format'                        =>              ['required']
         ]);
 
@@ -290,7 +290,7 @@ class ComputerController extends Controller
                 if ($request->action === 'Transfer') {
                     $validation = Validator::make($request->all(), [
                         'computer_user'         =>              ['required', 'exists:computer_users,id'],
-                        'date'                  =>              ['required', 'date'],
+                        'date'                  =>              ['required'],
                     ]);
 
                     if ($validation->fails()) {
