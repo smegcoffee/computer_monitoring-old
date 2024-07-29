@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('unit_id')->constrained()->onDelete('restrict');
             $table->foreignId('computer_user_id')->constrained()->onDelete('restrict');
-            $table->date('date')->nullable();
+            $table->string('date')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
         });

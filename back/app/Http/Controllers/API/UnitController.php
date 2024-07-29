@@ -51,7 +51,7 @@ class UnitController extends Controller
         $validation = Validator::make($request->all(), [
             '*.category'                        =>              ['required', 'exists:categories,id'],
             '*.supplier'                        =>              ['required', 'exists:suppliers,id'],
-            '*.date_of_purchase'                =>              ['required', 'date'],
+            '*.date_of_purchase'                =>              ['required'],
             '*.description'                     =>              ['required', 'max:5000'],
             '*.serial_number'                   =>              ['required'],
             '*.status'                          =>              ['required', 'in:Used,Vacant,Defective,Used (Transfer)']

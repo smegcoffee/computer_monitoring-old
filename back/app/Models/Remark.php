@@ -12,13 +12,6 @@ class Remark extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return [
-            'date'  =>  'datetime'
-        ];
-    }
-
     public function computer()
     {
         return $this->belongsTo(Computer::class);

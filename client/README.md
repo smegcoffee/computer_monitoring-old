@@ -72,3 +72,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 //"start": "set HTTPS=true&&set SSL_CRT_FILE=localhost.pem&&set SSL_KEY_FILE=localhost-key.pem&&set PORT=5000&&react-scripts start",
 
     // "start": "set PORT=5000 && react-scripts start",
+    

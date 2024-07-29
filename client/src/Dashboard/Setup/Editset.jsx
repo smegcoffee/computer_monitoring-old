@@ -524,7 +524,8 @@ function EditSet({
                               <DatePicker
                                 label="Date of Transfer"
                                 value={transferDate}
-                                onChange={setTransferDate}
+                                onChange={(newDate) => setTransferDate(newDate)}
+                                format="YYYY-MM-DD"
                               />
                             </DemoContainer>
                           </LocalizationProvider>

@@ -39,7 +39,7 @@ const Extract = () => {
   const [remark, setRemark] = useState("");
   const [remarksContent, setRemarksContent] = useState("");
   const [applicationContent, setApplicationContent] = useState([]);
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState();
   const [showAll, setShowAll] = useState(false);
   const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
@@ -511,6 +511,7 @@ const Extract = () => {
                           label="Date"
                           value={date}
                           onChange={(newDate) => setDate(newDate)}
+                          format="YYYY-MM-DD"
                         />
                       </DemoContainer>
                     </LocalizationProvider>
