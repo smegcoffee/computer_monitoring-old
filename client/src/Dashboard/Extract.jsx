@@ -31,6 +31,7 @@ import { DateField } from "@mui/x-date-pickers/DateField";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import Loading from "../context/Loading";
+import dayjs from 'dayjs';
 
 const Extract = () => {
   const { id } = useParams();
@@ -175,6 +176,10 @@ const Extract = () => {
       console.error('Update error:', error);
     }
     */
+  };
+
+  const handleDateChange = (newDate) => {
+    setDate(dayjs(newDate).format('YYYY-MM-DD'));
   };
 
   const handleApplications = (e, newValue) => {
@@ -509,8 +514,8 @@ const Extract = () => {
                         <DateField
                           fullWidth
                           label="Date"
-                          value={date}
-                          onChange={(newDate) => setDate(newDate)}
+                          value={date ? dayjs(date) : null}
+                          onChange={handleDateChange}
                           format="YYYY-MM-DD"
                         />
                       </DemoContainer>

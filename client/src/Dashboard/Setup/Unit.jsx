@@ -49,7 +49,10 @@ const CustomTableB = (refresh) => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState();
+  const [success, setSuccess] = useState();
+  const [validationErrors, setValidationErrors] = useState({});
+  const [refreshed, setRefreshed] = useState(false);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -76,7 +79,7 @@ const CustomTableB = (refresh) => {
     };
 
     fetchUnit();
-  }, [refresh]);
+  }, [refresh, refreshed]);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -90,6 +93,79 @@ const CustomTableB = (refresh) => {
   useEffect(() => {
     document.title = "Computer Monitoring - Setup Unit";
   });
+
+  const handleDeleteUnit = async (dataId) => {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      });
+
+      if (result.isConfirmed) {
+        setRefreshed(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+
+        const response = await axios.delete(`/api/unit-delete/${dataId}`);
+
+        if (response.data.status === true) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-right",
+            iconColor: "green",
+            customClass: {
+              popup: "colored-toast",
+            },
+            showConfirmButton: false,
+            showCloseButton: true,
+            timer: 2500,
+            timerProgressBar: true,
+          });
+          (async () => {
+            await Toast.fire({
+              icon: "success",
+              title: response.data.message,
+            });
+          })();
+        }
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setRefreshed(false);
+    }
+  };
 
   return (
     <div
@@ -119,15 +195,18 @@ const CustomTableB = (refresh) => {
               <TableCell align="center">
                 <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
               </TableCell>
-              <TableCell align="center" className="rounded-tr-xl">
+              <TableCell align="center">
                 <p className="font-semibold text-base mt-1.5">STATUS</p>
+              </TableCell>
+              <TableCell align="center" className="rounded-tr-xl">
+                <p className="font-semibold text-base mt-1.5">ACTION</p>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8}>
+                <TableCell colSpan={9}>
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="w-full p-4 rounded">
                       <div className="flex space-x-4 animate-pulse">
@@ -161,11 +240,19 @@ const CustomTableB = (refresh) => {
                     </TableCell>
                     <TableCell align="center">{data.serial_number}</TableCell>
                     <TableCell align="center">{data.status}</TableCell>
+                    <TableCell align="center">
+                      <button
+                        onClick={() => handleDeleteUnit(data.id)}
+                        className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={9} align="center">
                   No vacant/defective units found
                 </TableCell>
               </TableRow>
@@ -372,7 +459,7 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
 
   const handleChangeA = (date, index) => {
     const newRows = [...rows];
-    newRows[index]["date_of_purchase"] = date;
+    newRows[index]["date_of_purchase"] = format(date, "yyyy-MM-dd");
     setRows(newRows);
   };
 
