@@ -118,8 +118,22 @@ class UnitController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Unit $unit)
+    public function destroy($id)
     {
-        //
+        $unit = Unit::find($id);
+
+        if ($unit) {
+            $unit->delete();
+
+            return response()->json([
+                'status'                =>              true,
+                'message'               =>              $unit->category->category_name . ' deleted successfully'
+            ], 200);
+        } else {
+            return response()->json([
+                'status'            =>              false,
+                'message'           =>              'Unit not found/Already deleted'
+            ], 422);
+        }
     }
 }

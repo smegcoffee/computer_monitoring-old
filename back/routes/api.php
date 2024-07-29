@@ -46,6 +46,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/computers/{id}', [ComputerController::class, 'show']);
     Route::get('/unread-notifications', [NotificationController::class, 'index']);
+    Route::post('/add-unit', [UnitController::class, 'store']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -66,9 +67,8 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
+    Route::delete('/unit-delete/{id}', [UnitController::class, 'destroy']);
 });
-
-Route::post('/add-unit', [UnitController::class, 'store']);
 
 // GET
 // POST

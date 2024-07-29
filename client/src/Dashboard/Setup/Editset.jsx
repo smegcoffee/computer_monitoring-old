@@ -27,6 +27,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from 'dayjs';
 
 const style = {
   position: "absolute",
@@ -281,6 +282,10 @@ function EditSet({
     }
   };
 
+  const handleDateChange = (newDate) => {
+    setTransferDate(dayjs(newDate).format('YYYY-MM-DD'));
+  };
+
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -523,8 +528,8 @@ function EditSet({
                             <DemoContainer components={["DatePicker"]}>
                               <DatePicker
                                 label="Date of Transfer"
-                                value={transferDate}
-                                onChange={(newDate) => setTransferDate(newDate)}
+                                value={transferDate ? dayjs(transferDate) : null}
+                                onChange={handleDateChange}
                                 format="YYYY-MM-DD"
                               />
                             </DemoContainer>
