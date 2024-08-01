@@ -72,8 +72,10 @@ class ComputerController extends Controller
 
         if (!$computer) {
             $computer = Computer::create([
-                'computer_user_id' => $request->computer_user,
+                'computer_user_id'          =>              $request->computer_user,
+                'date_cleaning'             =>              now()
             ]);
+
             $computer->units()->attach($request->checkedRows);
         } else {
             $computer->units()->attach($request->checkedRows);
