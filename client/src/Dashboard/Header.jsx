@@ -291,8 +291,11 @@ function Header({ toggleSidebar }) {
   };
 
   const imageUrl = profileImg
-    ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+    ? `http://localhost:8000/${profileImg}`
     : defaultImg;
+    // const imageUrl = profileImg
+    // ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+    // : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
@@ -590,8 +593,11 @@ function Header({ toggleSidebar }) {
                       <Avatar
                         src={
                           notif.user.profile_picture
-                            ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                            ? `http://localhost:8000/${notif.user.profile_picture}`
                             : defaultImg
+                          // notif.user.profile_picture
+                          //   ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                          //   : defaultImg
                         }
                         sx={{ mr: 2 }}
                       />

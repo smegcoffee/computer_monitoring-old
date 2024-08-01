@@ -1,8 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import SideBar from "../Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import {
+  faCirclePlus,
+  faTrash,
+  faPen,
+  faX,
+  faFloppyDisk,
+} from "@fortawesome/free-solid-svg-icons";
+import { Link, useParams } from "react-router-dom";
 import {
   Table,
   TableHead,
@@ -44,6 +50,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomTableB = (refresh) => {
+  const { id } = useParams();
   const classes = useStyles();
   const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
@@ -53,6 +60,21 @@ const CustomTableB = (refresh) => {
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [refreshed, setRefreshed] = useState(false);
+  const [editUnitId, setEditUnitId] = useState(null);
+  const [category, setCategory] = useState({ data: [] });
+  const [supplier, setSupplier] = useState({ data: [] });
+  const options = [
+    { value: "Vacant", label: "Vacant" },
+    { value: "Defective", label: "Defective" },
+  ];
+  const [editValues, setEditValues] = useState({
+    date_of_purchase: "",
+    category: "",
+    description: "",
+    supplier: "",
+    serial_number: "",
+    status: "",
+  });
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -171,6 +193,155 @@ const CustomTableB = (refresh) => {
     }
   };
 
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/categories", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setCategory(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchCategory();
+  }, [category]);
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/suppliers", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setSupplier(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchSupplier();
+  }, [supplier]);
+
+  const Category = category.data.map((cat) => ({
+    label: cat.category_name,
+    value: cat.id,
+  }));
+
+  const Supplier = supplier.data.map((sup) => ({
+    label: sup.supplier_name,
+    value: sup.id,
+  }));
+
+  const handleUpdateUnit = (id, data) => {
+    setEditUnitId(id);
+    setEditValues({
+      ...editValues,
+      date_of_purchase: data.date_of_purchase,
+      category: { label: data.category.category_name, value: data.category.id },
+      description: data.description,
+      supplier: { label: data.supplier.supplier_name, value: data.supplier.id },
+      serial_number: data.serial_number,
+      status: { label: data.status, value: data.status },
+    });
+    setValidationErrors({});
+  };
+
+  const handleDateChange = (date) => {
+    setEditValues({
+      ...editValues,
+      date_of_purchase: date,
+    });
+  };
+
+  const handleSelectChange = (selectedOption, field) => {
+    setEditValues({
+      ...editValues,
+      [field]: selectedOption.value,
+    });
+  };
+
+  const handleSaveUnit = async (id) => {
+    setRefreshed(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.post(`/api/update-unit/${id}`, editValues, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.status === true) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+
+        handleCancelEdit();
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setRefreshed(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditUnitId(null);
+  };
+
   return (
     <div
       className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
@@ -226,31 +397,248 @@ const CustomTableB = (refresh) => {
               unit.vacantDefective
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((data, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={data.id}>
                     <TableCell align="center">{data.unit_code}</TableCell>
                     <TableCell align="center">
-                      {format(new Date(data.date_of_purchase), "yyyy-MM-dd")}
+                      {editUnitId === data.id ? (
+                        <DatePicker
+                          selected={editValues?.date_of_purchase}
+                          onChange={handleDateChange}
+                          placeholderText=""
+                          dateFormat={"yyyy-MM-dd"}
+                          className={
+                            editUnitId === data.id &&
+                            validationErrors["date_of_purchase"]
+                              ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                              : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                          }
+                        />
+                      ) : (
+                        format(new Date(data.date_of_purchase), "yyyy-MM-dd")
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["date_of_purchase"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["date_of_purchase"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
                     </TableCell>
                     <TableCell align="center">
-                      {data.category ? data.category.category_name : "N/A"}
+                      {editUnitId === data.id ? (
+                        <Select
+                          options={Category}
+                          value={editValues?.category}
+                          onChange={(e) => handleSelectChange(e, "category")}
+                          placeholder={
+                            editValues?.category ? "" : "Select Category"
+                          }
+                          className={
+                            editUnitId === data.id &&
+                            validationErrors["category"]
+                              ? "border border-red-500"
+                              : "border border-transparent"
+                          }
+                        />
+                      ) : data.category ? (
+                        data.category.category_name
+                      ) : (
+                        "N/A"
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["category"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["category"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
                     </TableCell>
                     <TableCell align="center">
-                      {data.description.split("\n").map((line, lineIndex) => (
-                        <div key={lineIndex}>{line}</div>
-                      ))}
+                      {editUnitId === data.id ? (
+                        <textarea
+                          rows={3}
+                          type="text"
+                          value={editValues?.description || ""}
+                          onChange={(e) =>
+                            setEditValues({
+                              ...editValues,
+                              description: e.target.value,
+                            })
+                          }
+                          style={{ resize: "none" }}
+                          className={
+                            editUnitId === data.id &&
+                            validationErrors["description"]
+                              ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                              : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                          }
+                        />
+                      ) : (
+                        data.description
+                          .split("\n")
+                          .map((line, lineIndex) => (
+                            <div key={lineIndex}>{line}</div>
+                          ))
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["description"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["description"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
                     </TableCell>
                     <TableCell align="center">
-                      {data.supplier ? data.supplier.supplier_name : "N/A"}
+                      {editUnitId === data.id ? (
+                        <Select
+                          options={Supplier}
+                          value={editValues?.supplier}
+                          onChange={(e) => handleSelectChange(e, "supplier")}
+                          placeholder={
+                            editValues?.supplier ? "" : "Select Supplier"
+                          }
+                          className={
+                            editUnitId === data.id &&
+                            validationErrors["supplier"]
+                              ? "border border-red-500"
+                              : "border border-transparent"
+                          }
+                        />
+                      ) : data.supplier ? (
+                        data.supplier.supplier_name
+                      ) : (
+                        "N/A"
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["supplier"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["supplier"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
                     </TableCell>
-                    <TableCell align="center">{data.serial_number}</TableCell>
-                    <TableCell align="center">{data.status}</TableCell>
                     <TableCell align="center">
-                      <button
-                        onClick={() => handleDeleteUnit(data.id)}
-                        className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                      >
-                        Delete
-                      </button>
+                      {editUnitId === data.id ? (
+                        <input
+                          type="text"
+                          value={editValues?.serial_number || null}
+                          onChange={(e) =>
+                            setEditValues({
+                              ...editValues,
+                              serial_number: e.target.value,
+                            })
+                          }
+                          placeholder=""
+                          className={
+                            editUnitId === data.id &&
+                            validationErrors["serial_number"]
+                              ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                              : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                          }
+                        />
+                      ) : (
+                        data.serial_number
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["serial_number"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["serial_number"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
+                    </TableCell>
+                    <TableCell align="center">
+                      {editUnitId === data.id ? (
+                        <Select
+                          options={options}
+                          value={editValues?.status || null}
+                          onChange={(e) => handleSelectChange(e, "status")}
+                          placeholder={
+                            editValues?.status ? "" : "Select status"
+                          }
+                          className={
+                            editUnitId === data.id && validationErrors["status"]
+                              ? "border border-red-500"
+                              : "border border-transparent"
+                          }
+                        />
+                      ) : (
+                        data.status
+                      )}
+                      <span className="text-sm text-center">
+                        {editUnitId === data.id &&
+                          validationErrors["status"] && (
+                            <div className="text-sm text-center text-red-500">
+                              {validationErrors["status"].map(
+                                (error, errorIndex) => (
+                                  <span key={errorIndex}>{error}</span>
+                                )
+                              )}
+                            </div>
+                          )}
+                      </span>
+                    </TableCell>
+                    <TableCell align="center">
+                      {editUnitId === data.id ? (
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleSaveUnit(data.id)}
+                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                          >
+                            <FontAwesomeIcon icon={faFloppyDisk} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                          >
+                            <FontAwesomeIcon icon={faX} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateUnit(data.id, data)}
+                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                          >
+                            <FontAwesomeIcon icon={faPen} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUnit(data.id)}
+                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

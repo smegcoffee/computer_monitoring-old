@@ -316,8 +316,10 @@ function Placeholder() {
   }, [refresh]);
 
   const imageUrl = inputValues.profile_picture
-    ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
+    ? `http://localhost:8000/${inputValues.profile_picture}`
     : defaultImg;
+    // ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
+    // : defaultImg;
   useEffect(() => {
     document.title = "Computer Monitoring - Profile";
   });
