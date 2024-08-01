@@ -20,9 +20,9 @@ return [
     'allowed_methods' => ['*'],
 
     // 'allowed_origins' => ['https://136.239.196.178:5000'],
-    // 'allowed_origins' => ['http://136.239.196.178:5000', 'https://desstrongmotors.com/monitoring'],
+    'allowed_origins' => ['http://136.239.196.178:5000', 'https://desstrongmotors.com/monitoring'],
     // 'allowed_origins' => ['http://10.50.2.220:3000'],
-    'allowed_origins' => ['http://localhost:5000'],
+    // 'allowed_origins' => ['http://localhost:5000'],
 
     'allowed_origins_patterns' => [],
 
