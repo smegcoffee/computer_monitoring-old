@@ -46,10 +46,10 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/computers/{id}', [ComputerController::class, 'show']);
     Route::get('/unread-notifications', [NotificationController::class, 'index']);
-    Route::post('/add-unit', [UnitController::class, 'store']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
+    Route::post('/add-unit', [UnitController::class, 'store']);
     Route::post('/add-supplier', [SupplierController::class, 'store']);
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
     Route::post('/add-position', [PositionController::class, 'store']);
@@ -61,6 +61,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::post('/marked-as-read/{notificationId}', [NotificationController::class, 'read']);
     Route::post('/marked-all-as-read', [NotificationController::class, 'markedAllAsRead']);
+    Route::post('/update-unit/{id}', [UnitController::class, 'update']);
 
     // PUT
 

@@ -110,9 +110,51 @@ class UnitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Unit $unit)
+    public function update(Request $request, $id)
     {
-        //
+        $unit = Unit::find($id);
+
+        if ($unit) {
+            $validation = Validator::make($request->all(), [
+                'category'                        =>              ['required', 'exists:categories,id'],
+                'supplier'                        =>              ['required', 'exists:suppliers,id'],
+                'date_of_purchase'                =>              ['required'],
+                'description'                     =>              ['required', 'max:5000'],
+                'serial_number'                   =>              ['required'],
+                'status'                          =>              ['required', 'in:Used,Vacant,Defective,Used (Transfer)']
+            ]);
+
+            if ($validation->fails()) {
+                return response()->json([
+                    'status'                =>              false,
+                    'message'               =>              'Something went wrong. Please fix.',
+                    'errors'                =>              $validation->errors()
+                ], 422);
+            }
+
+            $unit->update([
+                'category_id'               =>              $request->category,
+                'supplier_id'               =>              $request->supplier,
+                'date_of_purchase'          =>              $request->date_of_purchase,
+                'description'               =>              $request->description,
+                'serial_number'             =>              $request->serial_number,
+                'status'                    =>              $request->status
+            ]);
+
+            $unit->save();
+
+            return response()->json([
+                'status'            =>              true,
+                'message'           =>              'Unit ' . $unit->category->category_name . ' updated successfully',
+                'id'                =>              $unit->id
+            ], 200);
+
+        } else {
+            return response()->json([
+                'status'            =>              false,
+                'message'           =>              'Unit not found'
+            ], 422);
+        }
     }
 
     /**
