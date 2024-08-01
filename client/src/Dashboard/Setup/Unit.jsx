@@ -249,14 +249,29 @@ const CustomTableB = (refresh) => {
     setEditValues({
       ...editValues,
       date_of_purchase: data.date_of_purchase,
-      category: { label: data.category.category_name, value: data.category.id },
+      category: {
+        label: data.category.category_name,
+        value: data.category.id,
+      },
       description: data.description,
-      supplier: { label: data.supplier.supplier_name, value: data.supplier.id },
+      supplier: {
+        label: data.supplier.supplier_name,
+        value: data.supplier.id,
+      },
       serial_number: data.serial_number,
       status: { label: data.status, value: data.status },
     });
     setValidationErrors({});
   };
+
+  const formatEditValues = (values) => ({
+    date_of_purchase: values.date_of_purchase,
+    category: values.category.value,
+    description: values.description,
+    supplier: values.supplier.value,
+    serial_number: values.serial_number,
+    status: values.status.value,
+  });
 
   const handleDateChange = (date) => {
     setEditValues({
@@ -268,7 +283,7 @@ const CustomTableB = (refresh) => {
   const handleSelectChange = (selectedOption, field) => {
     setEditValues({
       ...editValues,
-      [field]: selectedOption.value,
+      [field]: selectedOption,
     });
   };
 
@@ -279,11 +294,17 @@ const CustomTableB = (refresh) => {
       if (!token) {
         throw new Error("Token not found");
       }
-      const response = await axios.post(`/api/update-unit/${id}`, editValues, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const formattedValues = formatEditValues(editValues);
+
+      const response = await axios.post(
+        `/api/update-unit/${id}`,
+        formattedValues,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data.status === true) {
         const Toast = Swal.mixin({
@@ -603,7 +624,7 @@ const CustomTableB = (refresh) => {
                           )}
                       </span>
                     </TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       {editUnitId === data.id ? (
                         <div className="flex gap-1">
                           <button
@@ -634,6 +655,133 @@ const CustomTableB = (refresh) => {
                             type="button"
                             onClick={() => handleDeleteUnit(data.id)}
                             className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </button>
+                        </div>
+                      )}
+                    </TableCell> */}
+
+                    {/* CENTER THE ICONS */}
+                    <TableCell style={{ textAlign: "center" }}>
+                      {editUnitId === data.id ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleSaveUnit(data.id)}
+                            style={{
+                              padding: "0.5rem 1rem",
+                              fontWeight: "600",
+                              color: "white",
+                              background:
+                                "linear-gradient(to right, #48C774, #1E90FF)",
+                              borderRadius: "0.375rem",
+                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              transition:
+                                "background-color 0.3s ease, transform 0.3s ease",
+                              outline: "none",
+                            }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #36D759, #1C86EE)")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #48C774, #1E90FF)")
+                            }
+                          >
+                            <FontAwesomeIcon icon={faFloppyDisk} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            style={{
+                              padding: "0.5rem 1rem",
+                              fontWeight: "600",
+                              color: "white",
+                              background:
+                                "linear-gradient(to right, #FF4D4D, #FF007F)",
+                              borderRadius: "0.375rem",
+                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              transition:
+                                "background-color 0.3s ease, transform 0.3s ease",
+                              outline: "none",
+                            }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #FF3B3B, #FF0055)")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #FF4D4D, #FF007F)")
+                            }
+                          >
+                            <FontAwesomeIcon icon={faX} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateUnit(data.id, data)}
+                            style={{
+                              padding: "0.5rem 1rem",
+                              fontWeight: "600",
+                              color: "white",
+                              background:
+                                "linear-gradient(to right, #1E90FF, #8A2BE2)",
+                              borderRadius: "0.375rem",
+                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              transition:
+                                "background-color 0.3s ease, transform 0.3s ease",
+                              outline: "none",
+                            }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #1C86EE, #7A2BCC)")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #1E90FF, #8A2BE2)")
+                            }
+                          >
+                            <FontAwesomeIcon icon={faPen} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUnit(data.id)}
+                            style={{
+                              padding: "0.5rem 1rem",
+                              fontWeight: "600",
+                              color: "white",
+                              background:
+                                "linear-gradient(to right, #FF4D4D, #FF007F)",
+                              borderRadius: "0.375rem",
+                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              transition:
+                                "background-color 0.3s ease, transform 0.3s ease",
+                              outline: "none",
+                            }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #FF3B3B, #FF0055)")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.background =
+                                "linear-gradient(to right, #FF4D4D, #FF007F)")
+                            }
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
