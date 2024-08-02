@@ -214,7 +214,7 @@ const CustomTableB = (refresh) => {
     };
 
     fetchCategory();
-  }, [category]);
+  }, []);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
@@ -234,7 +234,7 @@ const CustomTableB = (refresh) => {
     };
 
     fetchSupplier();
-  }, [supplier]);
+  }, []);
 
   const Category = category.data.map((cat) => ({
     label: cat.category_name,
@@ -962,7 +962,7 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
     };
 
     fetchCategory();
-  }, [category]);
+  }, []);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
@@ -982,7 +982,7 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
     };
 
     fetchSupplier();
-  }, [supplier]);
+  }, []);
 
   // This is a sample data for Category
   const Category =

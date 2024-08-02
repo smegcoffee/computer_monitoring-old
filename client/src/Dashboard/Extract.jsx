@@ -31,7 +31,7 @@ import { DateField } from "@mui/x-date-pickers/DateField";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import Loading from "../context/Loading";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 const Extract = () => {
   const { id } = useParams();
@@ -71,7 +71,7 @@ const Extract = () => {
     };
 
     fetchComputerData();
-  }, [computer]);
+  }, []);
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -179,7 +179,7 @@ const Extract = () => {
   };
 
   const handleDateChange = (newDate) => {
-    setDate(dayjs(newDate).format('YYYY-MM-DD'));
+    setDate(dayjs(newDate).format("YYYY-MM-DD"));
   };
 
   const handleApplications = (e, newValue) => {
