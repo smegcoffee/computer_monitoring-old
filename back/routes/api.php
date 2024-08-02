@@ -62,6 +62,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/marked-as-read/{notificationId}', [NotificationController::class, 'read']);
     Route::post('/marked-all-as-read', [NotificationController::class, 'markedAllAsRead']);
     Route::post('/update-unit/{id}', [UnitController::class, 'update']);
+    Route::post('/cleaning-complete/{id}', [ComputerController::class, 'doneCleaning']);
 
     // PUT
 

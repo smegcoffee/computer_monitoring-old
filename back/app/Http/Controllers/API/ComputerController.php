@@ -12,6 +12,7 @@ use App\Models\RecentUser;
 use App\Models\Remark;
 use App\Models\TransferUnit;
 use App\Models\Unit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -430,6 +431,36 @@ class ComputerController extends Controller
                 'status'            =>          true,
                 'message'           =>          'Updated successfully.',
                 'computer'          =>          $computer
+            ], 200);
+        }
+    }
+
+    public function doneCleaning($id)
+    {
+        $cleaning = Computer::find($id);
+
+        if (!$cleaning) {
+            return response()->json([
+                'status'                        =>                  false,
+                'message'                       =>                  'Computer not found.'
+            ], 422);
+        }
+
+        $dateCleaning = Carbon::parse($cleaning->date_cleaning);
+
+        if ($dateCleaning->isFuture()) {
+            return response()->json([
+                'status'                =>                  false,
+                'message'               =>                  $cleaning->computerUser->name . '`s computer is already cleaned.'
+            ], 422);
+        } else {
+            $cleaning->update([
+                'date_cleaning' => now()->addMonth(3)->format('Y-m-d'),
+            ]);
+
+            return response()->json([
+                'status'                    =>                  true,
+                'message'                   =>                  $cleaning->computerUser->name . '`s computer is completely cleaned.'
             ], 200);
         }
     }

@@ -63,6 +63,7 @@ function EditSet({
   const [checkedRows, setCheckedRows] = useState([]);
   const [computerId, setComputerId] = useState("");
   const [unit, setUnit] = useState([]);
+  const [markedLoading, setMarkedLoading] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
 
@@ -286,6 +287,82 @@ function EditSet({
     setTransferDate(dayjs(newDate).format("YYYY-MM-DD"));
   };
 
+  const handleMarkedAsClean = async (e) => {
+    e.preventDefault();
+    setMarkedLoading(true);
+    onSubmit(true);
+    setRefresh(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.post(
+        `/api/cleaning-complete/${computerId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.status === true) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+      }
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+            container: "swalContainer",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+
+        await Toast.fire({
+          icon: "error",
+          title: error.response.data.message,
+        });
+      } else {
+        console.log("ERROR!");
+      }
+    } finally {
+      setMarkedLoading(false);
+      setRefresh(false);
+      onSubmit(false);
+      onClose();
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -422,10 +499,15 @@ function EditSet({
                 </button>
                 <button
                   type="button"
-                  onClick={handleOpen}
-                  className="h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
+                  disabled={markedLoading}
+                  onClick={handleMarkedAsClean}
+                  className={
+                    markedLoading
+                      ? "h-8 ml-3 text-sm font-semibold text-white bg-green-400 rounded-full w-28 cursor-not-allowed"
+                      : "h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
+                  }
                 >
-                  Mark As Clean
+                  {markedLoading ? "Cleaning" : "Mark As Clean"}
                 </button>
                 <Modal
                   open={open}
