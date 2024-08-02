@@ -27,7 +27,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 const style = {
   position: "absolute",
@@ -63,6 +63,7 @@ function EditSet({
   const [checkedRows, setCheckedRows] = useState([]);
   const [computerId, setComputerId] = useState("");
   const [unit, setUnit] = useState([]);
+  const [markedLoading, setMarkedLoading] = useState(false);
 
   const [refresh, setRefresh] = useState(false);
 
@@ -283,7 +284,83 @@ function EditSet({
   };
 
   const handleDateChange = (newDate) => {
-    setTransferDate(dayjs(newDate).format('YYYY-MM-DD'));
+    setTransferDate(dayjs(newDate).format("YYYY-MM-DD"));
+  };
+
+  const handleMarkedAsClean = async (e) => {
+    e.preventDefault();
+    setMarkedLoading(true);
+    onSubmit(true);
+    setRefresh(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const response = await axios.post(
+        `/api/cleaning-complete/${computerId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.status === true) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+      }
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+            container: "swalContainer",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+
+        await Toast.fire({
+          icon: "error",
+          title: error.response.data.message,
+        });
+      } else {
+        console.log("ERROR!");
+      }
+    } finally {
+      setMarkedLoading(false);
+      setRefresh(false);
+      onSubmit(false);
+      onClose();
+    }
   };
 
   return (
@@ -420,6 +497,18 @@ function EditSet({
                 >
                   {checkedRows.length === 0 ? "UPDATE" : "UPDATE"}
                 </button>
+                <button
+                  type="button"
+                  disabled={markedLoading}
+                  onClick={handleMarkedAsClean}
+                  className={
+                    markedLoading
+                      ? "h-8 ml-3 text-sm font-semibold text-white bg-green-400 rounded-full w-28 cursor-not-allowed"
+                      : "h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
+                  }
+                >
+                  {markedLoading ? "Cleaning" : "Mark As Clean"}
+                </button>
                 <Modal
                   open={open}
                   onClose={handleClose}
@@ -528,7 +617,9 @@ function EditSet({
                             <DemoContainer components={["DatePicker"]}>
                               <DatePicker
                                 label="Date of Transfer"
-                                value={transferDate ? dayjs(transferDate) : null}
+                                value={
+                                  transferDate ? dayjs(transferDate) : null
+                                }
                                 onChange={handleDateChange}
                                 format="YYYY-MM-DD"
                               />

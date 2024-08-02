@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Computer;
 use App\Models\ComputerUser;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -15,7 +16,9 @@ class ComputerUserController extends Controller
         $allComputerUsers = ComputerUser::orderBy('id', 'asc')->with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier')->get();
         $computerSetUsers = ComputerUser::orderBy('id', 'asc')->with('computers', 'computers.units.category', 'computers.units.supplier')->whereHas('computers')->get();
 
+
         if ($allComputerUsers->count() > 0) {
+
             return response()->json([
                 'status'            =>              true,
                 'message'           =>              'All computer users successfully fetched',

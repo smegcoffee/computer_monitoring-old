@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import SideBar from "../Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import {
+  faRightFromBracket,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -26,6 +29,7 @@ import Header from "../../Dashboard/Header";
 import HomeIcon from "@mui/icons-material/Home";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MouseIcon from "@mui/icons-material/Mouse";
+import { DateTime } from "luxon";
 
 const useStyles = makeStyles({
   table: {
@@ -164,6 +168,9 @@ function Set() {
   useEffect(() => {
     document.title = "Computer Monitoring - Setup Computer Set";
   });
+
+  const now = DateTime.now().setZone("Asia/Manila").toJSDate();
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} />
@@ -286,12 +293,63 @@ function Set() {
                         .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
                         .map((row, rowIndex) => (
                           <React.Fragment key={`${row.id}-${rowIndex}`}>
-                            <TableRow>
+                            <TableRow
+                              className={
+                                row.computers
+                                  .map((comp) =>
+                                    format(
+                                      new Date(comp.date_cleaning),
+                                      "yyyy-MM-dd"
+                                    )
+                                  )
+                                  .join(", ") <=
+                                format(new Date(now), "yyyy-MM-dd")
+                                  ? "bg-red-200 animate-pulse relative"
+                                  : "relative"
+                              }
+                            >
                               <TableCell
                                 align="center"
                                 style={{ borderBottom: "none" }}
                               >
                                 {row.id}
+
+                                {row.computers
+                                  .map((comp) =>
+                                    format(
+                                      new Date(comp.date_cleaning),
+                                      "yyyy-MM-dd"
+                                    )
+                                  )
+                                  .join(", ") <=
+                                  format(new Date(now), "yyyy-MM-dd") && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: "55%",
+                                      left: "50%",
+                                      transform: "translate(-50%, -50%)",
+                                      fontWeight: "bold",
+                                      color: "red",
+                                    }}
+                                  >
+                                    <p>
+                                      <FontAwesomeIcon
+                                        style={{ fontSize: "50px" }}
+                                        icon={faTriangleExclamation}
+                                      />
+                                    </p>
+                                    <p
+                                      style={{
+                                        fontSize: "15px",
+                                      }}
+                                    >
+                                      The computer of the user is ready for
+                                      cleanup or needs a cleanup to optimize
+                                      performance.
+                                    </p>
+                                  </div>
+                                )}
                               </TableCell>
                               <TableCell
                                 align="center"
@@ -429,7 +487,21 @@ function Set() {
                               </TableCell>
                             </TableRow>
                             {/* Show more / Show less button */}
-                            <TableRow>
+                            <TableRow
+                              className={
+                                row.computers
+                                  .map((comp) =>
+                                    format(
+                                      new Date(comp.date_cleaning),
+                                      "yyyy-MM-dd"
+                                    )
+                                  )
+                                  .join(", ") <=
+                                format(new Date(now), "yyyy-MM-dd")
+                                  ? "bg-red-200 animate-pulse"
+                                  : ""
+                              }
+                            >
                               <TableCell colSpan={8} align="center">
                                 <button
                                   onClick={() => toggleShowAllRows(row.id)}

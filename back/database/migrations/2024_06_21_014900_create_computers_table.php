@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('computer_user_id')->nullable();
             $table->integer('formatted_status')->default(0)->nullable();
             $table->integer('remarks')->default(0)->nullable();
+            $table->string('date_cleaning')->nullable();
             $table->timestamps();
 
 

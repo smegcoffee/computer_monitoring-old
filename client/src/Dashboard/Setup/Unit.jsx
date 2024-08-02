@@ -7,6 +7,7 @@ import {
   faPen,
   faX,
   faFloppyDisk,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -54,6 +55,7 @@ const CustomTableB = (refresh) => {
   const classes = useStyles();
   const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [error, setError] = useState();
@@ -262,6 +264,8 @@ const CustomTableB = (refresh) => {
       status: { label: data.status, value: data.status },
     });
     setValidationErrors({});
+
+    console.log(editValues);
   };
 
   const formatEditValues = (values) => ({
@@ -286,9 +290,9 @@ const CustomTableB = (refresh) => {
       [field]: selectedOption,
     });
   };
-
   const handleSaveUnit = async (id) => {
     setRefreshed(true);
+    setLoadingUpdate(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -356,6 +360,7 @@ const CustomTableB = (refresh) => {
       }
     } finally {
       setRefreshed(false);
+      setLoadingUpdate(false);
     }
   };
 
@@ -629,10 +634,26 @@ const CustomTableB = (refresh) => {
                         <div className="flex gap-1">
                           <button
                             type="button"
-                            onClick={() => handleSaveUnit(data.id)}
-                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            disabled={loadingUpdate}
+                            onClick={() =>
+                              !loadingUpdate
+                                ? handleSaveUnit(data.id)
+                                : undefined
+                            }
+                            className={
+                              loadingUpdate
+                                ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
+                                : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            }
                           >
-                            <FontAwesomeIcon icon={faFloppyDisk} />
+                            {loadingUpdate ? (
+                              <FontAwesomeIcon
+                                className="animate-spin"
+                                icon={faSpinner}
+                              />
+                            ) : (
+                              <FontAwesomeIcon icon={faFloppyDisk} />
+                            )}
                           </button>
                           <button
                             type="button"

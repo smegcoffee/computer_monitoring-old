@@ -63,7 +63,7 @@ function User() {
     };
 
     fetchBrancheCode();
-  }, [branchcode]);
+  }, []);
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -83,7 +83,7 @@ function User() {
     };
 
     fetchPosition();
-  }, [position]);
+  }, []);
 
   // This is a sample data for Position
   const Position =

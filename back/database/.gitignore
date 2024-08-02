@@ -1,1 +1,2 @@
 *.sqlite*
+/back/config/cors.php
