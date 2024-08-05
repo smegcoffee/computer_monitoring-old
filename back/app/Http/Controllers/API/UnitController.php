@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-
+use App\Models\TransferUnit;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -148,7 +148,6 @@ class UnitController extends Controller
                 'message'           =>              'Unit ' . $unit->category->category_name . ' updated successfully',
                 'id'                =>              $unit->id
             ], 200);
-
         } else {
             return response()->json([
                 'status'            =>              false,
@@ -164,18 +163,36 @@ class UnitController extends Controller
     {
         $unit = Unit::find($id);
 
-        if ($unit) {
-            $unit->delete();
-
+        if (!$unit) {
             return response()->json([
-                'status'                =>              true,
-                'message'               =>              $unit->category->category_name . ' deleted successfully'
-            ], 200);
-        } else {
-            return response()->json([
-                'status'            =>              false,
-                'message'           =>              'Unit not found/Already deleted'
+                'status' => false,
+                'message' => 'Unit not found/Already deleted'
             ], 422);
         }
+
+        $isAssigned = $unit->computers()->exists();
+
+        if ($isAssigned) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cannot delete unit. It is assigned to one or more computers.'
+            ], 422);
+        }
+
+        $isReferenced = TransferUnit::where('unit_id', $id)->exists();
+
+        if ($isReferenced) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cannot delete unit. It is referenced in transfer records.'
+            ], 422);
+        }
+
+        $unit->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => $unit->category->category_name . ' deleted successfully'
+        ], 200);
     }
 }
