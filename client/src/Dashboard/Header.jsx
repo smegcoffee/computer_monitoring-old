@@ -22,7 +22,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import defaultImg from "../img/profile.png";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
-function Header({ toggleSidebar }) {
+function Header({ toggleSidebar, isRefresh }) {
   const [user, setUser] = useState(null);
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
@@ -79,7 +79,7 @@ function Header({ toggleSidebar }) {
     // const intervalId = setInterval(fetchUserProfile, 1000);
 
     // return () => clearInterval(intervalId);
-  }, []);
+  }, [isRefresh]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -112,7 +112,7 @@ function Header({ toggleSidebar }) {
     // const intervalId = setInterval(fetchNotifications, 1000);
 
     // return () => clearInterval(intervalId);
-  }, [refreshNotification]);
+  }, [refreshNotification, isRefresh]);
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -290,12 +290,12 @@ function Header({ toggleSidebar }) {
     }
   };
 
+  // const imageUrl = profileImg
+  //   ? `http://localhost:8000/${profileImg}`
+  //   : defaultImg;
   const imageUrl = profileImg
-    ? `http://localhost:8000/${profileImg}`
-    : defaultImg;
-    // const imageUrl = profileImg
-    // ? `https://desstrongmotors.com/monitoringback/${profileImg}`
-    // : defaultImg;
+  ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+  : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
@@ -506,7 +506,7 @@ function Header({ toggleSidebar }) {
               </span>
             </Typography>
           </div>
-          <div className="overflow-y-auto max-h-[600px]">
+          <div className="overflow-y-auto max-h-[400px]">
             {dataLoading ? (
               <div>
                 <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">

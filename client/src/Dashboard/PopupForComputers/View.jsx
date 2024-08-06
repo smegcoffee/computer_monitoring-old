@@ -125,7 +125,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
     };
 
     fetchBrancheCode();
-  }, [branchcode]);
+  }, []);
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -145,7 +145,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
     };
 
     fetchPosition();
-  }, [position]);
+  }, []);
 
   useEffect(() => {
     if (viewPopupData?.computers) {

@@ -38,6 +38,7 @@ function User() {
   const [validationErrors, setValidationErrors] = useState({});
   const [success, setSuccess] = useState();
   const [status, setStatus] = useState("");
+  const [isRefresh, setIsRefresh] = useState(false);
   const [user, setUser] = useState({
     name: "",
     position: "",
@@ -106,6 +107,7 @@ function User() {
   const handleSubmitUser = async (event) => {
     event.preventDefault();
     setuLoading(true);
+    setIsRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -183,6 +185,7 @@ function User() {
       }
     } finally {
       setuLoading(false);
+      setIsRefresh(false);
     }
   };
 
@@ -345,7 +348,7 @@ function User() {
   });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header isRefresh={isRefresh} toggleSidebar={toggleSidebar} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

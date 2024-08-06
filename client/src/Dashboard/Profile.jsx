@@ -7,6 +7,8 @@ import axios from "../api/axios";
 import Swal from "sweetalert2";
 import Header from "./Header";
 import SideBar from "./Sidebar";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -123,7 +125,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   );
 };
 
-function Placeholder() {
+function Placeholder({ onSubmit }) {
   const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -142,7 +144,6 @@ function Placeholder() {
   });
   const [image, setImage] = useState("");
   const [preview, setPreview] = useState(null);
-  const [refresh, setRefresh] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -205,9 +206,11 @@ function Placeholder() {
       setPreview(URL.createObjectURL(file));
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
+    onSubmit(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -234,6 +237,9 @@ function Placeholder() {
         },
       });
       if (response.data.status === true) {
+        setPreview(
+          `https://desstrongmotors.com/monitoringback/${response.data.data.profile_picture}`
+        );
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
@@ -258,6 +264,7 @@ function Placeholder() {
         inputValues.oldPassword = "";
         inputValues.newPassword = "";
         inputValues.newPassword_confirmation = "";
+        inputValues.profile_picture = null;
       }
     } catch (error) {
       console.error("Error: ", error);
@@ -289,37 +296,15 @@ function Placeholder() {
       }
     } finally {
       setLoading(false);
+      onSubmit(false);
     }
   };
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        const response = await axios.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, [refresh]);
-
   const imageUrl = inputValues.profile_picture
-    ? `http://localhost:8000/${inputValues.profile_picture}`
-    : defaultImg;
-    // ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
+    // ? `http://localhost:8000/${inputValues.profile_picture}`
     // : defaultImg;
+  ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
+  : defaultImg;
   useEffect(() => {
     document.title = "Computer Monitoring - Profile";
   });
@@ -328,9 +313,10 @@ function Placeholder() {
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="flex flex-col items-center justify-center w-full mt-4">
           <div className="flex flex-col items-center justify-center p-4 border shadow-xl w-80 h-80 rounded-xl">
-            <img
+            <LazyLoadImage
               src={preview ? preview : imageUrl}
               alt="Profile"
+              effect="blur"
               className="w-48 h-48 rounded-full"
             />
             <label htmlFor="upload-button" className="folder">
@@ -601,30 +587,7 @@ function Placeholder() {
 
 const Profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        const response = await axios.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
+  const [isRefresh, setIsRefresh] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -632,11 +595,11 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header toggleSidebar={toggleSidebar} />
+      <Header isRefresh={isRefresh} toggleSidebar={toggleSidebar} />
       <div className="flex flex-1">
         <SideBar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col items-center justify-center w-full p-4 space-y-4">
-          <Placeholder />
+          <Placeholder onSubmit={setIsRefresh} />
         </div>
       </div>
     </div>

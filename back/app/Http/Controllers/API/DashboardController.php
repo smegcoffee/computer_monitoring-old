@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Computer;
 use App\Models\Unit;
 use App\Models\ComputerUser;
+use App\Models\TransferUnit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class DashboardController extends Controller
         $totalVacant = Unit::where('status', 'Vacant')->count();
         $totalUsed = Unit::where('status', 'Used')->count();
         $totalDefective = Unit::where('status', 'Defective')->count();
-        $totalUsedTransfer = Unit::where('status', 'Used (Transfer)')->count();
+        $totalUsedTransfer = TransferUnit::count();
 
         // Users
         $usersCount = ComputerUser::whereBetween('created_at', [$startOfWeek, $endOfWeek])
