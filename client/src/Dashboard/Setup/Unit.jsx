@@ -85,19 +85,29 @@ const CustomTableB = (refresh) => {
         if (!token) {
           throw new Error("Token not found");
         }
+
         const response = await axios.get("/api/units", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setUnit(response.data);
-        setLoading(false);
-        setError(false);
+        if (response.data.vacantDefective.length === 0) {
+          setUnit([]);
+          setError(false);
+        } else {
+          setUnit(response.data);
+          setError(false);
+        }
       } catch (error) {
-        console.error("Error fetching units data:", error);
-        if (error.response.status === 404) {
+        if (error.response && error.response.status === 404) {
+          setUnit([]);
+          setError(false);
+        } else {
+          console.error("Error fetching units data:", error);
+          setUnit([]);
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };
@@ -119,6 +129,7 @@ const CustomTableB = (refresh) => {
   });
 
   const handleDeleteUnit = async (dataId) => {
+    setRefreshed(true);
     try {
       const result = await Swal.fire({
         title: "Are you sure?",
@@ -131,7 +142,6 @@ const CustomTableB = (refresh) => {
       });
 
       if (result.isConfirmed) {
-        setRefreshed(true);
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
@@ -207,7 +217,7 @@ const CustomTableB = (refresh) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setCategory(response.data);
+        setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -227,7 +237,7 @@ const CustomTableB = (refresh) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSupplier(response.data);
+        setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -236,12 +246,12 @@ const CustomTableB = (refresh) => {
     fetchSupplier();
   }, []);
 
-  const Category = category.data.map((cat) => ({
+  const Category = category.data?.map((cat) => ({
     label: cat.category_name,
     value: cat.id,
   }));
 
-  const Supplier = supplier.data.map((sup) => ({
+  const Supplier = supplier.data?.map((sup) => ({
     label: sup.supplier_name,
     value: sup.id,
   }));
@@ -419,8 +429,8 @@ const CustomTableB = (refresh) => {
                   ))}
                 </TableCell>
               </TableRow>
-            ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
-              unit.vacantDefective
+            ) : unit?.vacantDefective && unit?.vacantDefective.length > 0 ? (
+              unit?.vacantDefective
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((data, index) => (
                   <TableRow key={data.id}>
@@ -510,7 +520,7 @@ const CustomTableB = (refresh) => {
                           }
                         />
                       ) : (
-                        data.description
+                        data?.description
                           .split("\n")
                           .map((line, lineIndex) => (
                             <div key={lineIndex}>{line}</div>
@@ -823,7 +833,11 @@ const CustomTableB = (refresh) => {
         <TablePagination
           rowsPerPageOptions={[5, 15, 20, 25]}
           component="div"
-          count={unit.vacantDefective.length}
+          count={
+            Array.isArray(unit?.vacantDefective)
+              ? unit.vacantDefective.length
+              : 0
+          }
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -928,7 +942,13 @@ const SearchableDropdown = ({
   );
 };
 
-const CustomTableA = ({ rows, setRows, onSubmit }) => {
+const CustomTableA = ({
+  rows,
+  setRows,
+  onSubmit,
+  isCategoryRefresh,
+  isSupplierRefresh,
+}) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
@@ -955,14 +975,14 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setCategory(response.data);
+        setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
     };
 
     fetchCategory();
-  }, []);
+  }, [isCategoryRefresh]);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
@@ -975,14 +995,14 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSupplier(response.data);
+        setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
     };
 
     fetchSupplier();
-  }, []);
+  }, [isSupplierRefresh]);
 
   // This is a sample data for Category
   const Category =
@@ -1168,7 +1188,7 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
+              {rows?.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">
                     <DatePicker
@@ -1420,6 +1440,8 @@ function Unit() {
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
+  const [isSupplierRefresh, setIsSupplierRefresh] = useState(false);
+  const [isCategoryRefresh, setIsCategoryRefresh] = useState(false);
 
   const handleCategory = (e) => {
     setCategory(e.target.value);
@@ -1428,6 +1450,7 @@ function Unit() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     setsLoading(true);
+    setIsCategoryRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -1499,6 +1522,7 @@ function Unit() {
       }
     } finally {
       setsLoading(false);
+      setIsCategoryRefresh(false);
     }
   };
 
@@ -1509,6 +1533,7 @@ function Unit() {
   const handleAddSupplier = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setIsSupplierRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -1580,6 +1605,7 @@ function Unit() {
       }
     } finally {
       setLoading(false);
+      setIsSupplierRefresh(false);
     }
   };
   return (
@@ -1705,7 +1731,13 @@ function Unit() {
             </div>
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
-            <CustomTableA rows={rows} setRows={setRows} onSubmit={setRefresh} />
+            <CustomTableA
+              isCategoryRefresh={isCategoryRefresh}
+              isSupplierRefresh={isSupplierRefresh}
+              rows={rows}
+              setRows={setRows}
+              onSubmit={setRefresh}
+            />
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
             <CustomTableB rows={rows} refresh={refresh} />

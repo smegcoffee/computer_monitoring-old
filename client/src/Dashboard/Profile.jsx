@@ -238,7 +238,8 @@ function Placeholder({ onSubmit }) {
       });
       if (response.data.status === true) {
         setPreview(
-          `https://desstrongmotors.com/monitoringback/${response.data.data.profile_picture}`
+          `http://localhost:8000/${response.data.data.profile_picture}`
+          // `https://desstrongmotors.com/monitoringback/${response.data.data.profile_picture}`
         );
         const Toast = Swal.mixin({
           toast: true,
@@ -301,10 +302,10 @@ function Placeholder({ onSubmit }) {
   };
 
   const imageUrl = inputValues.profile_picture
-    // ? `http://localhost:8000/${inputValues.profile_picture}`
-    // : defaultImg;
-  ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
-  : defaultImg;
+    ? `http://localhost:8000/${inputValues.profile_picture}`
+    : defaultImg;
+  // ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
+  // : defaultImg;
   useEffect(() => {
     document.title = "Computer Monitoring - Profile";
   });

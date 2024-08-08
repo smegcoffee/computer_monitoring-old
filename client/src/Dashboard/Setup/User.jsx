@@ -23,6 +23,8 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 function User() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isBranchRefresh, setIsBranchRefresh] = useState(false);
+  const [isPositionRefresh, setIsPositionRefresh] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -64,7 +66,7 @@ function User() {
     };
 
     fetchBrancheCode();
-  }, []);
+  }, [isBranchRefresh]);
   useEffect(() => {
     const fetchPosition = async () => {
       try {
@@ -84,7 +86,7 @@ function User() {
     };
 
     fetchPosition();
-  }, []);
+  }, [isPositionRefresh]);
 
   // This is a sample data for Position
   const Position =
@@ -192,6 +194,7 @@ function User() {
   const handleSubmitPosition = async (event) => {
     event.preventDefault();
     setpLoading(true);
+    setIsPositionRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -263,12 +266,14 @@ function User() {
       }
     } finally {
       setpLoading(false);
+      setIsPositionRefresh(false);
     }
   };
 
   const handleSubmitBranchCode = async (event) => {
     event.preventDefault();
     setbLoading(true);
+    setIsBranchRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -340,6 +345,7 @@ function User() {
       }
     } finally {
       setbLoading(false);
+      setIsBranchRefresh(false);
     }
   };
 

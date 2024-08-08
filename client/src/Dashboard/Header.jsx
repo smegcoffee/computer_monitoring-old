@@ -290,12 +290,12 @@ function Header({ toggleSidebar, isRefresh }) {
     }
   };
 
-  // const imageUrl = profileImg
-  //   ? `http://localhost:8000/${profileImg}`
-  //   : defaultImg;
   const imageUrl = profileImg
-  ? `https://desstrongmotors.com/monitoringback/${profileImg}`
-  : defaultImg;
+    ? `http://localhost:8000/${profileImg}`
+    : defaultImg;
+  // const imageUrl = profileImg
+  // ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+  // : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });

@@ -575,7 +575,8 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
             EDIT
           </button>
           <button
-            className="text-xl text-white bg-blue-500 rounded-3xl h-9 w-36"
+            disabled={id.length === 0}
+            className={id.length === 0 ? "text-xl text-white bg-blue-300 cursor-not-allowed rounded-3xl h-9 w-36" : "text-xl text-white bg-blue-500 rounded-3xl h-9 w-36"}
             onClick={handleClick}
           >
             PRINT
