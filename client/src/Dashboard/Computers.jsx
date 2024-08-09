@@ -72,12 +72,12 @@ export const TableComponent = () => {
 
         setComputerUser(userData);
         setFilteredData(userData);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching computer users:", error);
         if (error.response.status === 404) {
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };

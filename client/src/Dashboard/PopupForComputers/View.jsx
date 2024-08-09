@@ -62,7 +62,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
 
   useEffect(() => {
     if (redirectToPrint) {
-      window.open(`/print/${id}`, "_blank");
+      window.open(`/monitoring/print/${id}`, "_blank");
     }
   }, [redirectToPrint]);
 

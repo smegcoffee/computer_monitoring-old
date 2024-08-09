@@ -96,12 +96,12 @@ function AllUnits() {
         const unit = response.data.data;
 
         setUnits(unit);
-        setLoading(false);
       } catch (error) {
         console.error("Error all units:", error);
         if (error.response.status === 404) {
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };

@@ -136,7 +136,7 @@ function Header({ toggleSidebar, isRefresh }) {
         });
 
         localStorage.removeItem("token");
-        window.location = "/login";
+        window.location = "/monitoring/login";
       } catch (error) {
         console.error("Error logging out:", error);
         Swal.fire("Error!", "Failed to log out. Please try again.", "error");
@@ -290,12 +290,12 @@ function Header({ toggleSidebar, isRefresh }) {
     }
   };
 
-  const imageUrl = profileImg
-    ? `http://localhost:8000/${profileImg}`
-    : defaultImg;
   // const imageUrl = profileImg
-  // ? `https://desstrongmotors.com/monitoringback/${profileImg}`
-  // : defaultImg;
+  //   ? `http://localhost:8000/${profileImg}`
+  //   : defaultImg;
+  const imageUrl = profileImg
+  ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+  : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
@@ -316,8 +316,6 @@ function Header({ toggleSidebar, isRefresh }) {
             COMPUTER MONITORING SYSTEM
           </p>
         </div>
-
-        {user && user.data && (
           <div>
             <Tooltip title="Notifications">
               <IconButton
@@ -370,11 +368,10 @@ function Header({ toggleSidebar, isRefresh }) {
                 aria-haspopup="true"
                 aria-expanded={openProfileMenu ? "true" : undefined}
               >
-                <Avatar alt={user.data.firstName} src={imageUrl} />
+                <Avatar alt={user?.data.firstName} src={imageUrl} />
               </IconButton>
             </Tooltip>
           </div>
-        )}
 
         <Menu
           anchorEl={profileAnchorEl}
@@ -592,12 +589,12 @@ function Header({ toggleSidebar, isRefresh }) {
                       <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
                       <Avatar
                         src={
-                          notif.user.profile_picture
-                            ? `http://localhost:8000/${notif.user.profile_picture}`
-                            : defaultImg
                           // notif.user.profile_picture
-                          //   ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                          //   ? `http://localhost:8000/${notif.user.profile_picture}`
                           //   : defaultImg
+                          notif.user.profile_picture
+                            ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                            : defaultImg
                         }
                         sx={{ mr: 2 }}
                       />

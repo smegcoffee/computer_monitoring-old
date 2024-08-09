@@ -80,12 +80,12 @@ function Set() {
         });
         setComputerUser(response.data.hasComputerSet);
         setFilteredData(response.data.hasComputerSet);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching computer users:", error);
         if (error.response.status === 404) {
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };
