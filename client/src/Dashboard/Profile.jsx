@@ -14,6 +14,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -61,7 +62,6 @@ const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
     onSelect(option);
     setIsOpen(false);
   };
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -73,7 +73,7 @@ const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     if (user && user.data.branch_code.branch_name) {
