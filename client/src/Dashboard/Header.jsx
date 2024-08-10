@@ -23,15 +23,21 @@ import defaultImg from "../img/profile.png";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
 function Header({ toggleSidebar, isRefresh }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
-  const [profileImg, setProfileImg] = useState(null);
-  const [notification, setNotification] = useState(null);
+  const [profileImg, setProfileImg] = useState(() => {
+    const savedProfileImg = localStorage.getItem("profileImg");
+    return savedProfileImg ? JSON.parse(savedProfileImg) : null;
+  });
+  const [notification, setNotification] = useState([]);
   const [notifCount, setNotifCount] = useState(null);
+  const [noNotification, setNoNotification] = useState(null);
   const [refreshNotification, setRefreshNotification] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [noNotification, setNoNotification] = useState(null);
   const [loadingNotificationId, setLoadingNotificationId] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -68,17 +74,22 @@ function Header({ toggleSidebar, isRefresh }) {
           },
         });
 
-        setUser(response.data);
-        setProfileImg(response.data.data.profile_picture);
+        const fetchedUser = response.data;
+        setUser(fetchedUser);
+        setProfileImg(fetchedUser.data.profile_picture);
+        localStorage.setItem("user", JSON.stringify(fetchedUser));
+        localStorage.setItem(
+          "profileImg",
+          JSON.stringify(fetchedUser.data.profile_picture)
+        );
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     };
 
-    fetchUserProfile();
-    // const intervalId = setInterval(fetchUserProfile, 1000);
-
-    // return () => clearInterval(intervalId);
+    if (!user || isRefresh) {
+      fetchUserProfile();
+    }
   }, [isRefresh]);
 
   useEffect(() => {
@@ -109,9 +120,9 @@ function Header({ toggleSidebar, isRefresh }) {
 
     fetchNotifications();
 
-    // const intervalId = setInterval(fetchNotifications, 1000);
+    const intervalId = setInterval(fetchNotifications, 10000);
 
-    // return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId);
   }, [refreshNotification, isRefresh]);
 
   const handleLogout = async () => {
@@ -135,7 +146,11 @@ function Header({ toggleSidebar, isRefresh }) {
           },
         });
 
+        setUser(null);
+        setProfileImg(null);
+        localStorage.removeItem("user");
         localStorage.removeItem("token");
+        localStorage.removeItem("profileImg");
         window.location = "/monitoring/login";
       } catch (error) {
         console.error("Error logging out:", error);
@@ -316,62 +331,62 @@ function Header({ toggleSidebar, isRefresh }) {
             COMPUTER MONITORING SYSTEM
           </p>
         </div>
-          <div>
-            <Tooltip title="Notifications">
-              <IconButton
-                onClick={handleNotificationClick}
-                size="small"
-                sx={{ color: "white", position: "relative" }}
-                aria-controls={
-                  openNotificationMenu ? "notification-menu" : undefined
-                }
-                aria-haspopup="true"
-                aria-expanded={openNotificationMenu ? "true" : undefined}
-              >
-                <NotificationsIcon
-                  sx={{
-                    color: "white",
-                    ...(notification
-                      ? {
-                          animation: "wiggle 1s infinite",
-                          "@keyframes wiggle": {
-                            "0%": { transform: "rotate(0deg)" },
-                            "10%": { transform: "rotate(-15deg)" },
-                            "20%": { transform: "rotate(15deg)" },
-                            "30%": { transform: "rotate(-15deg)" },
-                            "40%": { transform: "rotate(15deg)" },
-                            "50%": { transform: "rotate(0deg)" },
-                            "100%": { transform: "rotate(0deg)" },
-                          },
-                        }
-                      : {}),
-                  }}
-                />
-                {notification ? (
-                  <span className="absolute top-0 right-0 flex w-4 h-4">
-                    <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
-                    <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 font-bold text-white bg-red-500 rounded-full">
-                      {notifCount}
-                    </span>
+        <div>
+          <Tooltip title="Notifications">
+            <IconButton
+              onClick={handleNotificationClick}
+              size="small"
+              sx={{ color: "white", position: "relative" }}
+              aria-controls={
+                openNotificationMenu ? "notification-menu" : undefined
+              }
+              aria-haspopup="true"
+              aria-expanded={openNotificationMenu ? "true" : undefined}
+            >
+              <NotificationsIcon
+                sx={{
+                  color: "white",
+                  ...(notification?.length > 0
+                    ? {
+                        animation: "wiggle 1s infinite",
+                        "@keyframes wiggle": {
+                          "0%": { transform: "rotate(0deg)" },
+                          "10%": { transform: "rotate(-15deg)" },
+                          "20%": { transform: "rotate(15deg)" },
+                          "30%": { transform: "rotate(-15deg)" },
+                          "40%": { transform: "rotate(15deg)" },
+                          "50%": { transform: "rotate(0deg)" },
+                          "100%": { transform: "rotate(0deg)" },
+                        },
+                      }
+                    : {}),
+                }}
+              />
+              {notification?.length > 0 ? (
+                <span className="absolute top-0 right-0 flex w-4 h-4">
+                  <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
+                  <span className="relative inline-flex items-center text-[10px] justify-center w-4 h-4 font-bold text-white bg-red-500 rounded-full">
+                    {notifCount}
                   </span>
-                ) : (
-                  ""
-                )}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Account Settings">
-              <IconButton
-                onClick={handleProfileClick}
-                size="small"
-                sx={{ ml: 1 }}
-                aria-controls={openProfileMenu ? "profile-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={openProfileMenu ? "true" : undefined}
-              >
-                <Avatar alt={user?.data.firstName} src={imageUrl} />
-              </IconButton>
-            </Tooltip>
-          </div>
+                </span>
+              ) : (
+                ""
+              )}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Account Settings">
+            <IconButton
+              onClick={handleProfileClick}
+              size="small"
+              sx={{ ml: 1 }}
+              aria-controls={openProfileMenu ? "profile-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openProfileMenu ? "true" : undefined}
+            >
+              <Avatar alt={user?.data.firstName} src={imageUrl} />
+            </IconButton>
+          </Tooltip>
+        </div>
 
         <Menu
           anchorEl={profileAnchorEl}
@@ -600,9 +615,13 @@ function Header({ toggleSidebar, isRefresh }) {
                       />
                       <div>
                         <Typography variant="body2">
-                          <b>
-                            {notif.user.firstName} {notif.user.lastName}
-                          </b>
+                          {user.data.id === notif.user.id ? (
+                            <strong>You</strong>
+                          ) : (
+                            <strong>
+                              {notif.user.firstName} {notif.user.lastName}
+                            </strong>
+                          )}
                         </Typography>
                         <Typography variant="body2"> {notif.title}</Typography>
                         <Typography variant="caption" color="text.secondary">

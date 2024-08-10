@@ -1651,83 +1651,91 @@ function Unit() {
           <br /> <br />
           <div className="flex items-center justify-center ml-10 mr-10">
             <div className="w-1/2 mr-5 border border-transparent shadow-lg rounded-xl max-h-max">
-              <div className="flex items-center justify-center text-center">
-                <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                  <p className="font-semibold text-base mt-1.5">ADD CATEGORY</p>
-                </div>
-              </div>
-              <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                <input
-                  type="text"
-                  name="category_name"
-                  value={category}
-                  onChange={handleCategory}
-                  placeholder="Input category..."
-                  className={
-                    validationErrors.category_name
-                      ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                      : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                  }
-                />
-              </div>
-              <span className="text-sm text-center">
-                {validationErrors.category_name && (
-                  <div className="text-red-500">
-                    {validationErrors.category_name.map((error, index) => (
-                      <span key={index}>{error}</span>
-                    ))}
+              <form onSubmit={handleAddCategory}>
+                <div className="flex items-center justify-center text-center">
+                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
+                    <p className="font-semibold text-base mt-1.5">
+                      ADD CATEGORY
+                    </p>
                   </div>
-                )}
-              </span>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleAddCategory}
-                  disabled={sloading}
-                  className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                >
-                  {sloading ? "ADDING..." : "ADD"}
-                </button>
-              </div>
+                </div>
+                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
+                  <input
+                    type="text"
+                    name="category_name"
+                    value={category}
+                    onChange={handleCategory}
+                    placeholder="Input category..."
+                    className={
+                      validationErrors.category_name
+                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
+                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
+                    }
+                  />
+                </div>
+                <span className="text-sm text-center">
+                  {validationErrors.category_name && (
+                    <div className="text-red-500">
+                      {validationErrors.category_name.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={sloading}
+                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
+                  >
+                    {sloading ? "ADDING..." : "ADD"}
+                  </button>
+                </div>
+              </form>
             </div>
             <div className="w-1/2 border border-transparent shadow-lg rounded-xl max-h-max">
-              <div className="flex items-center justify-center text-center">
-                <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                  <p className="font-semibold text-base mt-1.5">ADD SUPPLIER</p>
-                </div>
-              </div>
-              <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                <input
-                  type="text"
-                  name="supplier_name"
-                  value={supplier}
-                  onChange={handleSupplier}
-                  placeholder="Input supplier..."
-                  className={
-                    validationErrors.supplier_name
-                      ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                      : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                  }
-                />
-              </div>
-
-              <span className="text-sm text-center">
-                {validationErrors.supplier_name && (
-                  <div className="text-red-500">
-                    {validationErrors.supplier_name.map((error, index) => (
-                      <span key={index}>{error}</span>
-                    ))}
+              <form onSubmit={handleAddSupplier}>
+                <div className="flex items-center justify-center text-center">
+                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
+                    <p className="font-semibold text-base mt-1.5">
+                      ADD SUPPLIER
+                    </p>
                   </div>
-                )}
-              </span>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleAddSupplier}
-                  disabled={loading}
-                  className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                >
-                  {loading ? "ADDING..." : "ADD"}
-                </button>
-              </div>
+                </div>
+                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
+                  <input
+                    type="text"
+                    name="supplier_name"
+                    value={supplier}
+                    onChange={handleSupplier}
+                    placeholder="Input supplier..."
+                    className={
+                      validationErrors.supplier_name
+                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
+                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
+                    }
+                  />
+                </div>
+
+                <span className="text-sm text-center">
+                  {validationErrors.supplier_name && (
+                    <div className="text-red-500">
+                      {validationErrors.supplier_name.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
+                  >
+                    {loading ? "ADDING..." : "ADD"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
