@@ -9,17 +9,15 @@ import { Breadcrumbs, Typography } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
 function QrC() {
+  const title = "Scan QR Codes";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  useEffect(() => {
-    document.title = "Computer Monitoring - Scan QR Codes";
-  });
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

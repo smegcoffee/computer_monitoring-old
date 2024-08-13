@@ -388,12 +388,10 @@ function Computers() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Monitored Computers";
-  });
+  const title = "Monitored Computers";
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

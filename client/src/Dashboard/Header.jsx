@@ -22,7 +22,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import defaultImg from "../img/profile.png";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 
-function Header({ toggleSidebar, isRefresh }) {
+function Header({ toggleSidebar, isRefresh, title }) {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -124,6 +124,14 @@ function Header({ toggleSidebar, isRefresh }) {
 
     return () => clearInterval(intervalId);
   }, [refreshNotification, isRefresh]);
+
+  useEffect(() => {
+    if (notifCount > 0) {
+      document.title = `(${notifCount}) Computer Monitoring - ${title}`;
+    } else {
+      document.title = `Computer Monitoring - ${title}`;
+    }
+  }, [notifCount, title]);
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -521,7 +529,7 @@ function Header({ toggleSidebar, isRefresh }) {
           <div className="overflow-y-auto max-h-[400px]">
             {dataLoading ? (
               <div>
-                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                <div class="shadow rounded-md p-4 w-full mx-auto">
                   <div class="animate-pulse flex space-x-4">
                     <div class="rounded-full bg-slate-700 h-10 w-10"></div>
                     <div class="flex-1 space-y-6 py-1">
@@ -536,7 +544,7 @@ function Header({ toggleSidebar, isRefresh }) {
                     </div>
                   </div>
                 </div>
-                <div class="shadow rounded-md p-4 max-w-sm w-full mx-auto">
+                <div class="shadow rounded-md p-4 w-full mx-auto">
                   <div class="animate-pulse flex space-x-4">
                     <div class="rounded-full bg-slate-700 h-10 w-10"></div>
                     <div class="flex-1 space-y-6 py-1">

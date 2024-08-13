@@ -296,9 +296,6 @@ function Placeholder({ onSubmit }) {
     // : defaultImg;
   ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
   : defaultImg;
-  useEffect(() => {
-    document.title = "Computer Monitoring - Profile";
-  });
   return (
     <div className="w-full max-w-2xl p-4 mt-10 rounded">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -578,6 +575,7 @@ function Placeholder({ onSubmit }) {
 }
 
 const Profile = () => {
+  const title = "Profile";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
 
@@ -587,7 +585,11 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header isRefresh={isRefresh} toggleSidebar={toggleSidebar} />
+      <Header
+        isRefresh={isRefresh}
+        toggleSidebar={toggleSidebar}
+        title={title}
+      />
       <div className="flex flex-1">
         <SideBar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="flex flex-col items-center justify-center w-full p-4 space-y-4">

@@ -123,13 +123,11 @@ function AllUnits() {
     rowsPerPage -
     Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - All Units";
-  });
-  
+  const title = "All Units";
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

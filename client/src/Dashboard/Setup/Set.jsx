@@ -165,15 +165,14 @@ function Set() {
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-  useEffect(() => {
-    document.title = "Computer Monitoring - Setup Computer Set";
-  });
+
+  const title = "Setup Computer Set";
 
   const now = DateTime.now().setZone("Asia/Manila").toJSDate();
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

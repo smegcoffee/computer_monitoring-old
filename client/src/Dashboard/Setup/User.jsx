@@ -349,12 +349,14 @@ function User() {
     }
   };
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Setup User";
-  });
+  const title = "Setup User";
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header isRefresh={isRefresh} toggleSidebar={toggleSidebar} />
+      <Header
+        isRefresh={isRefresh}
+        toggleSidebar={toggleSidebar}
+        title={title}
+      />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

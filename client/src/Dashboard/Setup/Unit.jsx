@@ -124,10 +124,6 @@ const CustomTableB = (refresh) => {
     setPage(newPage);
   };
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Setup Unit";
-  });
-
   const handleDeleteUnit = async (dataId) => {
     setRefreshed(true);
     try {
@@ -652,8 +648,8 @@ const CustomTableB = (refresh) => {
                             }
                             className={
                               loadingUpdate
-                                ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
-                                : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                              ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
+                              : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                             }
                           >
                             {loadingUpdate ? (
@@ -661,7 +657,7 @@ const CustomTableB = (refresh) => {
                                 className="animate-spin"
                                 icon={faSpinner}
                               />
-                            ) : (
+                              ) : (
                               <FontAwesomeIcon icon={faFloppyDisk} />
                             )}
                           </button>
@@ -669,27 +665,27 @@ const CustomTableB = (refresh) => {
                             type="button"
                             onClick={handleCancelEdit}
                             className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                          >
+                            >
                             <FontAwesomeIcon icon={faX} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateUnit(data.id, data)}
-                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                          >
-                            <FontAwesomeIcon icon={faPen} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUnit(data.id)}
+                            </button>
+                            </div>
+                            ) : (
+                              <div className="flex gap-1">
+                              <button
+                              type="button"
+                              onClick={() => handleUpdateUnit(data.id, data)}
+                              className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                              >
+                              <FontAwesomeIcon icon={faPen} />
+                              </button>
+                              <button
+                              type="button"
+                              onClick={() => handleDeleteUnit(data.id)}
                             className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                           >
                             <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
+                            </button>
+                            </div>
                       )}
                     </TableCell> */}
 
@@ -1419,6 +1415,8 @@ const CustomTableA = ({
 function Unit() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const title = "Setup Unit";
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -1610,7 +1608,7 @@ function Unit() {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar
