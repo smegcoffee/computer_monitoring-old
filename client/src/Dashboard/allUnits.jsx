@@ -96,12 +96,12 @@ function AllUnits() {
         const unit = response.data.data;
 
         setUnits(unit);
-        setLoading(false);
       } catch (error) {
         console.error("Error all units:", error);
         if (error.response.status === 404) {
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };
@@ -123,13 +123,11 @@ function AllUnits() {
     rowsPerPage -
     Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - All Units";
-  });
-  
+  const title = "All Units";
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

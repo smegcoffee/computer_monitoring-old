@@ -1,7 +1,7 @@
 import React from "react";
 import SideBar from "./Sidebar";
 import Dashboard from "./Db2";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "../api/axios";
 import Header from "./Header";
 import { Breadcrumbs, Typography } from "@mui/material";
@@ -38,12 +38,10 @@ function DashBoard() {
     fetchUserProfile();
   }, []);
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Dashboard";
-  });
+  const title = "Dashboard";
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

@@ -72,12 +72,12 @@ export const TableComponent = () => {
 
         setComputerUser(userData);
         setFilteredData(userData);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching computer users:", error);
         if (error.response.status === 404) {
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };
@@ -388,12 +388,10 @@ function Computers() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Monitored Computers";
-  });
+  const title = "Monitored Computers";
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar

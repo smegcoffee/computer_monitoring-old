@@ -85,19 +85,29 @@ const CustomTableB = (refresh) => {
         if (!token) {
           throw new Error("Token not found");
         }
+
         const response = await axios.get("/api/units", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setUnit(response.data);
-        setLoading(false);
-        setError(false);
+        if (response.data.vacantDefective.length === 0) {
+          setUnit([]);
+          setError(false);
+        } else {
+          setUnit(response.data);
+          setError(false);
+        }
       } catch (error) {
-        console.error("Error fetching units data:", error);
-        if (error.response.status === 404) {
+        if (error.response && error.response.status === 404) {
+          setUnit([]);
+          setError(false);
+        } else {
+          console.error("Error fetching units data:", error);
+          setUnit([]);
           setError(true);
         }
+      } finally {
         setLoading(false);
       }
     };
@@ -114,11 +124,8 @@ const CustomTableB = (refresh) => {
     setPage(newPage);
   };
 
-  useEffect(() => {
-    document.title = "Computer Monitoring - Setup Unit";
-  });
-
   const handleDeleteUnit = async (dataId) => {
+    setRefreshed(true);
     try {
       const result = await Swal.fire({
         title: "Are you sure?",
@@ -131,7 +138,6 @@ const CustomTableB = (refresh) => {
       });
 
       if (result.isConfirmed) {
-        setRefreshed(true);
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
@@ -207,7 +213,7 @@ const CustomTableB = (refresh) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setCategory(response.data);
+        setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -227,7 +233,7 @@ const CustomTableB = (refresh) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSupplier(response.data);
+        setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
@@ -236,12 +242,12 @@ const CustomTableB = (refresh) => {
     fetchSupplier();
   }, []);
 
-  const Category = category.data.map((cat) => ({
+  const Category = category.data?.map((cat) => ({
     label: cat.category_name,
     value: cat.id,
   }));
 
-  const Supplier = supplier.data.map((sup) => ({
+  const Supplier = supplier.data?.map((sup) => ({
     label: sup.supplier_name,
     value: sup.id,
   }));
@@ -419,8 +425,8 @@ const CustomTableB = (refresh) => {
                   ))}
                 </TableCell>
               </TableRow>
-            ) : unit.vacantDefective && unit.vacantDefective.length > 0 ? (
-              unit.vacantDefective
+            ) : unit?.vacantDefective && unit?.vacantDefective.length > 0 ? (
+              unit?.vacantDefective
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((data, index) => (
                   <TableRow key={data.id}>
@@ -510,7 +516,7 @@ const CustomTableB = (refresh) => {
                           }
                         />
                       ) : (
-                        data.description
+                        data?.description
                           .split("\n")
                           .map((line, lineIndex) => (
                             <div key={lineIndex}>{line}</div>
@@ -642,8 +648,8 @@ const CustomTableB = (refresh) => {
                             }
                             className={
                               loadingUpdate
-                                ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
-                                : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                              ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
+                              : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                             }
                           >
                             {loadingUpdate ? (
@@ -651,7 +657,7 @@ const CustomTableB = (refresh) => {
                                 className="animate-spin"
                                 icon={faSpinner}
                               />
-                            ) : (
+                              ) : (
                               <FontAwesomeIcon icon={faFloppyDisk} />
                             )}
                           </button>
@@ -659,27 +665,27 @@ const CustomTableB = (refresh) => {
                             type="button"
                             onClick={handleCancelEdit}
                             className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                          >
+                            >
                             <FontAwesomeIcon icon={faX} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateUnit(data.id, data)}
-                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                          >
-                            <FontAwesomeIcon icon={faPen} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUnit(data.id)}
+                            </button>
+                            </div>
+                            ) : (
+                              <div className="flex gap-1">
+                              <button
+                              type="button"
+                              onClick={() => handleUpdateUnit(data.id, data)}
+                              className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                              >
+                              <FontAwesomeIcon icon={faPen} />
+                              </button>
+                              <button
+                              type="button"
+                              onClick={() => handleDeleteUnit(data.id)}
                             className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                           >
                             <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
+                            </button>
+                            </div>
                       )}
                     </TableCell> */}
 
@@ -823,7 +829,11 @@ const CustomTableB = (refresh) => {
         <TablePagination
           rowsPerPageOptions={[5, 15, 20, 25]}
           component="div"
-          count={unit.vacantDefective.length}
+          count={
+            Array.isArray(unit?.vacantDefective)
+              ? unit.vacantDefective.length
+              : 0
+          }
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -928,7 +938,13 @@ const SearchableDropdown = ({
   );
 };
 
-const CustomTableA = ({ rows, setRows, onSubmit }) => {
+const CustomTableA = ({
+  rows,
+  setRows,
+  onSubmit,
+  isCategoryRefresh,
+  isSupplierRefresh,
+}) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
@@ -955,14 +971,14 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setCategory(response.data);
+        setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
     };
 
     fetchCategory();
-  }, []);
+  }, [isCategoryRefresh]);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
@@ -975,14 +991,14 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSupplier(response.data);
+        setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
     };
 
     fetchSupplier();
-  }, []);
+  }, [isSupplierRefresh]);
 
   // This is a sample data for Category
   const Category =
@@ -1168,7 +1184,7 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
+              {rows?.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell align="center">
                     <DatePicker
@@ -1399,6 +1415,8 @@ const CustomTableA = ({ rows, setRows, onSubmit }) => {
 function Unit() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const title = "Setup Unit";
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -1420,6 +1438,8 @@ function Unit() {
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
+  const [isSupplierRefresh, setIsSupplierRefresh] = useState(false);
+  const [isCategoryRefresh, setIsCategoryRefresh] = useState(false);
 
   const handleCategory = (e) => {
     setCategory(e.target.value);
@@ -1428,6 +1448,7 @@ function Unit() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     setsLoading(true);
+    setIsCategoryRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -1499,6 +1520,7 @@ function Unit() {
       }
     } finally {
       setsLoading(false);
+      setIsCategoryRefresh(false);
     }
   };
 
@@ -1509,6 +1531,7 @@ function Unit() {
   const handleAddSupplier = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setIsSupplierRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -1580,11 +1603,12 @@ function Unit() {
       }
     } finally {
       setLoading(false);
+      setIsSupplierRefresh(false);
     }
   };
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header toggleSidebar={toggleSidebar} />
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar
@@ -1625,87 +1649,101 @@ function Unit() {
           <br /> <br />
           <div className="flex items-center justify-center ml-10 mr-10">
             <div className="w-1/2 mr-5 border border-transparent shadow-lg rounded-xl max-h-max">
-              <div className="flex items-center justify-center text-center">
-                <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                  <p className="font-semibold text-base mt-1.5">ADD CATEGORY</p>
-                </div>
-              </div>
-              <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                <input
-                  type="text"
-                  name="category_name"
-                  value={category}
-                  onChange={handleCategory}
-                  placeholder="Input category..."
-                  className={
-                    validationErrors.category_name
-                      ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                      : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                  }
-                />
-              </div>
-              <span className="text-sm text-center">
-                {validationErrors.category_name && (
-                  <div className="text-red-500">
-                    {validationErrors.category_name.map((error, index) => (
-                      <span key={index}>{error}</span>
-                    ))}
+              <form onSubmit={handleAddCategory}>
+                <div className="flex items-center justify-center text-center">
+                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
+                    <p className="font-semibold text-base mt-1.5">
+                      ADD CATEGORY
+                    </p>
                   </div>
-                )}
-              </span>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleAddCategory}
-                  disabled={sloading}
-                  className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                >
-                  {sloading ? "ADDING..." : "ADD"}
-                </button>
-              </div>
+                </div>
+                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
+                  <input
+                    type="text"
+                    name="category_name"
+                    value={category}
+                    onChange={handleCategory}
+                    placeholder="Input category..."
+                    className={
+                      validationErrors.category_name
+                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
+                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
+                    }
+                  />
+                </div>
+                <span className="text-sm text-center">
+                  {validationErrors.category_name && (
+                    <div className="text-red-500">
+                      {validationErrors.category_name.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={sloading}
+                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
+                  >
+                    {sloading ? "ADDING..." : "ADD"}
+                  </button>
+                </div>
+              </form>
             </div>
             <div className="w-1/2 border border-transparent shadow-lg rounded-xl max-h-max">
-              <div className="flex items-center justify-center text-center">
-                <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                  <p className="font-semibold text-base mt-1.5">ADD SUPPLIER</p>
-                </div>
-              </div>
-              <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                <input
-                  type="text"
-                  name="supplier_name"
-                  value={supplier}
-                  onChange={handleSupplier}
-                  placeholder="Input supplier..."
-                  className={
-                    validationErrors.supplier_name
-                      ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                      : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                  }
-                />
-              </div>
-
-              <span className="text-sm text-center">
-                {validationErrors.supplier_name && (
-                  <div className="text-red-500">
-                    {validationErrors.supplier_name.map((error, index) => (
-                      <span key={index}>{error}</span>
-                    ))}
+              <form onSubmit={handleAddSupplier}>
+                <div className="flex items-center justify-center text-center">
+                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
+                    <p className="font-semibold text-base mt-1.5">
+                      ADD SUPPLIER
+                    </p>
                   </div>
-                )}
-              </span>
-              <div className="flex justify-center">
-                <button
-                  onClick={handleAddSupplier}
-                  disabled={loading}
-                  className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                >
-                  {loading ? "ADDING..." : "ADD"}
-                </button>
-              </div>
+                </div>
+                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
+                  <input
+                    type="text"
+                    name="supplier_name"
+                    value={supplier}
+                    onChange={handleSupplier}
+                    placeholder="Input supplier..."
+                    className={
+                      validationErrors.supplier_name
+                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
+                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
+                    }
+                  />
+                </div>
+
+                <span className="text-sm text-center">
+                  {validationErrors.supplier_name && (
+                    <div className="text-red-500">
+                      {validationErrors.supplier_name.map((error, index) => (
+                        <span key={index}>{error}</span>
+                      ))}
+                    </div>
+                  )}
+                </span>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
+                  >
+                    {loading ? "ADDING..." : "ADD"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
-            <CustomTableA rows={rows} setRows={setRows} onSubmit={setRefresh} />
+            <CustomTableA
+              isCategoryRefresh={isCategoryRefresh}
+              isSupplierRefresh={isSupplierRefresh}
+              rows={rows}
+              setRows={setRows}
+              onSubmit={setRefresh}
+            />
           </div>
           <div className="flex items-center justify-center ml-10 mr-10">
             <CustomTableB rows={rows} refresh={refresh} />

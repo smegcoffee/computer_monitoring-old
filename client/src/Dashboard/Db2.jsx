@@ -24,48 +24,22 @@ import ChartBoxComputer from "../data/ChartBoxComputer";
 import ChartBoxRemark from "../data/ChartBoxRemark";
 import axios from "../api/axios";
 
-function TopBox() {
+function TopBox({ dashboardData, dashboardLoading }) {
   const [userFormatted, setUserFormatted] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getRandomEmail = () => {
-    const domains = ["example.com", "mail.com", "test.com"];
-    const randomName = Math.random().toString(36).substring(2, 11);
-    const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-    return `${randomName}@${randomDomain}`;
-  };
-
   useEffect(() => {
-    const fetchUserFormatted = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const computersData = response.data.usersFormatted.map((user) => ({
-          username: user.computer_user.name,
-          img: profile,
-          email: getRandomEmail(),
-          many: user.formatted_status,
-        }));
-
-        setUserFormatted(computersData);
+        setUserFormatted(dashboardData);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false);
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchUserFormatted();
-  }, []);
-
-  //many = how many computers been formatted in his/her ownership
+    fetchData();
+  }, [dashboardData, dashboardLoading]);
 
   const dataUsers = userFormatted;
   return (
@@ -187,32 +161,22 @@ function BarChartBox(props) {
   );
 }
 
-function PieChartBox() {
+function PieChartBox({ dashboardData, dashboardLoading }) {
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPieData = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setPieData(response.data);
+        setPieData(dashboardData);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false);
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchPieData();
-  }, []);
+    fetchData();
+  }, [dashboardData, dashboardLoading]);
 
   const data = [
     { name: "Using", value: pieData.totalUsed, color: "#008bf2" },
@@ -241,8 +205,8 @@ function PieChartBox() {
               </div>
             ) : (
               data.map((item, index) => (
-                <ul>
-                  <li key={index}>
+                <ul key={index}>
+                  <li>
                     <div className="flex flex-col items-center gap-1 option">
                       <div className="flex items-center gap-1 title">
                         <div
@@ -284,39 +248,22 @@ function PieChartBox() {
   );
 }
 
-function BigChartBox() {
+function BigChartBox({ dashboardData, dashboardLoading }) {
   const [analyticsData, setAnalyticsData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnalyticsData = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-
-        const response = await axios.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const formattedData = response.data.analytics.map((analytic) => ({
-          name: analytic.name,
-          set: analytic.computers_count,
-          unit: analytic.units_count,
-        }));
-        setAnalyticsData(formattedData);
+        setAnalyticsData(dashboardData);
       } catch (error) {
-        console.error("Error fetching analytics data:", error);
+        console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false);
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchAnalyticsData();
-  }, []);
+    fetchData();
+  }, [dashboardData, dashboardLoading]);
   return (
     <div className="flex flex-col justify-between w-full h-full bigChartBox">
       <h1 className="text-2xl font-bold">Analytics</h1>
@@ -374,6 +321,28 @@ function Dashboard() {
   const [weeklyRemarks, setWeeklyRemarks] = useState([]);
   const [hasData, setHasData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [computersDatas, setComputersDatas] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [chartDataUser, setChartDataUser] = useState([]);
+  const [weeklyUsers, setWeeklyUsers] = useState([]);
+  const [userPercent, setUserPercent] = useState([]);
+  const [chartDataUnit, setChartDataUnit] = useState([]);
+  const [weeklyUnits, setWeeklyUnits] = useState([]);
+  const [unitPercent, setUnitPercent] = useState([]);
+  const [chartDataComputer, setChartDataComputer] = useState([]);
+  const [weeklyComputers, setWeeklyComputers] = useState([]);
+  const [computerPercent, setComputerPercent] = useState([]);
+  const [chartDataRemark, setChartDataRemark] = useState([]);
+  const [weeklyRemarksBox, setWeeklyRemarksBox] = useState([]);
+  const [remarkPercent, setRemarkPercent] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState([]);
+
+  const getRandomEmail = () => {
+    const domains = ["example.com", "mail.com", "test.com"];
+    const randomName = Math.random().toString(36).substring(2, 11);
+    const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+    return `${randomName}@${randomDomain}`;
+  };
 
   useEffect(() => {
     const fetchWeeklyRemarks = async () => {
@@ -387,14 +356,65 @@ function Dashboard() {
             Authorization: `Bearer ${token}`,
           },
         });
+        const remarksDatas = response.data.weeklyRemarks.map((day) => ({
+          name: day.name.substring(0, 3),
+          Remarks: day.Remarks,
+        }));
+
+        setWeeklyRemarks(remarksDatas);
+        const data = remarksDatas.some((day) => day.Remarks > 0);
+        setHasData(data);
+        const computersDatas = response.data.usersFormatted.map((user) => ({
+          username: user.computer_user.name,
+          img: profile,
+          email: getRandomEmail(),
+          many: user.formatted_status,
+        }));
+        setComputersDatas(computersDatas);
+        setPieData(response.data);
+        setChartDataUser(response.data);
+
+        const usersData = response.data.weeklyUsers.map((day) => ({
+          name: day.name.substring(0, 3),
+          Users: day.users,
+        }));
+
+        setWeeklyUsers(usersData);
+        setUserPercent(response.data.usersPercent);
+
+        setChartDataUnit(response.data);
+        const unitsData = response.data.weeklyUnits.map((day) => ({
+          name: day.name.substring(0, 3),
+          Units: day.units,
+        }));
+
+        setWeeklyUnits(unitsData);
+        setUnitPercent(response.data.unitsPercent);
+
+        setChartDataComputer(response.data);
+        const computersData = response.data.weeklyComputers.map((day) => ({
+          name: day.name.substring(0, 3),
+          Computers: day.Computers,
+        }));
+
+        setWeeklyComputers(computersData);
+        setComputerPercent(response.data.computersPercent);
+
+        setChartDataRemark(response.data);
         const remarksData = response.data.weeklyRemarks.map((day) => ({
           name: day.name.substring(0, 3),
           Remarks: day.Remarks,
         }));
 
-        setWeeklyRemarks(remarksData);
-        const data = remarksData.some((day) => day.Remarks > 0);
-        setHasData(data);
+        setWeeklyRemarksBox(remarksData);
+        setRemarkPercent(response.data.remarksPercent);
+
+        const formattedData = response.data.analytics.map((analytic) => ({
+          name: analytic.name,
+          set: analytic.computers_count,
+          unit: analytic.units_count,
+        }));
+        setAnalyticsData(formattedData);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       } finally {
@@ -410,25 +430,45 @@ function Dashboard() {
       style={{ gridAutoRows: "minmax(180px, auto)" }}
     >
       <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-3 rounded-xl">
-        <TopBox />
+        <TopBox dashboardData={computersDatas} dashboardLoading={loading} />
       </div>
       <div className="col-span-1 p-5 bg-green-500 border border-gray-100 rounded-xl">
-        <ChartBoxUser />
+        <ChartBoxUser
+          dashboardData={chartDataUser}
+          dashboardWeeklyUsers={weeklyUsers}
+          dashboardUserPercent={userPercent}
+          dashboardLoading={loading}
+        />
       </div>
       <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-rose-500">
-        <ChartBoxUnit />
+        <ChartBoxUnit
+          dashboardData={chartDataUnit}
+          dashboardWeeklyUnits={weeklyUnits}
+          dashboardUnitPercent={unitPercent}
+          dashboardLoading={loading}
+        />
       </div>
       <div className="col-span-1 row-span-1 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-4 rounded-xl">
-        <PieChartBox />
+        <PieChartBox dashboardData={pieData} dashboardLoading={loading} />
       </div>
       <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-amber-500">
-        <ChartBoxComputer />
+        <ChartBoxComputer
+          dashboardData={chartDataComputer}
+          dashboardWeeklyComputers={weeklyComputers}
+          dashboardComputerPercent={computerPercent}
+          dashboardLoading={loading}
+        />
       </div>
       <div className="col-span-1 p-5 bg-blue-500 border border-gray-100 rounded-xl">
-        <ChartBoxRemark />
+        <ChartBoxRemark
+          dashboardData={chartDataRemark}
+          dashboardWeeklyRemarks={weeklyRemarksBox}
+          dashboardRemarkPercent={remarkPercent}
+          dashboardLoading={loading}
+        />
       </div>
       <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-2 lg:col-span-2 md:row-span-2 rounded-xl">
-        <BigChartBox />
+        <BigChartBox dashboardData={analyticsData} dashboardLoading={loading} />
       </div>
       <div className="col-span-1 p-5 bg-blue-100 border border-gray-100 rounded-xl">
         {loading ? (

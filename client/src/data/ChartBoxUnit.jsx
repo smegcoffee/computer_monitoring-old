@@ -4,41 +4,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDesktop } from "@fortawesome/free-solid-svg-icons";
 import { ChartBox } from "../Dashboard/Db2";
 
-const ChartBoxUser = () => {
+const ChartBoxUser = ({
+  dashboardData,
+  dashboardWeeklyUnits,
+  dashboardUnitPercent,
+  dashboardLoading
+}) => {
   const [chartDataUnit, setChartDataUnit] = useState([]);
   const [weeklyUnits, setWeeklyUnits] = useState([]);
   const [unitPercent, setUnitPercent] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchChartDataUnit = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setChartDataUnit(response.data);
-        const unitsData = response.data.weeklyUnits.map((day) => ({
-          name: day.name.substring(0, 3),
-          Units: day.units,
-        }));
-
-        setWeeklyUnits(unitsData);
-        setUnitPercent(response.data.unitsPercent);
+        setChartDataUnit(dashboardData);
+        setWeeklyUnits(dashboardWeeklyUnits);
+        setUnitPercent(dashboardUnitPercent);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data: ", error);
       } finally {
-        setLoading(false);
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchChartDataUnit();
-  }, []);
+    fetchData();
+  }, [dashboardData, dashboardWeeklyUnits, dashboardUnitPercent, dashboardLoading]);
 
   const chartBox1 = {
     color: "#000080",
