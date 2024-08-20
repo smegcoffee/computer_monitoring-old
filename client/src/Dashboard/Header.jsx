@@ -153,9 +153,6 @@ function Header({ toggleSidebar, isRefresh, title }) {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        setUser(null);
-        setProfileImg(null);
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         localStorage.removeItem("profileImg");
