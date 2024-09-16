@@ -19,6 +19,7 @@ import Add from './Dashboard/Setup/Add';
 import AllUnits from './Dashboard/allUnits';
 import NotFound from './Dashboard/Notfound';
 import PrintInformation from './Dashboard/PopupForComputers/Print';
+import AllLogs from './Dashboard/AllLogs';
 
 function App() {
 
@@ -47,6 +48,7 @@ function App() {
           <Route path='/allunits' element={<AllUnits />}></Route>
           <Route path='/computers/:id' element={<Extract />} />
           <Route path='/user' element={<User/>}/>
+          <Route path='/all-logs' element={<AllLogs/>}/>
           <Route path='/add' element={<Add/>}/>
           <Route path='*' element={<NotFound />} />
           <Route path='/print/:id' element={<PrintInformation />} />

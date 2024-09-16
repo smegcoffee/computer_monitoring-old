@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Computer;
 use App\Models\Unit;
 use App\Models\ComputerUser;
+use App\Models\Log as LogData;
 use App\Models\TransferUnit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -85,6 +86,21 @@ class DashboardController extends Controller
             ];
         }
 
+        // Logs
+        $logsData = LogData::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->get()
+            ->groupBy(function ($log) {
+                return Carbon::parse($log->created_at)->format('D');
+            });
+
+        $weeklyLogs = [];
+        foreach ($daysOfWeek as $day) {
+            $weeklyLogs[] = [
+                'name' => $day,
+                'Logs' => isset($logsData[$day]) ? $logsData[$day]->count() : 0,
+            ];
+        }
+
         $totalRemarksInMonth = Computer::where('remarks', '!=', 0)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum('remarks');
 
         $remark_percentage = $totalRemarks > 0 ? ($totalRemarksInMonth / $totalRemarks) * 100 : 0;
@@ -134,6 +150,7 @@ class DashboardController extends Controller
             'totalDefective' => $totalDefective,
             'totalUsedTransfer' => $totalUsedTransfer,
             'weeklyRemarks' => $weeklyRemarks,
+            'weeklyLogs' => $weeklyLogs,
             'weeklyUsers' => $weeklyUsers,
             'weeklyUnits' => $weeklyUnits,
             'weeklyComputers' => $weeklyComputers,

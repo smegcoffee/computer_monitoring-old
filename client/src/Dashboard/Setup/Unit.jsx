@@ -511,8 +511,8 @@ const CustomTableB = (refresh) => {
                           className={
                             editUnitId === data.id &&
                             validationErrors["description"]
-                              ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
-                              : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                              ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 pl-2"
+                              : "bg-gray-200 border border-transparent rounded-xl w-4/4 pl-2"
                           }
                         />
                       ) : (

@@ -12,6 +12,32 @@ class Unit extends Model
 
     protected $guarded = [];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($unit) {
+            if (is_null($unit->unit_code)) {
+                $unit->unit_code = self::generateNextUnitCode();
+            }
+        });
+    }
+
+    private static function generateNextUnitCode()
+    {
+        $latestUnit = self::latest('id')->first();
+        $nextCode = '0000001';
+
+        if ($latestUnit) {
+            $lastCode = $latestUnit->unit_code;
+            if ($lastCode) {
+                $nextCode = str_pad((int) $lastCode + 1, 7, '0', STR_PAD_LEFT);
+            }
+        }
+
+        return $nextCode;
+    }
+
     public function categories()
     {
         return $this->hasMany(Category::class);

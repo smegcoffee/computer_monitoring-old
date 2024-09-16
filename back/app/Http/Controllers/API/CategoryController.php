@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Log as CategoryLog;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
@@ -59,6 +60,11 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'category_name'          =>          $request->category_name
+        ]);
+
+        CategoryLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a category: ' . $category->category_name
         ]);
 
         return response()->json([

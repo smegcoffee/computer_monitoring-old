@@ -161,6 +161,30 @@ function BarChartBox(props) {
   );
 }
 
+function BarChartBoxLog(props) {
+  return (
+    <div className="w-full h-full barChartBoxLog">
+      <h1 className="mb-3 text-xl">{props.title}</h1>
+      <div className="chart">
+        {props.hasLogData ? (
+          <ResponsiveContainer width="99%" height={120}>
+            <BarChart data={props.chartData}>
+              <Tooltip
+                contentStyle={{ background: "white", borderRadius: "5px" }}
+                labelStyle={{ display: "none" }}
+                cursor={{ fill: "none" }}
+              />
+              <Bar dataKey={props.dataKey} fill={props.color} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-center">No data found</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PieChartBox({ dashboardData, dashboardLoading }) {
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -319,7 +343,9 @@ function BigChartBox({ dashboardData, dashboardLoading }) {
 
 function Dashboard() {
   const [weeklyRemarks, setWeeklyRemarks] = useState([]);
+  const [weeklyLogs, setWeeklyLogs] = useState([]);
   const [hasData, setHasData] = useState([]);
+  const [hasLogData, setHasLogData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [computersDatas, setComputersDatas] = useState([]);
   const [pieData, setPieData] = useState([]);
@@ -345,7 +371,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    const fetchWeeklyRemarks = async () => {
+    const fetchWeeklyDatas = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -364,6 +390,16 @@ function Dashboard() {
         setWeeklyRemarks(remarksDatas);
         const data = remarksDatas.some((day) => day.Remarks > 0);
         setHasData(data);
+
+        const logsDatas = response.data.weeklyLogs.map((day) => ({
+          name: day.name.substring(0, 3),
+          Logs: day.Logs,
+        }));
+
+        setWeeklyLogs(logsDatas);
+        const dataLog = logsDatas.some((day) => day.Logs > 0);
+        setHasLogData(dataLog);
+
         const computersDatas = response.data.usersFormatted.map((user) => ({
           username: user.computer_user.name,
           img: profile,
@@ -392,11 +428,11 @@ function Dashboard() {
         setUnitPercent(response.data.unitsPercent);
 
         setChartDataComputer(response.data);
+
         const computersData = response.data.weeklyComputers.map((day) => ({
           name: day.name.substring(0, 3),
           Computers: day.Computers,
         }));
-
         setWeeklyComputers(computersData);
         setComputerPercent(response.data.computersPercent);
 
@@ -422,7 +458,7 @@ function Dashboard() {
       }
     };
 
-    fetchWeeklyRemarks();
+    fetchWeeklyDatas();
   }, []);
   return (
     <div
@@ -448,7 +484,7 @@ function Dashboard() {
           dashboardLoading={loading}
         />
       </div>
-      <div className="col-span-1 row-span-1 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-4 rounded-xl">
+      <div className="col-span-1 row-span-1 p-5 bg-blue-100 border border-gray-100 md:col-span-1 lg:col-span-1 md:row-span-1 lg:row-span-3 rounded-xl">
         <PieChartBox dashboardData={pieData} dashboardLoading={loading} />
       </div>
       <div className="col-span-1 p-5 border border-gray-100 rounded-xl bg-amber-500">
@@ -482,6 +518,21 @@ function Dashboard() {
             color="#ff8042"
             chartData={weeklyRemarks}
             hasData={hasData}
+          />
+        )}
+      </div>
+      <div className="col-span-1 p-5 bg-blue-100 border border-gray-100 rounded-xl">
+        {loading ? (
+          <p className="mt-20 text-center">
+            <strong>Loading...</strong>
+          </p>
+        ) : (
+          <BarChartBoxLog
+            title="Weekly Logs"
+            dataKey="Logs"
+            color="#341854"
+            chartData={weeklyLogs}
+            hasLogData={hasLogData}
           />
         )}
       </div>

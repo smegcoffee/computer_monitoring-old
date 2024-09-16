@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'request_new_password',
     ];
 
     /**
@@ -50,5 +51,10 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->belongsToMany(Notification::class, 'user_notifications')->withPivot('read_at')->withTimestamps();
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
     }
 }

@@ -102,6 +102,9 @@ class LoginController extends Controller
                 'message'       =>          'Invalid Credentials'
             ], 400);
         } elseif ($user->request_new_password == true) {
+
+            auth()->user()->tokens()->delete();
+
             return response()->json([
                 'status'            =>          true,
                 'message'           =>          'You need to change your password first',
@@ -110,6 +113,9 @@ class LoginController extends Controller
                 'id'                =>          auth()->user()->id
             ], 409);
         } else {
+
+            auth()->user()->tokens()->delete();
+
             return response()->json([
                 'status'        =>      true,
                 'message'       =>      "Welcome " . $user->email . " you are now login",

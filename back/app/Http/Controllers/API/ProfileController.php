@@ -68,7 +68,7 @@ class ProfileController extends Controller
 
         $validation = Validator::make($request->all(), [
             'firstName'                 =>                  ['required',],
-            'branch_code_id'               =>               ['required', 'exists:branch_codes,id'],
+            'branch_code_id'            =>                  ['required', 'exists:branch_codes,id'],
             'lastName'                  =>                  ['required'],
             'email'                     =>                  ['required', 'email', 'unique:users,email,' . $user->id],
             'contactNumber'             =>                  ['required', 'numeric', 'digits:11'],
@@ -117,17 +117,6 @@ class ProfileController extends Controller
 
             $user->profile_picture = $path . $name;
 
-            if ($hadProfilePicture) {
-                Notification::create([
-                    'user_id'       =>          $user->id,
-                    'title'         =>          $user->firstName . ' ' . $user->lastName . ' updated the profile picture',
-                ]);
-            } else {
-                Notification::create([
-                    'user_id'       =>          $user->id,
-                    'title'         =>          $user->firstName . ' ' . $user->lastName . ' added a new profile picture',
-                ]);
-            }
         }
 
 
