@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Position;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Log as PositionLog;
 
 class PositionController extends Controller
 {
@@ -59,6 +60,11 @@ class PositionController extends Controller
         $position = Position::create([
             'position_name'           =>              $request->position_name
         ], 200);
+
+        PositionLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a position: ' . $position->position_name
+        ]);
 
         return response()->json([
             'status'                =>              true,

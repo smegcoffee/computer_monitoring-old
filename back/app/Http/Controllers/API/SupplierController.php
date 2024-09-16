@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Log as SupplierLog;
 
 class SupplierController extends Controller
 {
@@ -59,6 +60,11 @@ class SupplierController extends Controller
 
         $supplier = Supplier::create([
             'supplier_name'          =>          $request->supplier_name
+        ]);
+
+        SupplierLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a supplier: ' . $supplier->supplier_name
         ]);
 
         return response()->json([

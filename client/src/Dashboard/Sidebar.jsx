@@ -9,6 +9,7 @@ import {
   faComputer,
   faX,
   faTimes,
+  faFile,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -29,6 +30,9 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
         break;
       case "/allunits":
         setActiveItem("allunits");
+        break;
+      case "/all-logs":
+        setActiveItem("all-logs");
         break;
       case "/unit":
         setActiveItem("unit");
@@ -103,6 +107,15 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               } rounded-3xl h-10 cursor-pointer`}
             >
               <FontAwesomeIcon icon={faComputer} /> All Units
+            </button>
+          </Link>
+          <Link to="/all-logs">
+            <button
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "all-logs" ? "bg-blue-500 text-white active" : ""
+              } rounded-3xl h-10 cursor-pointer`}
+            >
+              <FontAwesomeIcon icon={faFile} /> All Logs
             </button>
           </Link>
           <p

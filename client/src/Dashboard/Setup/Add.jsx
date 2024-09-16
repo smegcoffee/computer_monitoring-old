@@ -222,8 +222,6 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     }
   };
 
-  console.log(ComputerUser);
-
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\TransferUnit;
 use App\Models\Unit;
+use App\Models\Log as UnitLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -77,10 +78,17 @@ class UnitController extends Controller
                 'status'                        =>                  $unitData['status']
             ]);
 
-            $createdUnit->unit_code = '00000' . $createdUnit->id;
+            // $createdUnit->unit_code = '00000' . $createdUnit->id;
             $createdUnit->save();
 
             $createdUnits[] = $createdUnit;
+        }
+
+        foreach ($createdUnits as $unit) {
+            UnitLog::create([
+                'user_id'           =>              auth()->user()->id,
+                'log_data'          =>              'Added a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
+            ]);
         }
 
         return response()->json([
@@ -143,6 +151,11 @@ class UnitController extends Controller
 
             $unit->save();
 
+            UnitLog::create([
+                'user_id'           =>              auth()->user()->id,
+                'log_data'          =>              'Updated a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
+            ]);
+
             return response()->json([
                 'status'            =>              true,
                 'message'           =>              'Unit ' . $unit->category->category_name . ' updated successfully',
@@ -189,6 +202,11 @@ class UnitController extends Controller
         }
 
         $unit->delete();
+
+        UnitLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Deleted a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
+        ]);
 
         return response()->json([
             'status' => true,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Computer;
 use App\Models\ComputerUser;
 use App\Models\Notification;
+use App\Models\Log as ComputerUserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -73,6 +74,11 @@ class ComputerUserController extends Controller
         Notification::create([
             'user_id'       =>          $userAuth->id,
             'title'         =>          ' Added a computer user (' . $user->name . ').',
+        ]);
+
+        ComputerUserLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a computer user: ' . $user->name . ' assign in branch: ' . $user->branchCode->branch_name . ' and position: ' . $user->position->position_name
         ]);
 
 

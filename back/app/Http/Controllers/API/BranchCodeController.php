@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BranchCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Log as BranchLog;
 
 class BranchCodeController extends Controller
 {
@@ -27,7 +28,7 @@ class BranchCodeController extends Controller
             return response()->json([
                 'status'                =>              false,
                 'message'               =>             'No branches found.'
-            ], 200);
+            ], 404);
         }
     }
 
@@ -45,7 +46,7 @@ class BranchCodeController extends Controller
             return response()->json([
                 'status'                =>              false,
                 'message'               =>             'No branches found.'
-            ], 200);
+            ], 404);
         }
     }
 
@@ -77,6 +78,11 @@ class BranchCodeController extends Controller
         $branch = BranchCode::create([
             'branch_name'           =>              $request->branch_name
         ], 200);
+
+        BranchLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a branch: ' . $branch->branch_name
+        ]);
 
         return response()->json([
             'status'                =>              true,
@@ -131,6 +137,11 @@ class BranchCodeController extends Controller
                 'message' => 'You cannot delete a branch code that is already in use by users.'
             ], 422);
         }
+
+        BranchLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Deleted a branch: ' . $branchCode->branch_name
+        ]);
 
         $branchCode->delete();
 

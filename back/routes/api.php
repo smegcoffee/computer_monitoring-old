@@ -16,6 +16,7 @@ use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\UnitController;
+use App\Http\Controllers\API\LogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/computers/{id}', [ComputerController::class, 'show']);
     Route::get('/unread-notifications', [NotificationController::class, 'index']);
+    Route::get('/logs', [LogController::class, 'index']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
@@ -65,8 +67,8 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/cleaning-complete/{id}', [ComputerController::class, 'doneCleaning']);
 
     // PUT
-
     Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);
+
     // DELETE
     Route::delete('/branch-delete/{id}', [BranchCodeController::class, 'destroy']);
     Route::delete('/unit-delete/{id}', [UnitController::class, 'destroy']);
