@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import SideBar from "../Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faRightFromBracket,
   faTriangleExclamation,
+  faArrowUp,
+  faArrowDown
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -57,6 +58,8 @@ function Set() {
   const [loading, setLoading] = useState(true);
   const [showAllRows, setShowAllRows] = useState([]);
   const [error, setError] = useState(false);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const toggleShowAllRows = (rowId) => {
     if (showAllRows.includes(rowId)) {
@@ -166,6 +169,32 @@ function Set() {
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
+  const sortRows = (rows) => {
+    return rows.sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "id") {
+        valueA = a.id;
+        valueB = b.id;
+      } else if (sortColumn === "name") {
+        valueA = a.name.toLowerCase();
+        valueB = b.name.toLowerCase();
+      }
+
+      if (sortOrder === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+  };
+
+  const handleSort = (column) => {
+    const isAscending = sortColumn === column && sortOrder === "asc";
+    setSortColumn(column);
+    setSortOrder(isAscending ? "desc" : "asc");
+  };
+
   const title = "Setup Computer Set";
 
   const now = DateTime.now().setZone("Asia/Manila").toJSDate();
@@ -244,8 +273,19 @@ function Set() {
                 <Table className={classes.table} aria-label="simple table">
                   <TableHead>
                     <TableRow className="bg-red-200">
-                      <TableCell align="center">
-                        <p className="text-base font-semibold">ID</p>
+                      <TableCell
+                        align="center"
+                        onClick={() => handleSort("id")}
+                      >
+                        <p className="text-base font-semibold">
+                          ID{" "}
+                          {sortColumn === "id" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </p>
                       </TableCell>
                       <TableCell align="center">
                         <p className="text-base font-semibold">
@@ -267,8 +307,19 @@ function Set() {
                       <TableCell align="center">
                         <p className="text-base font-semibold">STATUS</p>
                       </TableCell>
-                      <TableCell align="center">
-                        <p className="text-base font-semibold">USERS</p>
+                      <TableCell
+                        align="center"
+                        onClick={() => handleSort("name")}
+                      >
+                        <p className="text-base font-semibold">
+                          USERS{" "}
+                          {sortColumn === "name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </p>
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -288,7 +339,7 @@ function Set() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      rows
+                      sortRows(rows)
                         .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
                         .map((row, rowIndex) => (
                           <React.Fragment key={`${row.id}-${rowIndex}`}>

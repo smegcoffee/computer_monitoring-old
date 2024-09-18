@@ -36,4 +36,8 @@ class ComputerUser extends Model
     {
         return $this->hasMany(TransferUnit::class);
     }
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
+    }
 }

@@ -16,4 +16,9 @@ class Remark extends Model
     {
         return $this->belongsTo(Computer::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

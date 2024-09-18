@@ -12,6 +12,8 @@ import {
   TextField,
   Autocomplete,
 } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { TablePagination } from "@material-ui/core";
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
@@ -33,6 +35,8 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   });
   const [vloading, setvLoading] = useState(true);
   const [verror, setvError] = useState(false);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     setFilteredData(vacantUnit);
@@ -186,7 +190,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
         })();
         setCheckedRows("");
         setComputer("");
-        setComputerUser("");
+        // setComputerUser("");
       }
       console.log("Adding computer set:", response.data);
     } catch (error) {
@@ -222,6 +226,47 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     }
   };
 
+  const sortRows = (rows) => {
+    return rows.sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "unit_code") {
+        valueA = a.unit_code;
+        valueB = b.unit_code;
+      } else if (sortColumn === "date_of_purchase") {
+        valueA = a.date_of_purchase;
+        valueB = b.date_of_purchase;
+      } else if (sortColumn === "description") {
+        valueA = a.description.toLowerCase();
+        valueB = b.description.toLowerCase();
+      } else if (sortColumn === "supplier.supplier_name") {
+        valueA = a.supplier.supplier_name.toLowerCase();
+        valueB = b.supplier.supplier_name.toLowerCase();
+      } else if (sortColumn === "category.category_name") {
+        valueA = a.category.category_name.toLowerCase();
+        valueB = b.category.category_name.toLowerCase();
+      } else if (sortColumn === "serial_number") {
+        valueA = a.serial_number.toLowerCase();
+        valueB = b.serial_number.toLowerCase();
+      } else if (sortColumn === "status") {
+        valueA = a.status.toLowerCase();
+        valueB = b.status.toLowerCase();
+      }
+
+      if (sortOrder === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+  };
+
+  const handleSort = (column) => {
+    const isAscending = sortColumn === column && sortOrder === "asc";
+    setSortColumn(column);
+    setSortOrder(isAscending ? "desc" : "asc");
+  };
+
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div
@@ -241,60 +286,130 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
                 <Table>
                   <TableHead>
                     <TableRow className="bg-red-200">
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("unit_code")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          UNIT CODE
+                          UNIT CODE{" "}
+                          {sortColumn === "unit_code" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("date_of_purchase")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          DATE OF PURCHASE
+                          DATE OF PURCHASE{" "}
+                          {sortColumn === "date_of_purchase" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("category.category_name")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          CATEGORY
+                          CATEGORY{" "}
+                          {sortColumn === "category.category_name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("description")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          DESCRIPTION
+                          DESCRIPTION{" "}
+                          {sortColumn === "description" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("supplier.supplier_name")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          SUPPLIER
+                          SUPPLIER{" "}
+                          {sortColumn === "supplier.supplier_name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("serial_number")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          SERIAL NO.
+                          SERIAL NO.{" "}
+                          {sortColumn === "serial_number" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("status")}
+                      >
                         <Typography
                           variant="subtitle1"
                           style={{ fontWeight: 700 }}
                         >
-                          STATUS
+                          STATUS{" "}
+                          {sortColumn === "status" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
@@ -330,7 +445,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredData
+                      sortRows(filteredData)
                         .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
                         .map((un, index) => (
                           <TableRow key={index}>

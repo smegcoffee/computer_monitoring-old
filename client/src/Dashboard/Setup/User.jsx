@@ -43,6 +43,7 @@ function User() {
   const [isRefresh, setIsRefresh] = useState(false);
   const [user, setUser] = useState({
     name: "",
+    email: "",
     position: "",
     branch_code: "",
   });
@@ -120,6 +121,7 @@ function User() {
         "api/add-computer-user",
         {
           name: user.name,
+          email: user.email,
           position: user.position,
           branch_code: user.branch_code,
         },
@@ -151,6 +153,7 @@ function User() {
         setSuccess(response.data.message);
         setUser({
           name: "",
+          email: "",
           position: "",
           branch_code: "",
         });
@@ -401,7 +404,7 @@ function User() {
             <div className="w-1/2 mr-5 border border-transparent shadow-lg rounded-xl max-h-max">
               <form onSubmit={handleSubmitPosition}>
                 <div className="flex items-center justify-center text-center">
-                  <div className="w-full h-10 bg-red-200 rounded-tl-xl rounded-tr-xl">
+                  <div className="w-full h-10 bg-yellow-300 rounded-tl-xl rounded-tr-xl">
                     <p className="font-semibold text-base mt-1.5">
                       ADD NEW POSITION
                     </p>
@@ -443,7 +446,7 @@ function User() {
             <div className="w-1/2 border border-transparent shadow-lg rounded-xl max-h-max">
               <form onSubmit={handleSubmitBranchCode}>
                 <div className="flex items-center justify-center text-center">
-                  <div className="w-full h-10 bg-red-200 rounded-tl-xl rounded-tr-xl">
+                  <div className="w-full h-10 bg-yellow-300 rounded-tl-xl rounded-tr-xl">
                     <p className="font-semibold text-base mt-1.5">
                       ADD NEW BRANCH CODE
                     </p>
@@ -491,13 +494,9 @@ function User() {
                     SET UP USERS
                   </h2>
                   <CardContent>
-                    <Grid
-                      container
-                      className="flex p-5 text-center"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Grid item>
+                    <Grid container spacing={3} className="p-5">
+                      {/* First Row */}
+                      <Grid item xs={12} sm={6} md={6}>
                         <TextField
                           value={user.name}
                           onChange={(e) =>
@@ -506,20 +505,37 @@ function User() {
                           id="name-user"
                           label="Name"
                           variant="standard"
-                          style={{ marginRight: "20px", width: "300px" }}
+                          style={{ width: "100%" }}
                         />
-
-                        <span>
-                          {validationErrors.name && (
-                            <div className="text-center text-red-500">
-                              {validationErrors.name.map((error, index) => (
-                                <span key={index}>{error}</span>
-                              ))}
-                            </div>
-                          )}
-                        </span>
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.name &&
+                            validationErrors.name.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
-                      <Grid item>
+
+                      <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                          value={user.email}
+                          onChange={(e) =>
+                            setUser({ ...user, email: e.target.value })
+                          }
+                          id="email-user"
+                          label="Email"
+                          variant="standard"
+                          style={{ width: "100%" }}
+                        />
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.email &&
+                            validationErrors.email.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
+                      </Grid>
+
+                      {/* Second Row */}
+                      <Grid item xs={12} sm={6} md={6}>
                         <Autocomplete
                           freeSolo
                           id="position-user"
@@ -527,7 +543,7 @@ function User() {
                           options={Position}
                           readOnly={Position.length === 0}
                           getOptionLabel={(option) =>
-                            option.position_name ? option.position_name : ""
+                            option.position_name || ""
                           }
                           renderInput={(params) => (
                             <TextField
@@ -538,7 +554,7 @@ function User() {
                                   : "Position"
                               }
                               variant="standard"
-                              style={{ marginRight: "20px", width: "300px" }}
+                              style={{ width: "100%" }}
                               InputProps={{
                                 ...params.InputProps,
                                 type: "search",
@@ -550,32 +566,26 @@ function User() {
                               (option) => option.id === user.position
                             ) || {}
                           }
-                          onChange={(event, newValue) => {
-                            setUser({ ...user, position: newValue.id });
-                          }}
+                          onChange={(event, newValue) =>
+                            setUser({ ...user, position: newValue.id })
+                          }
                         />
-
-                        <span>
-                          {validationErrors.position && (
-                            <div className="text-center text-red-500">
-                              {validationErrors.position.map((error, index) => (
-                                <span key={index}>{error}</span>
-                              ))}
-                            </div>
-                          )}
-                        </span>
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.position &&
+                            validationErrors.position.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
 
-                      <Grid item>
+                      <Grid item xs={12} sm={6} md={6}>
                         <Autocomplete
                           freeSolo
                           id="branch_code-user"
                           disableClearable
                           readOnly={Branchcode.length === 0}
                           options={Branchcode}
-                          getOptionLabel={(option) =>
-                            option.branch_name ? option.branch_name : ""
-                          }
+                          getOptionLabel={(option) => option.branch_name || ""}
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -585,7 +595,7 @@ function User() {
                                   : "Branchcode"
                               }
                               variant="standard"
-                              style={{ marginRight: "20px", width: "300px" }}
+                              style={{ width: "100%" }}
                               InputProps={{
                                 ...params.InputProps,
                                 type: "search",
@@ -597,30 +607,26 @@ function User() {
                               (option) => option.id === user.branch_code
                             ) || {}
                           }
-                          onChange={(event, newValue) => {
-                            setUser({ ...user, branch_code: newValue.id });
-                          }}
+                          onChange={(event, newValue) =>
+                            setUser({ ...user, branch_code: newValue.id })
+                          }
                         />
-
-                        <span>
-                          {validationErrors.branch_code && (
-                            <div className="text-center text-red-500">
-                              {validationErrors.branch_code.map(
-                                (error, index) => (
-                                  <span key={index}>{error}</span>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </span>
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.branch_code &&
+                            validationErrors.branch_code.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
-                      <Grid item>
+
+                      {/* Button Row */}
+                      <Grid item xs={12} 
+                          className="flex items-center justify-center">
                         <Button
                           type="submit"
                           disabled={uloading}
                           variant="contained"
                           style={{
-                            marginTop: "20px",
                             width: "300px",
                             fontWeight: "550",
                             borderRadius: "100px",

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import smct from "./../../img/smct.png";
 import Swal from "sweetalert2";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Table,
   TableBody,
@@ -26,6 +27,8 @@ import { styled } from "@mui/material/styles";
 import { format } from "date-fns";
 import axios from "../../api/axios";
 import PrintInformation from "./Print";
+import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { useTable, useSortBy } from "react-table";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
@@ -174,6 +177,45 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   const handleViewMore = () => {
     setShowAll(true);
   };
+
+  const columns = useMemo(
+    () => [
+      {
+        Header: "UNIT CODE",
+        accessor: "unit_code",
+        id: "unit_code",
+      },
+      {
+        Header: "CATEGORY",
+        accessor: "category.category_name",
+        id: "category",
+      },
+      {
+        Header: "STATUS",
+        accessor: "status",
+        id: "status",
+      },
+    ],
+    []
+  );
+
+  const dataPop = useMemo(() => [viewPopupData], [viewPopupData]);
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows: tableRows,
+    prepareRow,
+    state: { sortBy },
+    setSortBy,
+  } = useTable(
+    {
+      columns,
+      data: rows,
+    },
+    useSortBy
+  );
 
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
@@ -334,107 +376,99 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TableContainer component={Paper}>
-                <Table>
+                <Table {...getTableProps()}>
                   <TableHead>
-                    <TableRow className="bg-blue-300">
-                      <TableCell>
-                        <Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          UNIT CODE
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          CATEGORY
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          STATUS
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          align="center"
-                          variant="subtitle1"
-                          fontWeight="bold"
-                        >
-                          RECENT USER
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((unit, index) => (
-                      <TableRow key={index}>
-                        <TableCell align="center">
-                          <Typography variant="subtitle1" fontWeight="medium">
-                            {unit.unit_code}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="subtitle1" fontWeight="medium">
-                            {unit.category.category_name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="subtitle1" fontWeight="medium">
-                            {unit.status}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="subtitle1" fontWeight="medium">
-                            {viewPopupData.name}
+                    {headerGroups.map((headerGroup) => (
+                      <TableRow
+                        className="bg-blue-300"
+                        {...headerGroup.getHeaderGroupProps()}
+                      >
+                        {headerGroup.headers.map((column) => (
+                          <TableCell
+                            key={column.id}
+                            {...column.getHeaderProps(
+                              column.getSortByToggleProps()
+                            )}
+                            align="center"
+                          >
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {column.render("Header")}
+                              <span className="ml-2">
+                                {column.isSorted ? (
+                                  column.isSortedDesc ? (
+                                    <FontAwesomeIcon icon={faArrowDown} />
+                                  ) : (
+                                    <FontAwesomeIcon icon={faArrowUp} />
+                                  )
+                                ) : (
+                                  ""
+                                )}
+                              </span>
+                            </Typography>
+                          </TableCell>
+                        ))}
+                        <TableCell>
+                          <Typography
+                            align="center"
+                            variant="subtitle1"
+                            fontWeight="bold"
+                          >
+                            RECENT USER
                           </Typography>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {/* {viewPopupData.computers.flatMap((comp) =>
-                      comp.recent_users.map((recent, index) => (
-                        <TableRow key={index}>
-                          <TableCell align="center">
-                            <Typography variant="subtitle1" fontWeight="medium">
-                              {recent.unit.unit_code}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Typography variant="subtitle1" fontWeight="medium">
-                              {recent.unit.category.category_name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Typography variant="subtitle1" fontWeight="medium">
-                              {recent.unit.status}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Typography variant="subtitle1" fontWeight="medium">
-                              {recent.computer_user.name}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )} */}
-                    <TableRow>
-                      <TableCell align="center" colSpan={4}>
-                        <p className="text-center">
-                          {rows.length === 0
-                            ? "This user has no computer units"
-                            : ""}
-                        </p>
-                      </TableCell>
-                    </TableRow>
+                  </TableHead>
+                  <TableBody {...getTableBodyProps()}>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={4}>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="w-full p-4 rounded">
+                              <div className="flex space-x-4 animate-pulse">
+                                <div className="flex-1 py-1 space-y-6">
+                                  <div className="h-10 bg-gray-200 rounded shadow"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      tableRows.map((row) => {
+                        prepareRow(row);
+                        return (
+                          <TableRow key={row.index} {...row.getRowProps()}>
+                            {row.cells.map((cell) => (
+                              <TableCell
+                                key={cell.column.id}
+                                align="center"
+                                {...cell.getCellProps()}
+                              >
+                                {cell.render("Cell")}
+                              </TableCell>
+                            ))}
+                            <TableCell align="center">
+                              <Typography
+                                variant="subtitle1"
+                                fontWeight="medium"
+                              >
+                                {viewPopupData.name}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                    {rows.length === 0 && !loading && (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center">
+                          <p className="text-center">
+                            This user has no computer units
+                          </p>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -576,7 +610,11 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
           </button>
           <button
             disabled={id.length === 0}
-            className={id.length === 0 ? "text-xl text-white bg-blue-300 cursor-not-allowed rounded-3xl h-9 w-36" : "text-xl text-white bg-blue-500 rounded-3xl h-9 w-36"}
+            className={
+              id.length === 0
+                ? "text-xl text-white bg-blue-300 cursor-not-allowed rounded-3xl h-9 w-36"
+                : "text-xl text-white bg-blue-500 rounded-3xl h-9 w-36"
+            }
             onClick={handleClick}
           >
             PRINT

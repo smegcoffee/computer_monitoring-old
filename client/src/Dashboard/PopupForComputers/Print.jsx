@@ -164,7 +164,7 @@ const PrintInformation = () => {
                   {unit.supplier.supplier_name}
                 </TableCell>
                 <TableCell sx={{ fontSize: "10px" }} align="center">
-                  {format(new Date(unit.date_of_purchase), "yyyy-MM-dd")}
+                  {format(new Date(unit.date_of_purchase), "MMMM dd, yyyy")}
                 </TableCell>
                 <TableCell sx={{ fontSize: "10px" }} align="center">
                   {unit.serial_number}
@@ -178,39 +178,54 @@ const PrintInformation = () => {
         </Table>
       </TableContainer>
       <br />
-      <p className="text-xl font-semibold">INSTALLED APPLICATIONS</p>
+      <p className="py-10 text-xl font-semibol">INSTALLED APPLICATIONS</p>
       {Array.isArray(computer?.installed_applications) ? (
-        <div>
-          <ul>
-            {computer?.installed_applications.length === 0
-              ? "No records yet."
-              : computer?.installed_applications.map((item, idx) => (
-                  <li key={idx}>{item.application_content}</li>
-                ))}
-          </ul>
+        <div className="flex flex-wrap gap-2">
+          {computer?.installed_applications.length === 0
+            ? "No records yet."
+            : computer?.installed_applications.map((item, idx) => (
+                <span className="px-5 py-2 border rounded-full bg-slate-100 hover:bg-slate-200" key={idx}>{item.application_content}</span>
+              ))}
         </div>
       ) : (
         <span>{computer?.installed_applications}</span>
       )}
       <br />
-      <p className="text-xl font-semibold">REMARKS</p>
-      {Array.isArray(computer?.remarks) ? (
-        <div>
-          <ul>
-            {computer?.remarks.length === 0
-              ? "No records yet."
-              : computer?.remarks.map((item, idx) => (
-                  <li key={idx}>
-                    {item.remark_content.split("\n").map((line, lineIndex) => (
-                      <div key={lineIndex}>{line}</div>
-                    ))}
-                  </li>
-                ))}
-          </ul>
-        </div>
-      ) : (
-        <span>{computer?.remarks}</span>
-      )}
+      <p className="text-xl font-semibold">REMARKS</p> <br />
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                DATE
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                TASK PERFORMED
+              </TableCell>
+              <TableCell align="center" sx={{ fontSize: "10px" }}>
+                PERFORMED BY
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {computer?.remarks.map((remark, index) => (
+              <TableRow key={index}>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {format(new Date(remark.date), "MMMM dd, yyyy")}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {remark.remark_content.split("\n").map((line, lineIndex) => (
+                    <div key={lineIndex}>{line}</div>
+                  ))}
+                </TableCell>
+                <TableCell sx={{ fontSize: "10px" }} align="center">
+                  {remark.user?.firstName} {remark.computer_user?.lastName}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };

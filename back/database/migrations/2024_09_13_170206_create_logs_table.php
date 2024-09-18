@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable();
+            $table->foreignId('computer_user_id')->nullable();
             $table->string('log_data')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('computer_user_id')->references('id')->on('computer_users')->onDelete('restrict');
         });
     }
 

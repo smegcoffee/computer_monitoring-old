@@ -10,6 +10,7 @@ import {
   faX,
   faTimes,
   faFile,
+  faArrowsTurnToDots
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -28,8 +29,11 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
       case "/qr":
         setActiveItem("qr");
         break;
-      case "/allunits":
-        setActiveItem("allunits");
+      case "/transfered-units":
+        setActiveItem("transfered-units");
+        break;
+      case "/all-units":
+        setActiveItem("all-units");
         break;
       case "/all-logs":
         setActiveItem("all-logs");
@@ -100,10 +104,19 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               <FontAwesomeIcon icon={faQrcode} /> Scan QR Codes
             </button>
           </Link>
-          <Link to="/allunits">
+          <Link to="/transfered-units">
             <button
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
-                activeItem === "allunits" ? "bg-blue-500 text-white active" : ""
+                activeItem === "transfered-units" ? "bg-blue-500 text-white active" : ""
+              } rounded-3xl h-10 cursor-pointer`}
+            >
+              <FontAwesomeIcon icon={faArrowsTurnToDots} /> Transfered Units
+            </button>
+          </Link>
+          <Link to="/all-units">
+            <button
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "all-units" ? "bg-blue-500 text-white active" : ""
               } rounded-3xl h-10 cursor-pointer`}
             >
               <FontAwesomeIcon icon={faComputer} /> All Units

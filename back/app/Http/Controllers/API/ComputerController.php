@@ -89,8 +89,9 @@ class ComputerController extends Controller
             })->implode(', ');
 
             ComputerLog::create([
-                'user_id'           =>              $authUser->id,
-                'log_data'          =>              'Added and Installed a unit ' . $unitDetails  . ' on ' . $computer->computerUser->name
+                'user_id'                   =>              $authUser->id,
+                'computer_user_id'          =>              $request->computer_user,
+                'log_data'                  =>              'Added and Installed a unit ' . $unitDetails  . ' on ' . $computer->computerUser->name
             ]);
         } else {
             $computer->units()->attach($request->checkedRows);
@@ -104,8 +105,9 @@ class ComputerController extends Controller
             })->implode(', ');
 
             ComputerLog::create([
-                'user_id'           =>              $authUser->id,
-                'log_data'          =>              'Installed a unit ' . $unitDetails  . ' on ' . $computer->computerUser->name . '\'s computer'
+                'user_id'                   =>              $authUser->id,
+                'computer_user_id'          =>              $request->computer_user,
+                'log_data'                  =>              'Installed a unit ' . $unitDetails  . ' on ' . $computer->computerUser->name . '\'s computer'
             ]);
         }
 
@@ -123,8 +125,9 @@ class ComputerController extends Controller
                 ]);
 
                 ComputerLog::create([
-                    'user_id'           =>              auth()->user()->id,
-                    'log_data'          =>              'An ' . $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
+                    'user_id'                   =>              auth()->user()->id,
+                    'computer_user_id'          =>              $request->computer_user,
+                    'log_data'                  =>              'An ' . $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
                 ]);
             }
         }
@@ -152,7 +155,7 @@ class ComputerController extends Controller
     public function show(Computer $computer, $id)
     {
 
-        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks', 'recentUsers.computerUser', 'recentUsers.unit.category')->find($id);
+        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks', 'remarks.user', 'recentUsers.computerUser', 'recentUsers.unit.category')->find($id);
 
         if (!$computer) {
             return response()->json([
@@ -279,6 +282,7 @@ class ComputerController extends Controller
 
             $remark = Remark::create([
                 'computer_id'                   =>                  $computerId,
+                'user_id'                       =>                  auth()->user()->id,
                 'date'                          =>                  $request->date,
                 'remark_content'                =>                  $request->remark_content,
             ]);
@@ -290,8 +294,9 @@ class ComputerController extends Controller
             $computer->save();
 
             ComputerLog::create([
-                'user_id'           =>              auth()->user()->id,
-                'log_data'          =>              'Installed ' . implode(', ', $installedContent) . ' and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.')
+                'user_id'                   =>              auth()->user()->id,
+                'computer_user_id'          =>              $computer->computer_user_id,
+                'log_data'                  =>              'Installed ' . implode(', ', $installedContent) . ' and added a remark: ' . $remark->remark_content . ($request->format === 'Yes' ? ', and formatted the computer.' : '.')
             ]);
 
             return response()->json([
@@ -365,8 +370,9 @@ class ComputerController extends Controller
                     $transfers[] = $transfer;
 
                     ComputerLog::create([
-                        'user_id'           =>              auth()->user()->id,
-                        'log_data'          =>              $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
+                        'user_id'                   =>              auth()->user()->id,
+                        'computer_user_id'          =>              $request->computer_user,
+                        'log_data'                  =>              'An ' . $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
                     ]);
 
                     return response()->json([
@@ -381,8 +387,9 @@ class ComputerController extends Controller
                     $units[] = $unit;
 
                     ComputerLog::create([
-                        'user_id'           =>              auth()->user()->id,
-                        'log_data'          =>              $unit->category->category_name . ' unit marked as defective'
+                        'user_id'                   =>              auth()->user()->id,
+                        'computer_user_id'          =>              $computer->computer_user_id,
+                        'log_data'                  =>              'Remove ' . $unit->category->category_name . ' unit and automatically marked as defective'
                     ]);
 
                     return response()->json([
@@ -390,17 +397,20 @@ class ComputerController extends Controller
                         'message'               =>              'Unit(s) successfully marked as defective',
                     ], 200);
                 }
+
                 if ($request->action ===  'Delete') {
                     if ($unit->status === 'Defective') {
                         ComputerLog::create([
-                            'user_id'           =>              auth()->user()->id,
-                            'log_data'          =>              'An ' . $unit->category->category_name . ' unit marked as defective'
+                            'user_id'                   =>              auth()->user()->id,
+                            'computer_user_id'          =>              $computer->computer_user_id,
+                            'log_data'                  =>              'An ' . $unit->category->category_name . ' unit marked as defective'
                         ]);
                         $unit->status = 'Defective';
                     } else {
                         ComputerLog::create([
-                            'user_id'           =>              auth()->user()->id,
-                            'log_data'          =>              'An ' . $unit->category->category_name . ' unit marked as vacant'
+                            'user_id'                   =>              auth()->user()->id,
+                            'computer_user_id'          =>              $computer->computer_user_id,
+                            'log_data'                  =>              'An ' . $unit->category->category_name . ' unit marked as vacant'
                         ]);
                         $unit->status = 'Vacant';
                     }
@@ -410,8 +420,9 @@ class ComputerController extends Controller
 
                     if ($computer->units()->count() === 0) {
                         ComputerLog::create([
-                            'user_id'           =>              auth()->user()->id,
-                            'log_data'          =>              'Computer automatic deleted due to no units left'
+                            'user_id'                   =>              auth()->user()->id,
+                            'computer_user_id'          =>              $computer->computer_user_id,
+                            'log_data'                  =>              'Computer automatic deleted due to no units left'
                         ]);
                         $computer->delete();
                     }
@@ -458,10 +469,11 @@ class ComputerController extends Controller
         } else {
             if ($request->has('application_content')) {
                 $existingApplications = InstalledApplication::where('computer_id', $computerId)->get();
-                $existingApplications->whereNotIn('application_content', $request->application_content)->each(function ($app) {
+                $existingApplications->whereNotIn('application_content', $request->application_content)->each(function ($app) use ($computer) {
                     ComputerLog::create([
-                        'user_id'           =>              auth()->user()->id,
-                        'log_data'          =>              'Uninstalled ' . $app->application_content . ' application' . ' from ' . $app->computer->computerUser->name . ' \'s computer'
+                        'user_id'                   =>              auth()->user()->id,
+                        'computer_user_id'          =>              $computer->computer_user_id,
+                        'log_data'                  =>              'Uninstalled ' . $app->application_content . ' application' . ' from ' . $app->computer->computerUser->name . ' \'s computer'
                     ]);
                     $app->delete();
                 });
@@ -472,8 +484,9 @@ class ComputerController extends Controller
                         ['application_content' => $content]
                     );
                     ComputerLog::create([
-                        'user_id'           =>              auth()->user()->id,
-                        'log_data'          =>              'Installed ' . $content . ' application ' . ' to ' . $installedApp->computer->computerUser->name . ' \'s computer'
+                        'user_id'                   =>              auth()->user()->id,
+                        'computer_user_id'          =>              $computer->computer_user_id,
+                        'log_data'                  =>              'Installed ' . $content . ' application ' . ' to ' . $installedApp->computer->computerUser->name . ' \'s computer'
                     ]);
                 }
             }
@@ -493,8 +506,9 @@ class ComputerController extends Controller
                 ]);
 
                 ComputerLog::create([
-                    'user_id'           =>              auth()->user()->id,
-                    'log_data'          =>              'Updated : ' . $computerUser->name . '\'s branch to: ' . $computerUser->branchCode->branch_name . ' and position to: ' . $computerUser->position->position_name
+                    'user_id'                   =>              auth()->user()->id,
+                    'computer_user_id'          =>              $computer->computerUser->id,
+                    'log_data'                  =>              'Updated : ' . $computerUser->name . '\'s branch to: ' . $computerUser->branchCode->branch_name . ' and position to: ' . $computerUser->position->position_name
                 ]);
             }
 
@@ -530,8 +544,9 @@ class ComputerController extends Controller
             ]);
 
             ComputerLog::create([
-                'user_id'           =>              auth()->user()->id,
-                'log_data'          =>              'Marking ' . $cleaning->computerUser->name . '\'s computer as cleaned'
+                'user_id'                   =>              auth()->user()->id,
+                'computer_user_id'          =>              $cleaning->computerUser->id,
+                'log_data'                  =>              'Marking ' . $cleaning->computerUser->name . '\'s computer as cleaned'
             ]);
 
             return response()->json([

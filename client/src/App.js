@@ -16,10 +16,11 @@ import Reset from './Request/Reset';
 import ChangePassword from './context/ChangePassword';
 import User from './Dashboard/Setup/User';
 import Add from './Dashboard/Setup/Add';
-import AllUnits from './Dashboard/allUnits';
+import TransferedUnits from './Dashboard/transferedUnits';
 import NotFound from './Dashboard/Notfound';
 import PrintInformation from './Dashboard/PopupForComputers/Print';
 import AllLogs from './Dashboard/AllLogs';
+import AllUnits from './Dashboard/AllUnits';
 
 function App() {
 
@@ -45,7 +46,8 @@ function App() {
           <Route path='/profile' element={<Profile />}></Route>
           <Route path='/computers' element={<Computers />}></Route>
           <Route path='/qr' element={<QrC />}></Route>
-          <Route path='/allunits' element={<AllUnits />}></Route>
+          <Route path='/transfered-units' element={<TransferedUnits />}></Route>
+          <Route path='/all-units' element={<AllUnits />}></Route>
           <Route path='/computers/:id' element={<Extract />} />
           <Route path='/user' element={<User/>}/>
           <Route path='/all-logs' element={<AllLogs/>}/>

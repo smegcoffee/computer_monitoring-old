@@ -14,27 +14,62 @@ class UnitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $allUnits = Unit::orderBy('id', 'asc')->with(['category', 'supplier', 'transferUnits.computerUser'])->get();
-        $vacantDefectiveUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->orWhere('status', 'Defective')->with(['category', 'supplier'])->get();
-        $vacantUnits = Unit::orderBy('id', 'asc')->where('status', 'Vacant')->with(['category', 'supplier'])->get();
+        $sortColumn = $request->query('sort_column', 'id');
+        $sortOrder = $request->query('sort_order', 'asc');
+
+        $validColumns = [
+            'id',
+            'unit_code',
+            'date_of_purchase',
+            'category.category_name',
+            'description',
+            'supplier.supplier_name',
+            'serial_number',
+            'status'
+        ];
+
+        if (!in_array($sortColumn, $validColumns)) {
+            $sortColumn = 'id';
+        }
+
+        $allUnitsQuery = Unit::with(['category', 'supplier', 'transferUnits.computerUser']);
+
+        if (in_array($sortColumn, ['category_name', 'supplier_name'])) {
+            $allUnitsQuery->join('categories', 'units.category_id', '=', 'categories.id')
+                ->join('suppliers', 'units.supplier_id', '=', 'suppliers.id');
+        }
+
+        $allUnits = $allUnitsQuery->orderBy($sortColumn, $sortOrder)->get();
+
+        $vacantDefectiveUnits = Unit::where('status', 'Vacant')
+            ->orWhere('status', 'Defective')
+            ->with(['category', 'supplier'])
+            ->orderBy($sortColumn, $sortOrder)
+            ->get();
+
+        $vacantUnits = Unit::where('status', 'Vacant')
+            ->with(['category', 'supplier'])
+            ->orderBy($sortColumn, $sortOrder)
+            ->get();
 
         if ($allUnits->count() > 0) {
             return response()->json([
-                'status'                =>              true,
-                'message'               =>              "Successfully fetch all units data",
-                'data'                  =>              $allUnits,
-                'vacantDefective'       =>              $vacantDefectiveUnits,
-                'vacant'                =>              $vacantUnits
+                'status'                =>          true,
+                'message'               =>          "Successfully fetched all units data",
+                'data'                  =>          $allUnits,
+                'vacantDefective'       =>          $vacantDefectiveUnits,
+                'vacant'                =>          $vacantUnits
             ], 200);
         } else {
             return response()->json([
-                'status'                =>              true,
-                'message'               =>              "No units found.",
+                'status'        =>      true,
+                'message'       =>      "No units found.",
             ], 404);
         }
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -86,8 +121,8 @@ class UnitController extends Controller
 
         foreach ($createdUnits as $unit) {
             UnitLog::create([
-                'user_id'           =>              auth()->user()->id,
-                'log_data'          =>              'Added a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
+                'user_id'                   =>              auth()->user()->id,
+                'log_data'                  =>              'Added a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
             ]);
         }
 

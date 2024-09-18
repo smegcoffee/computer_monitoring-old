@@ -363,13 +363,6 @@ function Dashboard() {
   const [remarkPercent, setRemarkPercent] = useState([]);
   const [analyticsData, setAnalyticsData] = useState([]);
 
-  const getRandomEmail = () => {
-    const domains = ["example.com", "mail.com", "test.com"];
-    const randomName = Math.random().toString(36).substring(2, 11);
-    const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-    return `${randomName}@${randomDomain}`;
-  };
-
   useEffect(() => {
     const fetchWeeklyDatas = async () => {
       try {
@@ -403,7 +396,7 @@ function Dashboard() {
         const computersDatas = response.data.usersFormatted.map((user) => ({
           username: user.computer_user.name,
           img: profile,
-          email: getRandomEmail(),
+          email: user.computer_user.email,
           many: user.formatted_status,
         }));
         setComputersDatas(computersDatas);
