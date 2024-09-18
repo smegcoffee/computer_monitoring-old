@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import smct from "./../../img/smct.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Table,
   TableBody,
@@ -12,6 +13,8 @@ import {
 } from "@mui/material";
 import { format } from "date-fns";
 import CloseIcon from "@mui/icons-material/Close";
+import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { useTable, useSortBy } from "react-table";
 
 function Specs({
   isOpen,
@@ -20,8 +23,8 @@ function Specs({
   specsPopupData,
   setSpecsPopupData,
 }) {
-  const [rows, setRows] = useState([]);
   const [id, setId] = useState("");
+  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,12 +36,39 @@ function Specs({
           computerName: computer.name,
         }))
       );
-      setRows(specsData);
+      setUnits(specsData);
       const id = specsPopupData.computers.map((comp) => comp.id);
       setId(id);
     }
     setLoading(false);
   }, [specsPopupData]);
+
+  const columns = useMemo(
+    () => [
+      { Header: "UNIT CODE", accessor: "unit_code" },
+      { Header: "CATEGORY", accessor: "category.category_name" },
+      { Header: "DESCRIPTION", accessor: "description" },
+      { Header: "SUPPLIER", accessor: "supplier.supplier_name" },
+      {
+        Header: "DATE OF PURCHASE",
+        accessor: (row) => format(new Date(row.date_of_purchase), "MMMM dd, yyyy"),
+      },
+      { Header: "SERIAL NUMBER", accessor: "serial_number" },
+    ],
+    []
+  );
+
+  const data = useMemo(() => units, [units]);
+
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable(
+      {
+        columns,
+        data,
+      },
+      useSortBy
+    );
+
   if (!isOpen) {
     return null; // Render nothing if isOpen is false
   }
@@ -67,45 +97,44 @@ function Specs({
         <div className="max-h-screen mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify">
           <h2 className="mb-4 text-xl font-semibold">Specifications:</h2>
           <TableContainer component={Paper}>
-            <Table>
+            <Table {...getTableProps()}>
               <TableHead>
-                <TableRow>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      UNIT CODE
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      CATEGORY
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      DESCRIPTION
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      SUPPLIER
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      DATE OF PURCHASE
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      SERIAL NUMBER
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                {headerGroups.map((headerGroup) => (
+                  <TableRow {...headerGroup.getHeaderGroupProps()}>
+                    {headerGroup.headers.map((column) => (
+                      <TableCell
+                        align="center"
+                        {...column.getHeaderProps(
+                          column.getSortByToggleProps()
+                        )}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          className="flex"
+                          fontWeight="bold"
+                        >
+                          {column.render("Header")}
+                          <span className="ml-2">
+                            {column.isSorted ? (
+                              column.isSortedDesc ? (
+                                <FontAwesomeIcon icon={faArrowDown} />
+                              ) : (
+                                <FontAwesomeIcon icon={faArrowUp} />
+                              )
+                            ) : (
+                              ""
+                            )}
+                          </span>
+                        </Typography>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
               </TableHead>
-              <TableBody>
+              <TableBody {...getTableBodyProps()}>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8}>
+                    <TableCell colSpan={6}>
                       {[...Array(3)].map((_, i) => (
                         <div key={i} className="w-full p-4 rounded">
                           <div className="flex space-x-4 animate-pulse">
@@ -118,35 +147,31 @@ function Specs({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rows.map((unit, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="center">{unit.unit_code}</TableCell>
-                      <TableCell align="center">
-                        {unit.category.category_name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {unit.description.split("\n").map((line, lineIndex) => (
-                          <div key={lineIndex}>{line}</div>
+                  rows.map((row) => {
+                    prepareRow(row);
+                    return (
+                      <TableRow key={row.index} {...row.getRowProps()}>
+                        {row.cells.map((cell) => (
+                          <TableCell align="center" {...cell.getCellProps()}>
+                            {cell.column.id === "description"
+                              ? cell.value
+                                  .split("\n")
+                                  .map((line, index) => (
+                                    <div key={index}>{line}</div>
+                                  ))
+                              : cell.render("Cell")}
+                          </TableCell>
                         ))}
-                      </TableCell>
-                      <TableCell align="center">
-                        {unit.supplier.supplier_name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {format(new Date(unit.date_of_purchase), "yyyy-MM-dd")}
-                      </TableCell>
-                      <TableCell align="center">{unit.serial_number}</TableCell>
-                    </TableRow>
-                  ))
+                      </TableRow>
+                    );
+                  })
                 )}
-                {rows.length === 0 ? (
+                {!loading && units.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} align="center">
                       <p className="py-5 text-lg">No records found.</p>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  ""
                 )}
               </TableBody>
             </Table>

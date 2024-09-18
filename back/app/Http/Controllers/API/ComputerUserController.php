@@ -50,7 +50,8 @@ class ComputerUserController extends Controller
         $validation = Validator::make($request->all(), [
             'name'                           =>              ['required', 'unique:computer_users,name'],
             'position'                       =>              ['required', 'exists:positions,id'],
-            'branch_code'                    =>              ['required', 'exists:branch_codes,id']
+            'branch_code'                    =>              ['required', 'exists:branch_codes,id'],
+            'email'                          =>              ['required', 'unique:computer_users,email', 'email', 'regex:/^\S+@\S+\.\S+$/'],
         ]);
 
         if ($validation->fails()) {
@@ -66,6 +67,7 @@ class ComputerUserController extends Controller
 
         $user = ComputerUser::create([
             'name'                    =>          $request->name,
+            'email'                   =>          $request->email,
             'position_id'             =>          $request->position,
             'branch_code_id'          =>          $request->branch_code
 

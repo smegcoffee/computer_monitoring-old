@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useTable, useSortBy } from "react-table";
 import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faArrowUp,
+  faArrowDown,
   faArrowUpRightFromSquare,
   faGears,
   faQrcode,
@@ -214,9 +217,68 @@ export const TableComponent = () => {
     };
   };
 
+  const columns = useMemo(
+    () => [
+      {
+        Header: "ID",
+        accessor: "id",
+      },
+      {
+        Header: "Branch Code",
+        accessor: "branch_code.branch_name",
+      },
+      {
+        Header: "Name and Position",
+        accessor: (row) => `${row.name} (${row.position.position_name})`,
+      },
+      {
+        Header: "Action",
+        Cell: ({ row }) => (
+          <div>
+            {row.original.action.includes("Specs") && (
+              <Button
+                className="hover:text-blue-500"
+                onClick={() => openSpecsPopup(row.original.id)}
+              >
+                <FontAwesomeIcon icon={faGears} />
+              </Button>
+            )}
+            {row.original.action.includes("View") && (
+              <Button
+                className="hover:text-blue-500"
+                onClick={() => openViewPopup(row.original.id)}
+              >
+                <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+              </Button>
+            )}
+            {row.original.action.includes("Qr") && (
+              <Button
+                className="hover:text-blue-500"
+                onClick={() => openQrPopup(row.original.id)}
+              >
+                <FontAwesomeIcon icon={faQrcode} />
+              </Button>
+            )}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const data = useMemo(() => filteredData, [filteredData]);
+
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable(
+      {
+        columns,
+        data,
+      },
+      useSortBy
+    );
+
   const emptyRows =
-    rowsPerPage -
-    Math.min(rowsPerPage, filteredData.length - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
   return (
     <>
       {/* search thru NAME */}
@@ -236,35 +298,41 @@ export const TableComponent = () => {
         />
       </div>
       <TableContainer component={Paper} className="w-full table-container">
-        <Table>
+        <Table {...getTableProps()}>
           <TableHead>
-            <TableRow className="bg-blue-200">
-              <TableCell align="center">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  ID
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  Branch Code
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  Name and Position
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Typography variant="subtitle1" fontWeight="bold">
-                  Action
-                </Typography>
-              </TableCell>
-            </TableRow>
+            {headerGroups.map((headerGroup) => (
+              <TableRow
+                className="bg-blue-200"
+                {...headerGroup.getHeaderGroupProps()}
+              >
+                {headerGroup.headers.map((column) => (
+                  <TableCell
+                    align="center"
+                    {...column.getHeaderProps(column.getSortByToggleProps())}
+                  >
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {column.render("Header")}
+                      <span className="ml-2">
+                        {column.isSorted ? (
+                          column.isSortedDesc ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          )
+                        ) : (
+                          ""
+                        )}
+                      </span>
+                    </Typography>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
           </TableHead>
-          <TableBody>
+          <TableBody {...getTableBodyProps()}>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={4}>
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="w-full p-4 rounded">
                       <div className="flex space-x-4 animate-pulse">
@@ -277,70 +345,38 @@ export const TableComponent = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData
+              rows
                 .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-                .map((row, index) => (
-                  <TableRow key={row.id}>
-                    <TableCell align="center">{row.id}</TableCell>
-                    <TableCell align="center">
-                      {row.branch_code.branch_name}
-                    </TableCell>
-                    <TableCell align="center">
-                      <b>{row.name}</b>
-                      <br />
-                      <i>{row.position.position_name}</i>
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.action.includes("Specs") && (
-                        <Button
-                          className="hover:text-blue-500"
-                          onClick={() => openSpecsPopup(row.id)}
-                        >
-                          <FontAwesomeIcon icon={faGears} />
-                        </Button>
-                      )}
-
-                      {row.action.includes("View") && (
-                        <Button
-                          className="hover:text-blue-500"
-                          onClick={() => openViewPopup(row.id)}
-                        >
-                          <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-                        </Button>
-                      )}
-                      {row.action.includes("Qr") && (
-                        <Button
-                          className="hover:text-blue-500"
-                          onClick={() => openQrPopup(row.id)}
-                        >
-                          <FontAwesomeIcon icon={faQrcode} />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
+                .map((row) => {
+                  prepareRow(row);
+                  return (
+                    <TableRow key={row.original.id} {...row.getRowProps()}>
+                      {row.cells.map((cell) => (
+                        <TableCell align="center" {...cell.getCellProps()}>
+                          {cell.render("Cell")}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })
             )}
-            {loading
-              ? ""
-              : emptyRows > 0 && (
-                  <TableRow style={{ height: 53 * emptyRows }}>
-                    <TableCell colSpan={6}>
-                      {filteredData.length === 0 ? (
-                        !searchTerm ? (
-                          <p className="text-xl text-center">
-                            No user to manage.
-                          </p>
-                        ) : (
-                          <p className="text-xl text-center">
-                            No "{searchTerm}" result found.
-                          </p>
-                        )
-                      ) : (
-                        ""
-                      )}{" "}
-                    </TableCell>
-                  </TableRow>
-                )}
+            {!loading && emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={4}>
+                  {filteredData.length === 0 ? (
+                    !searchTerm ? (
+                      <p className="text-xl text-center">No user to manage.</p>
+                    ) : (
+                      <p className="text-xl text-center">
+                        No "{searchTerm}" result found.
+                      </p>
+                    )
+                  ) : (
+                    ""
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         <TablePagination

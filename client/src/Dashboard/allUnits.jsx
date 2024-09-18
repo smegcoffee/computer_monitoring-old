@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowUpRightFromSquare,
-  faRightFromBracket,
-} from "@fortawesome/free-solid-svg-icons";
+import { useTable, useSortBy } from "react-table";
+import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
-import Swal from "sweetalert2";
 import {
-  AppBar,
   Breadcrumbs,
-  Button,
-  Dialog,
-  DialogContent,
-  IconButton,
   Slide,
   Table,
   TableBody,
@@ -27,15 +19,9 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import { format } from "date-fns";
 import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 function AllUnits() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,8 +30,8 @@ function AllUnits() {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const [open, setOpen] = useState(false);
-  const [units, setUnits] = useState([]);
   const [selectedUnit, setSelectedUnit] = useState(null);
+  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -64,7 +50,16 @@ function AllUnits() {
     const filteredData = units.filter(
       (unit) =>
         unit.unit_code.toLowerCase().includes(searchValue) ||
+        unit.date_of_purchase.toLowerCase().includes(searchValue) ||
+        unit.description.toLowerCase().includes(searchValue) ||
+        unit.serial_number.toLowerCase().includes(searchValue) ||
+        unit.status.toLowerCase().includes(searchValue) ||
+        unit.supplier.supplier_name.toLowerCase().includes(searchValue) ||
         unit.category.category_name.toLowerCase().includes(searchValue) ||
+        unit.transfer_units
+          .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+          ?.computer_user?.name.toLowerCase()
+          .includes(searchValue.toLowerCase()) ||
         unit.status.toLowerCase().includes(searchValue)
     );
 
@@ -93,8 +88,8 @@ function AllUnits() {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log(response.data);
         const unit = response.data.data;
-
         setUnits(unit);
       } catch (error) {
         console.error("Error all units:", error);
@@ -119,9 +114,64 @@ function AllUnits() {
     setSelectedUnit(null);
   };
 
+  const columns = useMemo(
+    () => [
+      {
+        Header: "UNIT CODE",
+        accessor: "unit_code",
+      },
+      {
+        Header: "DATE OF PURCHASE",
+        accessor: "date_of_purchase",
+      },
+      {
+        Header: "CATEGORY",
+        accessor: "category.category_name",
+      },
+      {
+        Header: "DESCRIPTION",
+        accessor: "description",
+      },
+      {
+        Header: "SUPPLIER",
+        accessor: "supplier.supplier_name",
+      },
+      {
+        Header: "SERIAL NO.",
+        accessor: "serial_number",
+      },
+      {
+        Header: "STATUS",
+        accessor: "status",
+      },
+      {
+        Header: "USERS",
+        accessor: (row) => {
+          const latestTransfer = row.transfer_units.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          )[0];
+          return latestTransfer?.computer_user?.name || "No user assigned yet";
+        },
+      },
+    ],
+    []
+  );
+
+  const data = useMemo(() => filteredUnits, [filteredUnits]);
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    state: { sortBy },
+  } = useTable({ columns, data }, useSortBy);
+
+  console.log(rows);
+
   const emptyRows =
-    rowsPerPage -
-    Math.min(rowsPerPage, filteredUnits.length - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const title = "All Units";
 
@@ -175,51 +225,47 @@ function AllUnits() {
               }}
             />
             <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
-              <Table>
+              <Table {...getTableProps()}>
                 <TableHead>
-                  <TableRow className="bg-blue-400">
-                    <TableCell align="center">
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        color={"white"}
-                      >
-                        UNIT CODE
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        color={"white"}
-                      >
-                        CATEGORY
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        color={"white"}
-                      >
-                        STATUS
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight="bold"
-                        color={"white"}
-                      >
-                        ACTION
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  {headerGroups.map((headerGroup) => (
+                    <TableRow
+                      {...headerGroup.getHeaderGroupProps()}
+                      className="bg-blue-400"
+                    >
+                      {headerGroup.headers.map((column) => (
+                        <TableCell
+                          {...column.getHeaderProps(
+                            column.getSortByToggleProps()
+                          )}
+                          align="center"
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            color="white"
+                          >
+                            {column.render("Header")}
+                            <span className="ml-2">
+                              {column.isSorted ? (
+                                column.isSortedDesc ? (
+                                  <FontAwesomeIcon icon={faArrowDown} />
+                                ) : (
+                                  <FontAwesomeIcon icon={faArrowUp} />
+                                )
+                              ) : (
+                                ""
+                              )}
+                            </span>
+                          </Typography>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
                 </TableHead>
-                <TableBody>
+                <TableBody {...getTableBodyProps()}>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={8}>
                         {[...Array(3)].map((_, i) => (
                           <div key={i} className="w-full p-4 rounded">
                             <div className="flex space-x-4 animate-pulse">
@@ -232,33 +278,32 @@ function AllUnits() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUnits
+                    rows
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
                       )
-                      .map((unit, index) => (
-                        <TableRow key={index}>
-                          <TableCell align="center">{unit.unit_code}</TableCell>
-                          <TableCell align="center">
-                            {unit.category.category_name}
-                          </TableCell>
-                          <TableCell align="center">{unit.status}</TableCell>
-                          <TableCell align="center">
-                            <Button onClick={() => handleClickOpen(unit)}>
-                              <FontAwesomeIcon
-                                icon={faArrowUpRightFromSquare}
-                              />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      .map((row) => {
+                        prepareRow(row);
+                        return (
+                          <TableRow {...row.getRowProps()}>
+                            {row.cells.map((cell) => (
+                              <TableCell
+                                {...cell.getCellProps()}
+                                align="center"
+                              >
+                                {cell.render("Cell")}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })
                   )}
                   {loading
                     ? ""
                     : emptyRows > 0 && (
                         <TableRow style={{ height: 53 * emptyRows }}>
-                          <TableCell colSpan={4}>
+                          <TableCell colSpan={8}>
                             {filteredUnits.length === 0 ? (
                               !searchTerm ? (
                                 <p className="text-xl text-center">
@@ -295,101 +340,6 @@ function AllUnits() {
           </div>
         </div>
       </div>
-      {selectedUnit && (
-        <Dialog
-          fullScreen
-          open={open}
-          onClose={handleClose}
-          TransitionComponent={Transition}
-        >
-          <AppBar sx={{ position: "relative" }}>
-            <Toolbar>
-              <IconButton
-                edge="start"
-                color="inherit"
-                onClick={handleClose}
-                aria-label="close"
-              >
-                <CloseIcon />
-              </IconButton>
-              <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                {selectedUnit.unit_code} - {selectedUnit.category.category_name}
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          <DialogContent dividers>
-            <div style={{ overflowY: "auto" }}>
-              <TableContainer
-                className="w-full bg-white rounded-lg shadow-md"
-                style={{
-                  maxWidth: "1000px",
-                  margin: "0 auto",
-                  textAlign: "center",
-                  marginTop: "50px",
-                  marginBottom: "50px",
-                }}
-              >
-                <Table>
-                  <TableHead>
-                    <TableRow className="bg-red-400">
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight="bold"
-                          color={"white"}
-                        >
-                          STATUS
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight="bold"
-                          color={"white"}
-                        >
-                          RECENT USER
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight="bold"
-                          color={"white"}
-                        >
-                          DATE OF TRANSFER
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedUnit && selectedUnit.transfer_units.length > 0 ? (
-                      selectedUnit.transfer_units.map((transfer, index) => (
-                        <TableRow key={index}>
-                          <TableCell align="center">
-                            {transfer.status}
-                          </TableCell>
-                          <TableCell align="center">
-                            {transfer.computer_user.name}
-                          </TableCell>
-                          <TableCell align="center">
-                            {format(new Date(transfer.date), "MMMM dd, yyyy")}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell align="center" colSpan={3}>
-                          No data found.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }

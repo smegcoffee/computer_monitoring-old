@@ -16,4 +16,9 @@ class Log extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function computerUser()
+    {
+        return $this->belongsTo(ComputerUser::class);
+    }
 }

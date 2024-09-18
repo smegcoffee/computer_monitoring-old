@@ -26,6 +26,8 @@ import { format } from "date-fns";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 
@@ -64,6 +66,8 @@ function EditSet({
   const [computerId, setComputerId] = useState("");
   const [unit, setUnit] = useState([]);
   const [markedLoading, setMarkedLoading] = useState(false);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const [refresh, setRefresh] = useState(false);
 
@@ -363,6 +367,47 @@ function EditSet({
     }
   };
 
+  const sortRows = (rows) => {
+    return rows.sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "unit_code") {
+        valueA = a.unit_code;
+        valueB = b.unit_code;
+      } else if (sortColumn === "date_of_purchase") {
+        valueA = a.date_of_purchase;
+        valueB = b.date_of_purchase;
+      } else if (sortColumn === "description") {
+        valueA = a.description.toLowerCase();
+        valueB = b.description.toLowerCase();
+      } else if (sortColumn === "supplier.supplier_name") {
+        valueA = a.supplier.supplier_name.toLowerCase();
+        valueB = b.supplier.supplier_name.toLowerCase();
+      } else if (sortColumn === "category.category_name") {
+        valueA = a.category.category_name.toLowerCase();
+        valueB = b.category.category_name.toLowerCase();
+      } else if (sortColumn === "serial_number") {
+        valueA = a.serial_number.toLowerCase();
+        valueB = b.serial_number.toLowerCase();
+      } else if (sortColumn === "status") {
+        valueA = a.status.toLowerCase();
+        valueB = b.status.toLowerCase();
+      }
+
+      if (sortOrder === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+  };
+
+  const handleSort = (column) => {
+    const isAscending = sortColumn === column && sortOrder === "asc";
+    setSortColumn(column);
+    setSortOrder(isAscending ? "desc" : "asc");
+  };
+
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -381,39 +426,130 @@ function EditSet({
               <Table>
                 <TableHead>
                   <TableRow className="bg-red-200">
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        UNIT CODE
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("unit_code")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        UNIT CODE{" "}
+                        {sortColumn === "unit_code" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        DATE OF PURCHASE
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("date_of_purchase")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        DATE OF PURCHASE{" "}
+                        {sortColumn === "date_of_purchase" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        CATEGORY
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("category.category_name")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        CATEGORY{" "}
+                        {sortColumn === "category.category_name" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        DESCRIPTION
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("description")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        DESCRIPTION{" "}
+                        {sortColumn === "description" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        SUPPLIER
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("supplier.supplier_name")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        SUPPLIER{" "}
+                        {sortColumn === "supplier.supplier_name" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        SERIAL NO.
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("serial_number")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        SERIAL NO.{" "}
+                        {sortColumn === "serial_number" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        STATUS
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("status")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        STATUS{" "}
+                        {sortColumn === "status" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
                       </Typography>
                     </TableCell>
                     <TableCell align="center"></TableCell>
@@ -435,7 +571,7 @@ function EditSet({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    unit.map((unit, index) => (
+                    sortRows(unit).map((unit, index) => (
                       <TableRow key={index}>
                         <TableCell align="center">{unit.unit_code}</TableCell>
                         <TableCell align="center">

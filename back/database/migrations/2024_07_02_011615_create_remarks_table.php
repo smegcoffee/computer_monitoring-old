@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('remarks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('computer_id')->constrained()->onDelete('restrict');
+            $table->foreignId('user_id')->constrained()->onDelete('restrict');
             $table->string('remark_content');
             $table->string('date')->nullable();
             $table->timestamps();

@@ -2,12 +2,22 @@ import React, { useState, useEffect, useMemo } from "react";
 import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
-import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowDown,
+  faArrowUp,
+  faArrowUpRightFromSquare,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
 import Swal from "sweetalert2";
 import {
+  AppBar,
   Breadcrumbs,
+  Button,
+  Dialog,
+  DialogContent,
+  IconButton,
   Slide,
   Table,
   TableBody,
@@ -17,6 +27,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -29,40 +40,38 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function AllLogs() {
+function TransferedUnits() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const [open, setOpen] = useState(false);
-  const [logs, setLogs] = useState([]);
-  const [selectedLog, setSelectedLog] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredLogs, setFilteredLogs] = useState([]);
+  const [filteredUnits, setFilteredUnits] = useState([]);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    setFilteredLogs(logs);
-  }, [logs]);
+    setFilteredUnits(units);
+  }, [units]);
 
   const handleSearchChange = (event) => {
     const searchValue = event.target.value.toLowerCase();
     setSearchTerm(searchValue);
 
-    const filteredData = logs.filter(
-      (log) =>
-        log.log_data.toLowerCase().includes(searchValue) ||
-        log.user.firstName.toLowerCase().includes(searchValue) ||
-        log.user.lastName.toLowerCase().includes(searchValue) ||
-        log.computer_user?.name.toLowerCase().includes(searchValue) ||
-        log.created_at.toLowerCase().includes(searchValue)
-      );
+    const filteredData = units.filter(
+      (unit) =>
+        unit.unit_code.toLowerCase().includes(searchValue) ||
+        unit.category.category_name.toLowerCase().includes(searchValue) ||
+        unit.status.toLowerCase().includes(searchValue)
+    );
 
-    setFilteredLogs(filteredData);
+    setFilteredUnits(filteredData);
     setPage(0);
   };
 
@@ -76,22 +85,21 @@ function AllLogs() {
   };
 
   useEffect(() => {
-    const fetchLogs = async () => {
+    const fetchUnits = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
         }
-        const response = await axios.get("/api/logs", {
+        const response = await axios.get("/api/units", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const log = response.data.logs;
-
-        setLogs(log);
+        const unit = response.data.data;
+        setUnits(unit);
       } catch (error) {
-        console.error("Error all logs:", error);
+        console.error("Error transfered units:", error);
         if (error.response.status === 404) {
           setError(true);
         }
@@ -100,50 +108,68 @@ function AllLogs() {
       }
     };
 
-    fetchLogs();
+    fetchUnits();
   }, []);
 
-  const handleClickOpen = (log) => {
-    setSelectedLog(log);
+  const handleClickOpen = (unit) => {
+    setSelectedUnit(unit);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedLog(null);
+    setSelectedUnit(null);
   };
 
   const columns = useMemo(
     () => [
       {
-        Header: "Logger",
-        accessor: "user",
-        Cell: ({ value }) =>
-          `${value?.firstName || ""} ${value?.lastName || ""}`,
-        sortType: "basic",
+        Header: "UNIT CODE",
+        accessor: "unit_code",
       },
       {
-        Header: "Log data",
-        accessor: "log_data",
-        sortType: "basic",
+        Header: "CATEGORY",
+        accessor: "category.category_name",
       },
       {
-        Header: "Computer user",
-        accessor: "computer_user",
-        Cell: ({ value }) => value?.name || "No record",
-        sortType: "basic",
+        Header: "STATUS",
+        accessor: "status",
       },
       {
-        Header: "Date",
-        accessor: "created_at",
-        Cell: ({ value }) => format(new Date(value), "MMMM d, yyyy"),
-        sortType: "basic",
+        Header: "ACTION",
+        Cell: ({ row }) => (
+          <Button onClick={() => handleClickOpen(row.original)}>
+            <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+          </Button>
+        ),
       },
     ],
     []
   );
 
-  const data = useMemo(() => filteredLogs, [filteredLogs]);
+  const dialogColumns = useMemo(
+    () => [
+      {
+        Header: "STATUS",
+        accessor: "status",
+      },
+      {
+        Header: "RECENT USER",
+        accessor: "computer_user.name",
+      },
+      {
+        Header: "DATE OF TRANSFER",
+        accessor: (row) => format(new Date(row.date), "MMMM dd, yyyy"),
+      },
+    ],
+    []
+  );
+
+  const data = useMemo(() => filteredUnits, [filteredUnits]);
+  const dialogData = useMemo(
+    () => (selectedUnit ? selectedUnit.transfer_units : []),
+    [selectedUnit]
+  );
 
   const {
     getTableProps,
@@ -152,19 +178,21 @@ function AllLogs() {
     rows,
     prepareRow,
     state: { sortBy },
-    setSortBy,
-  } = useTable(
-    {
-      columns,
-      data,
-    },
-    useSortBy
-  );
+  } = useTable({ columns, data }, useSortBy);
+
+  const {
+    getTableProps: getDialogTableProps,
+    getTableBodyProps: getDialogTableBodyProps,
+    headerGroups: dialogHeaderGroups,
+    rows: dialogRows,
+    prepareRow: prepareDialogRow,
+    state: { sortBy: dialogSortBy },
+  } = useTable({ columns: dialogColumns, data: dialogData }, useSortBy);
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  const title = "All Logs";
+  const title = "Transfered Units";
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -177,7 +205,7 @@ function AllLogs() {
           />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">All Logs</p>
+          <p className="pt-10 ml-10 text-2xl font-normal">Transfered Units</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -195,7 +223,7 @@ function AllLogs() {
                 color="text.primary"
               >
                 <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                All Logs
+                Transfered Units
               </Typography>
             </Breadcrumbs>
           </div>
@@ -220,21 +248,20 @@ function AllLogs() {
                 <TableHead>
                   {headerGroups.map((headerGroup) => (
                     <TableRow
-                      className="bg-blue-400"
                       {...headerGroup.getHeaderGroupProps()}
+                      className="bg-red-400"
                     >
                       {headerGroup.headers.map((column) => (
                         <TableCell
-                          align="center"
                           {...column.getHeaderProps(
                             column.getSortByToggleProps()
                           )}
-                          style={{ cursor: "pointer" }}
+                          align="center"
                         >
                           <Typography
                             variant="subtitle1"
                             fontWeight="bold"
-                            color={"white"}
+                            color="white"
                           >
                             {column.render("Header")}
                             <span className="ml-2">
@@ -281,8 +308,8 @@ function AllLogs() {
                           <TableRow {...row.getRowProps()}>
                             {row.cells.map((cell) => (
                               <TableCell
-                                align="center"
                                 {...cell.getCellProps()}
+                                align="center"
                               >
                                 {cell.render("Cell")}
                               </TableCell>
@@ -291,21 +318,33 @@ function AllLogs() {
                         );
                       })
                   )}
-                  {!loading && filteredLogs.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        {searchTerm
-                          ? `No "${searchTerm}" result found.`
-                          : "No logs found."}
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  {loading
+                    ? ""
+                    : emptyRows > 0 && (
+                        <TableRow style={{ height: 53 * emptyRows }}>
+                          <TableCell colSpan={4}>
+                            {filteredUnits.length === 0 ? (
+                              !searchTerm ? (
+                                <p className="text-xl text-center">
+                                  No units to found.
+                                </p>
+                              ) : (
+                                <p className="text-xl text-center">
+                                  No "{searchTerm}" result found.
+                                </p>
+                              )
+                            ) : (
+                              ""
+                            )}{" "}
+                          </TableCell>
+                        </TableRow>
+                      )}
                 </TableBody>
               </Table>
               <TablePagination
                 rowsPerPageOptions={[10, 15, 20]}
                 component="div"
-                count={filteredLogs.length}
+                count={filteredUnits.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
@@ -320,8 +359,106 @@ function AllLogs() {
           </div>
         </div>
       </div>
+      {selectedUnit && (
+        <Dialog
+          fullScreen
+          open={open}
+          onClose={handleClose}
+          TransitionComponent={Transition}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleClose}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                {selectedUnit.unit_code} - {selectedUnit.category.category_name}
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <DialogContent dividers>
+            <div style={{ overflowY: "auto" }}>
+              <TableContainer
+                className="w-full bg-white rounded-lg shadow-md"
+                style={{
+                  maxWidth: "1000px",
+                  margin: "0 auto",
+                  textAlign: "center",
+                  marginTop: "20px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Table {...getDialogTableProps()}>
+                  <TableHead>
+                    {dialogHeaderGroups.map((headerGroup) => (
+                      <TableRow
+                        {...headerGroup.getHeaderGroupProps()}
+                        className="bg-red-400"
+                      >
+                        {headerGroup.headers.map((column) => (
+                          <TableCell
+                            {...column.getHeaderProps(
+                              column.getSortByToggleProps()
+                            )}
+                            align="center"
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                              color="white"
+                            >
+                              {column.render("Header")}
+                              <span className="ml-2">
+                                {column.isSorted ? (
+                                  column.isSortedDesc ? (
+                                    <FontAwesomeIcon icon={faArrowDown} />
+                                  ) : (
+                                    <FontAwesomeIcon icon={faArrowUp} />
+                                  )
+                                ) : (
+                                  ""
+                                )}
+                              </span>
+                            </Typography>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHead>
+                  <TableBody {...getDialogTableBodyProps()}>
+                    {dialogRows.map((row) => {
+                      prepareDialogRow(row);
+                      return (
+                        <TableRow {...row.getRowProps()}>
+                          {row.cells.map((cell) => (
+                            <TableCell {...cell.getCellProps()} align="center">
+                              {cell.render("Cell")}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })}
+                    {dialogRows.length === 0 && (
+                      <TableRow>
+                        <TableCell align="center" colSpan={3}>
+                          No data found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
 
-export default AllLogs;
+export default TransferedUnits;

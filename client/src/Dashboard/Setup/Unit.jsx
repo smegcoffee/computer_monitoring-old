@@ -4,7 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCirclePlus,
   faTrash,
+  faArrowUp,
+  faArrowDown,
   faPen,
+  faSort,
   faX,
   faFloppyDisk,
   faSpinner,
@@ -65,6 +68,8 @@ const CustomTableB = (refresh) => {
   const [editUnitId, setEditUnitId] = useState(null);
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
+  const [sortColumn, setSortColumn] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
   const options = [
     { value: "Vacant", label: "Vacant" },
     { value: "Defective", label: "Defective" },
@@ -78,6 +83,13 @@ const CustomTableB = (refresh) => {
     status: "",
   });
 
+  const handleSort = (column) => {
+    const newOrder =
+      sortColumn === column && sortOrder === "asc" ? "desc" : "asc";
+    setSortColumn(column);
+    setSortOrder(newOrder);
+  };
+
   useEffect(() => {
     const fetchUnit = async () => {
       try {
@@ -86,11 +98,14 @@ const CustomTableB = (refresh) => {
           throw new Error("Token not found");
         }
 
-        const response = await axios.get("/api/units", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          `/api/units?sort_column=${sortColumn}&sort_order=${sortOrder}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (response.data.vacantDefective.length === 0) {
           setUnit([]);
           setError(false);
@@ -113,7 +128,12 @@ const CustomTableB = (refresh) => {
     };
 
     fetchUnit();
-  }, [refresh, refreshed]);
+  }, [refresh, refreshed, sortColumn, sortOrder]);
+
+  const getSortIcon = (column) => {
+    if (sortColumn !== column) return faSort;
+    return sortOrder === "asc" ? faArrowUp : faArrowDown;
+  };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -382,28 +402,88 @@ const CustomTableB = (refresh) => {
         <Table className={classes.table}>
           <TableHead>
             <TableRow className="bg-red-200">
-              <TableCell align="center" className="rounded-tl-xl">
-                <p className="font-semibold text-base mt-1.5">UNIT CODE</p>
-              </TableCell>
-              <TableCell align="center">
+              <TableCell
+                align="center"
+                className="cursor-pointer rounded-tl-xl"
+                onClick={() => handleSort("unit_code")}
+              >
                 <p className="font-semibold text-base mt-1.5">
-                  DATE OF PURCHASE
+                  UNIT CODE{" "}
+                  {sortColumn === "unit_code" && (
+                    <FontAwesomeIcon icon={getSortIcon("unit_code")} />
+                  )}
                 </p>
               </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">CATEGORY</p>
+              <TableCell
+                className="cursor-pointer"
+                align="center"
+                onClick={() => handleSort("date_of_purchase")}
+              >
+                <p className="font-semibold text-base mt-1.5">
+                  DATE OF PURCHASE{" "}
+                  {sortColumn === "date_of_purchase" && (
+                    <FontAwesomeIcon icon={getSortIcon("date_of_purchase")} />
+                  )}
+                </p>
               </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
+              <TableCell
+                className="cursor-pointer"
+                align="center"
+                onClick={() => handleSort("category_name")}
+              >
+                <p className="font-semibold text-base mt-1.5">
+                  CATEGORY{" "}
+                  {sortColumn === "category_name" && (
+                    <FontAwesomeIcon icon={getSortIcon("category_name")} />
+                  )}
+                </p>
               </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
+              <TableCell
+                className="cursor-pointer"
+                align="center"
+                onClick={() => handleSort("description")}
+              >
+                <p className="font-semibold text-base mt-1.5">
+                  DESCRIPTION{" "}
+                  {sortColumn === "description" && (
+                    <FontAwesomeIcon icon={getSortIcon("description")} />
+                  )}
+                </p>
               </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
+              <TableCell
+                className="cursor-pointer"
+                align="center"
+                onClick={() => handleSort("supplier_name")}
+              >
+                <p className="font-semibold text-base mt-1.5">
+                  SUPPLIER{" "}
+                  {sortColumn === "supplier_name" && (
+                    <FontAwesomeIcon icon={getSortIcon("supplier_name")} />
+                  )}
+                </p>
               </TableCell>
-              <TableCell align="center">
-                <p className="font-semibold text-base mt-1.5">STATUS</p>
+              <TableCell
+                className="cursor-pointer"
+                align="center"
+                onClick={() => handleSort("serial_number")}
+              >
+                <p className="font-semibold text-base mt-1.5">
+                  SERIAL NO.{" "}
+                  {sortColumn === "serial_number" && (
+                    <FontAwesomeIcon icon={getSortIcon("serial_number")} />
+                  )}
+                </p>
+              </TableCell>
+              <TableCell className="cursor-pointer" align="center">
+                <p
+                  className="font-semibold text-base mt-1.5"
+                  onClick={() => handleSort("status")}
+                >
+                  STATUS{" "}
+                  {sortColumn === "status" && (
+                    <FontAwesomeIcon icon={getSortIcon("status")} />
+                  )}
+                </p>
               </TableCell>
               <TableCell align="center" className="rounded-tr-xl">
                 <p className="font-semibold text-base mt-1.5">ACTION</p>
@@ -446,7 +526,7 @@ const CustomTableB = (refresh) => {
                           }
                         />
                       ) : (
-                        format(new Date(data.date_of_purchase), "yyyy-MM-dd")
+                        format(new Date(data.date_of_purchase), "MMMM dd, yyyy")
                       )}
                       <span className="text-sm text-center">
                         {editUnitId === data.id &&
