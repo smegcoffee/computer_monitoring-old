@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('branch_code_id')->nullable();
             $table->foreignId('position_id')->nullable();
             $table->string('name')->nullable();
-            $table->email('email')->unique()->nullable();
+            $table->string('email')->unique()->nullable();
             $table->timestamps();
 
             $table->foreign('branch_code_id')->references('id')->on('branch_codes')->onDelete('restrict');

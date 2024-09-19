@@ -270,12 +270,13 @@ class ComputerController extends Controller
                 'message'           =>              'No computers found'
             ], 422);
         } else {
+            // InstalledApplication::where('computer_id', $computerId)->delete();
             $installedApplications = [];
             foreach ($request->application_content as $content) {
-                $installed = InstalledApplication::create([
-                    'computer_id'                   =>                  $computerId,
-                    'application_content'           =>                  $content,
-                ]);
+                $installed = InstalledApplication::updateOrCreate(
+                    ['computer_id' => $computerId, 'application_content' => $content],
+                    ['application_content' => $content]
+                );
                 $installedApplications[] = $installed;
                 $installedContent[] = $content;
             }
