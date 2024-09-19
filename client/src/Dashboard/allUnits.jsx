@@ -88,7 +88,6 @@ function AllUnits() {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data);
         const unit = response.data.data;
         setUnits(unit);
       } catch (error) {
@@ -167,8 +166,6 @@ function AllUnits() {
     prepareRow,
     state: { sortBy },
   } = useTable({ columns, data }, useSortBy);
-
-  console.log(rows);
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);

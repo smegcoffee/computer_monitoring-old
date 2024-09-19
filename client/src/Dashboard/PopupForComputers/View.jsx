@@ -62,6 +62,11 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
       : null,
   });
   const [redirectToPrint, setRedirectToPrint] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
+
+  const dismissAlert = () => {
+    setShowAlert(false);
+  };
 
   useEffect(() => {
     if (redirectToPrint) {
@@ -373,6 +378,50 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
           className="mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify"
           style={{ height: "470px" }}
         >
+          {showAlert && (
+            <div
+              className="relative px-4 py-5 mb-5 text-blue-800 bg-blue-100 border border-blue-400 rounded-md"
+              role="alert"
+            >
+              <strong className="text-xl font-bold">Recommended Applications!</strong>
+              <span className="block ml-5 sm:inline animate-bounce">
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  Package
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  PDF Reader
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  Microsoft Office
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  SQL
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  Google Chrome
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  WinRAR
+                </span>
+                <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
+                  Anydesk
+                </span>
+              </span>
+              <button
+                className="absolute top-0 bottom-0 right-0 px-4 py-3 text-blue-500 hover:text-blue-700"
+                onClick={dismissAlert}
+              >
+                <svg
+                  className="w-6 h-6 fill-current"
+                  role="button"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M14.348 14.849a1 1 0 01-1.414 0L10 11.415l-2.934 2.934a1 1 0 01-1.414-1.414l2.934-2.934-2.934-2.934a1 1 0 011.414-1.414l2.934 2.934 2.934-2.934a1 1 0 011.414 1.414l-2.934 2.934 2.934 2.934a1 1 0 010 1.414z" />
+                </svg>
+              </button>
+            </div>
+          )}
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TableContainer component={Paper}>
@@ -732,11 +781,16 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
                   multiple
                   id="tags-outlined"
                   options={[
-                    "Adobe",
-                    "Office",
-                    "Chrome",
-                    "Firefox",
-                    "Visual Studio",
+                    "Package",
+                    "SQL",
+                    "Anydesk",
+                    "WinRAR",
+                    "LAN Messenger",
+                    "Adobe Acrobat Reader",
+                    "Adobe Photoshop",
+                    "Microsoft Office",
+                    "Google Chrome",
+                    "Mozilla Firefox",
                   ]}
                   freeSolo
                   value={applicationContent}

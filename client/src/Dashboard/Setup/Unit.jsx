@@ -290,8 +290,6 @@ const CustomTableB = (refresh) => {
       status: { label: data.status, value: data.status },
     });
     setValidationErrors({});
-
-    console.log(editValues);
   };
 
   const formatEditValues = (values) => ({
@@ -587,7 +585,6 @@ const CustomTableB = (refresh) => {
                               description: e.target.value,
                             })
                           }
-                          style={{ resize: "none" }}
                           className={
                             editUnitId === data.id &&
                             validationErrors["description"]
@@ -1332,7 +1329,6 @@ const CustomTableA = ({
                       rows={3}
                       type="text"
                       value={row.description}
-                      style={{ resize: "none" }}
                       onChange={(e) =>
                         handleChange(index, "description", e.target.value)
                       }

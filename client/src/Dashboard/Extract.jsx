@@ -45,6 +45,7 @@ const Extract = () => {
   const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchComputerData = async () => {
@@ -60,6 +61,10 @@ const Extract = () => {
         });
         if (response.data.status) {
           setComputer(response.data.computer);
+          const apps = response.data.computer.installed_applications.map(
+            (comp) => comp.application_content
+          );
+          setApplicationContent(apps);
         } else {
           console.error("Fetch error:", response.data.message);
         }
@@ -71,7 +76,7 @@ const Extract = () => {
     };
 
     fetchComputerData();
-  }, []);
+  }, [refresh]);
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -80,6 +85,7 @@ const Extract = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -118,10 +124,10 @@ const Extract = () => {
             title: response.data.message,
           });
         })();
-        setApplicationContent([]);
         setDate(null);
         setRemark("");
         setRemarksContent("");
+        setApplicationContent([]);
         setValidationErrors("");
       }
       console.log("Adding computer set:", response.data);
@@ -154,6 +160,7 @@ const Extract = () => {
       }
     } finally {
       setLoading(false);
+      setRefresh(false);
     }
 
     // Example of sending data to backend:
@@ -196,8 +203,8 @@ const Extract = () => {
   if (cLoading) {
     return (
       <div>
-        <div class="flex items-center justify-center min-h-screen bg-gray-100">
-          <div class="w-16 h-16 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="w-16 h-16 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
           <p className="absolute mt-24 text-xl text-center">
             <strong>Loading...</strong>
           </p>
@@ -241,7 +248,7 @@ const Extract = () => {
                       "No formatting has been applied yet."
                     ) : (
                       <span
-                        class={
+                        className={
                           computer.formatted_status >= 10
                             ? "bg-red-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
                             : "bg-yellow-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
@@ -422,11 +429,16 @@ const Extract = () => {
                       multiple
                       id="tags-outlined"
                       options={[
-                        "Adobe",
-                        "Office",
-                        "Chrome",
-                        "Firefox",
-                        "Visual Studio",
+                        "Package",
+                        "SQL",
+                        "Anydesk",
+                        "WinRAR",
+                        "LAN Messenger",
+                        "Adobe Acrobat Reader",
+                        "Adobe Photoshop",
+                        "Microsoft Office",
+                        "Google Chrome",
+                        "Mozilla Firefox",
                       ]}
                       freeSolo
                       value={applicationContent}
