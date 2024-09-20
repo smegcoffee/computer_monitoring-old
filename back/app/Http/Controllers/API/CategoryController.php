@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $allCategories = Category::all();
+        $allCategories = Category::orderBy('created_at', 'desc')->get();
 
         if ($allCategories->count() > 0) {
             return response()->json([
