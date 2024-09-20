@@ -449,6 +449,7 @@ class ComputerController extends Controller
             'application_content'               =>              ['required', 'array'],
             'application_content.*'             =>              ['string'],
             'position'                          =>              ['required', 'exists:positions,id'],
+            'email'                             =>              ['required', 'email', 'unique:computer_users,email,' . $computerUserId, 'regex:/^\S+@\S+\.\S+$/'],
             'branch_code'                       =>              ['required', 'exists:branch_codes,id']
         ]);
 
@@ -502,6 +503,7 @@ class ComputerController extends Controller
                 ], 400);
             } else {
                 $computerUser->update([
+                    'email'                   =>          $request->email,
                     'position_id'             =>          $request->position,
                     'branch_code_id'          =>          $request->branch_code
                 ]);

@@ -56,6 +56,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   const [validationErrors, setValidationErrors] = useState({});
   const [user, setUser] = useState({
     application_content: applicationContent,
+    email: viewPopupData.email ? viewPopupData.email : null,
     position: viewPopupData.position ? viewPopupData.position.id : null,
     branch_code: viewPopupData.branch_code
       ? viewPopupData.branch_code.id
@@ -81,6 +82,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   useEffect(() => {
     setUser({
       application_content: applicationContent,
+      email: viewPopupData.email,
       branch_code: viewPopupData.branch_code
         ? viewPopupData.branch_code.id
         : null,
@@ -94,6 +96,16 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
       branch_code: newValue ? newValue.id : null,
     });
   };
+
+  const handleEmailChange = (event) => {
+    const newValue = event.target.value ? event.target.value : viewPopupData.email;
+
+    setUser({
+      ...user,
+      email: newValue ? newValue : null,
+    });
+  };
+
   const handlePositionChange = (event, newValue) => {
     setUser({
       ...user,
@@ -259,6 +271,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
         `api/installed/${id[0]}/computer-user/${viewPopupData.id}`,
         {
           application_content: applicationContent,
+          email: user.email,
           position: user.position,
           branch_code: user.branch_code,
         },
@@ -707,6 +720,22 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
                   }}
                   style={{ marginBottom: "10px", width: "100%" }}
                 />
+                <TextField
+                  id="outlined-read-only-input"
+                  label="User Email"
+                  defaultValue={viewPopupData.email}
+                  style={{ width: "100%" }}
+                  onChange={handleEmailChange}
+                />
+                {validationErrors.email ? (
+                  <span className="text-red-500">
+                    {validationErrors.email.map((error, index) => (
+                      <span key={index}>{error}</span>
+                    ))}
+                  </span>
+                ) : (
+                  ""
+                )}
                 <Autocomplete
                   id="branch-code"
                   freeSolo
@@ -724,7 +753,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
                           ? "No branchcode added yet"
                           : "Branchcode"
                       }
-                      style={{ marginBottom: "10px" }}
+                      style={{ marginBottom: "10px", marginTop: "10px" }}
                     />
                   )}
                   value={

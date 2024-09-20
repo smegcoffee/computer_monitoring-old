@@ -68,7 +68,7 @@ function TopBox({ dashboardData, dashboardLoading }) {
                   <span className="text-sm font-medium username">
                     {user.username}
                   </span>
-                  <span className="text-xs email">{user.email}</span>
+                  <span className="overflow-hidden text-xs break-all text-wrap text-ellipsis email">{user.email}</span>
                 </div>
               </div>
               <span

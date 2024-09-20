@@ -51,9 +51,18 @@ class ComputerUserController extends Controller
             'name'                           =>              ['required', 'unique:computer_users,name'],
             'position'                       =>              ['required', 'exists:positions,id'],
             'branch_code'                    =>              ['required', 'exists:branch_codes,id'],
-            'email'                          =>              ['required', 'unique:computer_users,email', 'email', 'regex:/^\S+@\S+\.\S+$/'],
         ]);
 
+        $request->merge([
+            'email'         =>      str_replace(' ', '.', $request->input('email'))
+        ]);
+
+
+        if($request->has('email') && $request->email != null){
+            $validation = Validator::make($request->all(), [
+                'email'                          =>              ['unique:computer_users,email', 'lowercase', 'regex:/^\S+@\S+\.\S+$/'],
+            ]);
+        }
         if ($validation->fails()) {
             return response()->json([
                 'status'                =>          false,
@@ -67,7 +76,7 @@ class ComputerUserController extends Controller
 
         $user = ComputerUser::create([
             'name'                    =>          $request->name,
-            'email'                   =>          $request->email,
+            'email'                   =>          $request->email ?: str_replace(' ', '', strtolower($request->name)) . '.smct@gmail.com',
             'position_id'             =>          $request->position,
             'branch_code_id'          =>          $request->branch_code
 
