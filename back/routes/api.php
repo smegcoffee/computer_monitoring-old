@@ -17,6 +17,7 @@ use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\UnitController;
 use App\Http\Controllers\API\LogController;
+use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/computers/{id}', [ComputerController::class, 'show']);
     Route::get('/unread-notifications', [NotificationController::class, 'index']);
     Route::get('/logs', [LogController::class, 'index']);
+    Route::get('/admin/users-list', [UserController::class, 'index']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);

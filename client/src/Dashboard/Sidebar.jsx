@@ -10,12 +10,15 @@ import {
   faX,
   faTimes,
   faFile,
-  faArrowsTurnToDots
+  faArrowsTurnToDots,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import axios from "../api/axios";
+import { useAdmin } from "../context/AdminContext";
 
 function SideBar({ isSidebarOpen, toggleSidebar }) {
   const [activeItem, setActiveItem] = useState();
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     const hashPath = window.location.pathname.replace("/monitoring", "");
@@ -46,6 +49,9 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
         break;
       case "/user":
         setActiveItem("user");
+        break;
+      case "/admin/users-list":
+        setActiveItem("users-list");
         break;
       default:
         setActiveItem("dashboard");
@@ -107,7 +113,9 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           <Link to="/transfered-units">
             <button
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
-                activeItem === "transfered-units" ? "bg-blue-500 text-white active" : ""
+                activeItem === "transfered-units"
+                  ? "bg-blue-500 text-white active"
+                  : ""
               } rounded-3xl h-10 cursor-pointer`}
             >
               <FontAwesomeIcon icon={faArrowsTurnToDots} /> Transfered Units
@@ -116,7 +124,9 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           <Link to="/all-units">
             <button
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
-                activeItem === "all-units" ? "bg-blue-500 text-white active" : ""
+                activeItem === "all-units"
+                  ? "bg-blue-500 text-white active"
+                  : ""
               } rounded-3xl h-10 cursor-pointer`}
             >
               <FontAwesomeIcon icon={faComputer} /> All Units
@@ -163,6 +173,19 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               Setup Users
             </button>
           </Link>
+          {isAdmin && (
+            <Link to="/admin/users-list">
+              <button
+                className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${
+                  activeItem === "users-list"
+                    ? "bg-blue-500 text-white active"
+                    : ""
+                } rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-44 ml-8 cursor-pointer`}
+              >
+                Users List
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
