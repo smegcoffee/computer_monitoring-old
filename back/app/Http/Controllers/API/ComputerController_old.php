@@ -127,7 +127,7 @@ class ComputerController extends Controller
                 ComputerLog::create([
                     'user_id'                   =>              auth()->user()->id,
                     'computer_user_id'          =>              $request->computer_user,
-                    'log_data'                  =>              $transfer->unit->category->category_name . ' transferred' . ' to ' . $transfer->computerUser->name . '\'s computer'
+                    'log_data'                  =>              'An ' . $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
                 ]);
             }
         }
@@ -373,7 +373,7 @@ class ComputerController extends Controller
                     ComputerLog::create([
                         'user_id'                   =>              auth()->user()->id,
                         'computer_user_id'          =>              $request->computer_user,
-                        'log_data'                  =>              $transfer->unit->category->category_name . ' unit transferred' . ' to ' . $transfer->computerUser->name . '\'s computer'
+                        'log_data'                  =>              'An ' . $transfer->unit->category->category_name . ' unit transfered ' . ' to ' . $transfer->computerUser->name . '\'s computer'
                     ]);
 
                     return response()->json([
@@ -404,14 +404,14 @@ class ComputerController extends Controller
                         ComputerLog::create([
                             'user_id'                   =>              auth()->user()->id,
                             'computer_user_id'          =>              $computer->computer_user_id,
-                            'log_data'                  =>              $unit->category->category_name . ' marked as defective'
+                            'log_data'                  =>              'An ' . $unit->category->category_name . ' unit marked as defective'
                         ]);
                         $unit->status = 'Defective';
                     } else {
                         ComputerLog::create([
                             'user_id'                   =>              auth()->user()->id,
                             'computer_user_id'          =>              $computer->computer_user_id,
-                            'log_data'                  =>              $unit->category->category_name . ' marked as vacant'
+                            'log_data'                  =>              'An ' . $unit->category->category_name . ' unit marked as vacant'
                         ]);
                         $unit->status = 'Vacant';
                     }

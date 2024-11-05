@@ -20,7 +20,7 @@ import TransferedUnits from './Dashboard/transferedUnits';
 import NotFound from './Dashboard/Notfound';
 import PrintInformation from './Dashboard/PopupForComputers/Print';
 import AllLogs from './Dashboard/AllLogs';
-import AllUnits from './Dashboard/AllUnits';
+import AllUnits from './Dashboard/allUnits';
 
 function App() {
 
