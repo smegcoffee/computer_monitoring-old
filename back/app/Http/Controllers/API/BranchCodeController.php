@@ -81,7 +81,7 @@ class BranchCodeController extends Controller
 
         BranchLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Added a branch: ' . $branch->branch_name
+            'log_data'          =>              'Added a branch code: ' . $branch->branch_name
         ]);
 
         return response()->json([
@@ -102,17 +102,66 @@ class BranchCodeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BranchCode $branchCode)
+    public function edit($id)
     {
-        //
+        $branchCode = BranchCode::find($id);
+
+        if (!$branchCode) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Branch code not found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              'Branch code fetched successfully.',
+            'branch'                =>              $branchCode
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BranchCode $branchCode)
+    public function update(Request $request, $id)
     {
-        //
+        $branchCode = BranchCode::find($id);
+
+        $validation = Validator::make($request->all(), [
+            'branch_name'           =>              ['required', 'unique:branch_codes,branch_name,' . $branchCode->id],
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Something went wrong. Please fix.',
+                'errors'        =>          $validation->errors()
+            ], 422);
+        }
+
+        if (!$branchCode) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Branch code not found.'
+            ], 404);
+        }
+
+        $oldBranchName = $branchCode->branch_name;
+
+        $branchCode->update([
+            'branch_name'           =>              $request->branch_name
+        ]);
+
+        BranchLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Updated a branch code from: ' . $oldBranchName . ' to: ' . $branchCode->branch_name
+        ]);
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              $branchCode->branch_name . ' branch code updated successfully.',
+            'id'                    =>              $branchCode->id
+        ], 200);
     }
 
     /**
@@ -124,8 +173,8 @@ class BranchCodeController extends Controller
 
         if (!$branchCode) {
             return response()->json([
-                'status' => false,
-                'message' => 'Branch code not found.'
+                'status'                =>              false,
+                'message'               =>              'Branch code not found.'
             ], 404);
         }
 
@@ -133,21 +182,21 @@ class BranchCodeController extends Controller
 
         if ($users > 0) {
             return response()->json([
-                'status' => false,
-                'message' => 'You cannot delete a branch code that is already in use by users.'
+                'status'                =>              false,
+                'message'               =>              'You cannot delete a branch code that is already in use by users.'
             ], 422);
         }
 
         BranchLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a branch: ' . $branchCode->branch_name
+            'log_data'          =>              'Deleted a branch code: ' . $branchCode->branch_name
         ]);
 
         $branchCode->delete();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Branch code deleted successfully.'
+            'status'                =>              true,
+            'message'               =>              'Branch code deleted successfully.'
         ], 200);
     }
 }

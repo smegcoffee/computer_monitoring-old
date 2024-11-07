@@ -3,7 +3,7 @@ import SideBar from "../Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import axios from "../../api/axios";
 import {
   Breadcrumbs,
@@ -24,6 +24,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import GroupIcon from "@mui/icons-material/Group";
 import defaultImg from "../../img/profile.png";
 import { Settings } from "@mui/icons-material";
+import { useAdmin } from "../../context/AdminContext";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -41,6 +42,7 @@ function AllUsers() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     setFilteredUsers(users);
@@ -191,6 +193,9 @@ function AllUsers() {
 
   const title = "All Users";
 
+  if (!isAdmin) {
+    return <Navigate to="/not-authorized-user" />;
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />

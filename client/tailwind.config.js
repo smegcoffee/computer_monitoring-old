@@ -7,7 +7,6 @@ module.exports = {
       safelist: ['class-to-keep'],
     },
   },
-  darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {},
   },

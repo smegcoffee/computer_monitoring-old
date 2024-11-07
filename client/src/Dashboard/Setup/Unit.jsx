@@ -11,6 +11,7 @@ import {
   faX,
   faFloppyDisk,
   faSpinner,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -62,7 +63,6 @@ const CustomTableB = (refresh) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [error, setError] = useState();
-  const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [refreshed, setRefreshed] = useState(false);
   const [editUnitId, setEditUnitId] = useState(null);
@@ -800,7 +800,14 @@ const CustomTableB = (refresh) => {
                                 "linear-gradient(to right, #48C774, #1E90FF)")
                             }
                           >
-                            <FontAwesomeIcon icon={faFloppyDisk} />
+                            {loadingUpdate ? (
+                              <FontAwesomeIcon
+                                className="animate-spin"
+                                icon={faSpinner}
+                              />
+                            ) : (
+                              <FontAwesomeIcon icon={faFloppyDisk} />
+                            )}
                           </button>
                           <button
                             type="button"
@@ -1021,6 +1028,7 @@ const CustomTableA = ({
   onSubmit,
   isCategoryRefresh,
   isSupplierRefresh,
+  toggleModal,
 }) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
@@ -1228,13 +1236,15 @@ const CustomTableA = ({
 
   return (
     <div
-      className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-max w-full mt-3`}
+      className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-[45rem] min-h-[40rem] mt-3`}
     >
       <form onSubmit={handleAddUnit}>
-        <TableContainer className={classes.container}>
+        <TableContainer
+          className={`${classes.container} overflow-auto max-h-[35rem] min-h-[30rem]`}
+        >
           <Table className={classes.table}>
             <TableHead>
-              <TableRow className="bg-blue-200">
+              <TableRow className="sticky top-0 z-40 bg-blue-200">
                 <TableCell align="center" className="rounded-tl-xl">
                   <p className="font-semibold text-base mt-1.5">
                     DATE OF PURCHASE
@@ -1474,7 +1484,14 @@ const CustomTableA = ({
         >
           <FontAwesomeIcon icon={faCirclePlus}></FontAwesomeIcon> ADD FIELD
         </button>
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-2">
+          <button
+            type="button"
+            onClick={toggleModal}
+            className="w-32 mt-4 mb-5 text-base font-semibold text-white duration-700 bg-gray-600 border border-transparent hover:bg-gray-700 rounded-3xl h-9"
+          >
+            CLOSE
+          </button>
           <button
             type="submit"
             disabled={uloading}
@@ -1497,7 +1514,6 @@ function Unit() {
     setIsSidebarOpen(!isSidebarOpen);
   };
   const [category, setCategory] = useState("");
-  const [supplier, setSupplier] = useState("");
   const [rows, setRows] = useState([
     {
       date_of_purchase: "",
@@ -1516,172 +1532,12 @@ function Unit() {
   const [refresh, setRefresh] = useState(false);
   const [isSupplierRefresh, setIsSupplierRefresh] = useState(false);
   const [isCategoryRefresh, setIsCategoryRefresh] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const handleCategory = (e) => {
-    setCategory(e.target.value);
+  const toggleModal = () => {
+    setIsOpenModal(!isOpenModal);
   };
 
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    setsLoading(true);
-    setIsCategoryRefresh(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await axios.post(
-        "/api/add-category",
-        {
-          category_name: category,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.status === true) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "green",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "success",
-            title: response.data.message,
-          });
-        })();
-        setSuccess(response.data.message);
-        setError("");
-        setCategory("");
-        setValidationErrors("");
-      }
-    } catch (error) {
-      console.error("Error: ", error);
-      setSuccess("");
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
-        setValidationErrors(error.response.data.errors || {});
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "red",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "error",
-            title: error.response.data.message,
-          });
-        })();
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    } finally {
-      setsLoading(false);
-      setIsCategoryRefresh(false);
-    }
-  };
-
-  const handleSupplier = (e) => {
-    setSupplier(e.target.value);
-  };
-
-  const handleAddSupplier = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setIsSupplierRefresh(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await axios.post(
-        "/api/add-supplier",
-        {
-          supplier_name: supplier,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.status === true) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "green",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "success",
-            title: response.data.message,
-          });
-        })();
-        setSuccess(response.data.message);
-        setError("");
-        setSupplier("");
-        setValidationErrors("");
-      }
-    } catch (error) {
-      console.error("Error: ", error);
-      setSuccess("");
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
-        setValidationErrors(error.response.data.errors || {});
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "red",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "error",
-            title: error.response.data.message,
-          });
-        })();
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    } finally {
-      setLoading(false);
-      setIsSupplierRefresh(false);
-    }
-  };
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
@@ -1723,96 +1579,27 @@ function Unit() {
             </Breadcrumbs>
           </div>
           <br /> <br />
-          <div className="flex items-center justify-center ml-10 mr-10">
-            <div className="w-1/2 mr-5 border border-transparent shadow-lg rounded-xl max-h-max">
-              <form onSubmit={handleAddCategory}>
-                <div className="flex items-center justify-center text-center">
-                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                    <p className="font-semibold text-base mt-1.5">
-                      ADD CATEGORY
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                  <input
-                    type="text"
-                    name="category_name"
-                    value={category}
-                    onChange={handleCategory}
-                    placeholder="Input category..."
-                    className={
-                      validationErrors.category_name
-                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                    }
-                  />
-                </div>
-                <span className="text-sm text-center">
-                  {validationErrors.category_name && (
-                    <div className="text-red-500">
-                      {validationErrors.category_name.map((error, index) => (
-                        <span key={index}>{error}</span>
-                      ))}
-                    </div>
-                  )}
-                </span>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={sloading}
-                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                  >
-                    {sloading ? "ADDING..." : "ADD"}
-                  </button>
-                </div>
-              </form>
+          {isOpenModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white min-h-[40rem] max-h-[45rem] max-w-[95%] right-5 top-5 rounded-xl relative">
+                <button
+                  className="absolute z-50 text-5xl text-black right-7 top-2 hover:text-gray-700"
+                  onClick={toggleModal}
+                >
+                  &times;
+                </button>
+                <CustomTableA
+                  isCategoryRefresh={isCategoryRefresh}
+                  isSupplierRefresh={isSupplierRefresh}
+                  rows={rows}
+                  setRows={setRows}
+                  onSubmit={setRefresh}
+                  toggleModal={toggleModal}
+                />
+              </div>
             </div>
-            <div className="w-1/2 border border-transparent shadow-lg rounded-xl max-h-max">
-              <form onSubmit={handleAddSupplier}>
-                <div className="flex items-center justify-center text-center">
-                  <div className="w-full h-10 bg-yellow-200 rounded-tl-xl rounded-tr-xl">
-                    <p className="font-semibold text-base mt-1.5">
-                      ADD SUPPLIER
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-center pt-5 pb-4 pl-5 pr-5">
-                  <input
-                    type="text"
-                    name="supplier_name"
-                    value={supplier}
-                    onChange={handleSupplier}
-                    placeholder="Input supplier..."
-                    className={
-                      validationErrors.supplier_name
-                        ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5"
-                        : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"
-                    }
-                  />
-                </div>
-
-                <span className="text-sm text-center">
-                  {validationErrors.supplier_name && (
-                    <div className="text-red-500">
-                      {validationErrors.supplier_name.map((error, index) => (
-                        <span key={index}>{error}</span>
-                      ))}
-                    </div>
-                  )}
-                </span>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-32 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
-                  >
-                    {loading ? "ADDING..." : "ADD"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div className="flex items-center justify-center ml-10 mr-10">
+          )}
+          {/* <div className="flex items-center justify-center ml-10 mr-10">
             <CustomTableA
               isCategoryRefresh={isCategoryRefresh}
               isSupplierRefresh={isSupplierRefresh}
@@ -1820,9 +1607,19 @@ function Unit() {
               setRows={setRows}
               onSubmit={setRefresh}
             />
-          </div>
-          <div className="flex items-center justify-center ml-10 mr-10">
-            <CustomTableB rows={rows} refresh={refresh} />
+          </div> */}
+          <div className="relative">
+            <button
+              onClick={toggleModal}
+              className="absolute flex items-center px-6 py-3 space-x-2 font-semibold text-white transition duration-300 ease-in-out bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 right-5"
+            >
+              <FontAwesomeIcon icon={faPlus} />
+              <span>Add Unit</span>
+            </button>
+
+            <div className="mt-12 px-4 py-6 bg-white rounded-lg max-h-[45rem] overflow-auto">
+              <CustomTableB rows={rows} refresh={refresh} />
+            </div>
           </div>
         </div>
       </div>

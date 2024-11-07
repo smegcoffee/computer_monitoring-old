@@ -15,20 +15,28 @@ import {
   Box,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
   Checkbox,
   Grid,
 } from "@mui/material";
 import Swal from "sweetalert2";
+import Select from "react-select";
 import axios from "../../api/axios";
 import { format } from "date-fns";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import DatePicker from "react-datepicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  faArrowUp,
+  faArrowDown,
+  faEdit,
+  faX,
+  faFloppyDisk,
+  faSpinner,
+  faPen,
+} from "@fortawesome/free-solid-svg-icons";
 import dayjs from "dayjs";
 
 const style = {
@@ -45,7 +53,6 @@ const style = {
 function EditSet({
   isOpen,
   onClose,
-  row,
   editPopupData,
   setEditPopupData,
   onSubmit,
@@ -68,9 +75,22 @@ function EditSet({
   const [markedLoading, setMarkedLoading] = useState(false);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-
-  const [refresh, setRefresh] = useState(false);
-
+  const [editUnitId, setEditUnitId] = useState(null);
+  const [category, setCategory] = useState({ data: [] });
+  const [supplier, setSupplier] = useState({ data: [] });
+  const [editValues, setEditValues] = useState({
+    date_of_purchase: "",
+    category: "",
+    description: "",
+    supplier: "",
+    serial_number: "",
+    status: "",
+  });
+  const options = [
+    { value: "Used", label: "Used" },
+    { value: "Defective", label: "Defective" },
+  ];
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -81,32 +101,33 @@ function EditSet({
       setCheckedRows([...checkedRows, unitId]);
     }
   };
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      if (Array.isArray(editPopupData.computers)) {
-        const allUnits = editPopupData.computers.flatMap((computer) =>
-          computer.units.map((unit) => ({
-            ...unit,
-            computerName: computer.name,
-          }))
-        );
-        setUnit(allUnits);
-        const name = editPopupData.name;
-        const id = editPopupData.computers.map((computer) => computer.id);
-        setComputerName(name);
-        setComputerId(id);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        if (Array.isArray(editPopupData.computers)) {
+          const allUnits = editPopupData.computers.flatMap((computer) =>
+            computer.units.map((unit) => ({
+              ...unit,
+              computerName: computer.name,
+            }))
+          );
+          setUnit(allUnits);
+          const name = editPopupData.name;
+          const id = editPopupData.computers.map((computer) => computer.id);
+          setComputerName(name);
+          setComputerId(id);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  }, [refresh]);
+  }, []);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -138,14 +159,187 @@ function EditSet({
             name: cu.name,
           }))
       : [];
+
+  const handleUpdateUnit = (id, data) => {
+    setEditUnitId(id);
+    setEditValues({
+      ...editValues,
+      date_of_purchase: data.date_of_purchase,
+      category: {
+        label: data.category.category_name,
+        value: data.category.id,
+      },
+      description: data.description,
+      supplier: {
+        label: data.supplier.supplier_name,
+        value: data.supplier.id,
+      },
+      serial_number: data.serial_number,
+      status: { label: data.status, value: data.status },
+    });
+    setValidationErrors({});
+  };
+
+  const formatEditValues = (values) => ({
+    date_of_purchase: values.date_of_purchase,
+    category: values.category.value,
+    description: values.description,
+    supplier: values.supplier.value,
+    serial_number: values.serial_number,
+    status: values.status.value,
+  });
+
+  const handleEditDateChange = (date) => {
+    setEditValues({
+      ...editValues,
+      date_of_purchase: date,
+    });
+  };
+
+  const handleSelectChange = (selectedOption, field) => {
+    setEditValues({
+      ...editValues,
+      [field]: selectedOption,
+    });
+  };
+  const handleSaveUnit = async (id) => {
+    setLoadingUpdate(true);
+    onSubmit(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const formattedValues = formatEditValues(editValues);
+
+      const response = await axios.post(
+        `/api/update-unit/${id}`,
+        formattedValues,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "green",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+
+        handleCancelEdit();
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        console.log("Backend error response:", error.response.data);
+        setError(error.response.data.message);
+        setValidationErrors(error.response.data.errors || {});
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-right",
+          iconColor: "red",
+          customClass: {
+            popup: "colored-toast",
+          },
+          showConfirmButton: false,
+          showCloseButton: true,
+          timer: 2500,
+          timerProgressBar: true,
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setLoadingUpdate(false);
+      onSubmit(false);
+      onClose();
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditUnitId(null);
+  };
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/categories", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setCategory(response?.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchCategory();
+  }, []);
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/suppliers", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setSupplier(response?.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchSupplier();
+  }, []);
+
+  const Category = category.data?.map((cat) => ({
+    label: cat.category_name,
+    value: cat.id,
+  }));
+
+  const Supplier = supplier.data?.map((sup) => ({
+    label: sup.supplier_name,
+    value: sup.id,
+  }));
+
   if (!isOpen) {
     return null;
   }
+
   const handleSubmitEditedSet = async (e) => {
     e.preventDefault();
     setsLoading(true);
     onSubmit(true);
-    setRefresh(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -282,7 +476,6 @@ function EditSet({
       }
     } finally {
       setsLoading(false);
-      setRefresh(false);
       onSubmit(false);
     }
   };
@@ -295,7 +488,6 @@ function EditSet({
     e.preventDefault();
     setMarkedLoading(true);
     onSubmit(true);
-    setRefresh(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -361,7 +553,6 @@ function EditSet({
       }
     } finally {
       setMarkedLoading(false);
-      setRefresh(false);
       onSubmit(false);
       onClose();
     }
@@ -407,13 +598,18 @@ function EditSet({
     setSortColumn(column);
     setSortOrder(isAscending ? "desc" : "asc");
   };
-
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
         <div
           className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl"
-          style={{ minWidth: "1000px", maxWidth: "100vh", maxHeight: "100vh" }}
+          style={{
+            minWidth: "90%",
+            maxWidth: "100%",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            margin: "0 auto",
+          }}
         >
           <div className="max-h-screen overflow-y-auto text-justify">
             <TableContainer
@@ -552,7 +748,14 @@ function EditSet({
                           ))}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        ACTION
+                      </Typography>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -575,33 +778,329 @@ function EditSet({
                       <TableRow key={index}>
                         <TableCell align="center">{unit.unit_code}</TableCell>
                         <TableCell align="center">
-                          {format(
-                            new Date(unit.date_of_purchase),
-                            "yyyy-MM-dd"
+                          {editUnitId === unit.id ? (
+                            <>
+                              <DatePicker
+                                selected={editValues?.date_of_purchase}
+                                onChange={handleEditDateChange}
+                                placeholderText=""
+                                dateFormat={"yyyy-MM-dd"}
+                                className={
+                                  editUnitId === unit.id &&
+                                  validationErrors["date_of_purchase"]
+                                    ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                                    : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                                }
+                              />
+                            </>
+                          ) : (
+                            <>
+                              {format(
+                                new Date(unit.date_of_purchase),
+                                "yyyy-MM-dd"
+                              )}
+                            </>
                           )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["date_of_purchase"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["date_of_purchase"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
                         </TableCell>
                         <TableCell align="center">
-                          {unit.category.category_name}
+                          {editUnitId === unit.id ? (
+                            <Select
+                              options={Category}
+                              value={editValues?.category}
+                              onChange={(e) =>
+                                handleSelectChange(e, "category")
+                              }
+                              placeholder={
+                                editValues?.category ? "" : "Select Category"
+                              }
+                              className={
+                                editUnitId === unit.id &&
+                                validationErrors["category"]
+                                  ? "border border-red-500"
+                                  : "border border-transparent"
+                              }
+                            />
+                          ) : unit.category ? (
+                            unit.category.category_name
+                          ) : (
+                            "N/A"
+                          )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["category"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["category"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
                         </TableCell>
                         <TableCell align="center">
-                          {unit.description
-                            .split("\n")
-                            .map((line, lineIndex) => (
-                              <div key={lineIndex}>{line}</div>
-                            ))}
+                          {editUnitId === unit.id ? (
+                            <textarea
+                              rows={3}
+                              type="text"
+                              value={editValues?.description || ""}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  description: e.target.value,
+                                })
+                              }
+                              className={
+                                editUnitId === unit.id &&
+                                validationErrors["description"]
+                                  ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 pl-2"
+                                  : "bg-gray-200 border border-transparent rounded-xl w-4/4 pl-2"
+                              }
+                            />
+                          ) : (
+                            unit?.description
+                              .split("\n")
+                              .map((line, lineIndex) => (
+                                <div key={lineIndex}>{line}</div>
+                              ))
+                          )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["description"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["description"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
                         </TableCell>
                         <TableCell align="center">
-                          {unit.supplier.supplier_name}
+                          {editUnitId === unit.id ? (
+                            <Select
+                              options={Supplier}
+                              value={editValues?.supplier}
+                              onChange={(e) =>
+                                handleSelectChange(e, "supplier")
+                              }
+                              placeholder={
+                                editValues?.supplier ? "" : "Select Supplier"
+                              }
+                              className={
+                                editUnitId === unit.id &&
+                                validationErrors["supplier"]
+                                  ? "border border-red-500"
+                                  : "border border-transparent"
+                              }
+                            />
+                          ) : unit.supplier ? (
+                            unit.supplier.supplier_name
+                          ) : (
+                            "N/A"
+                          )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["supplier"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["supplier"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
                         </TableCell>
                         <TableCell align="center">
-                          {unit.serial_number}
+                          {editUnitId === unit.id ? (
+                            <input
+                              type="text"
+                              value={editValues?.serial_number || null}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  serial_number: e.target.value,
+                                })
+                              }
+                              placeholder=""
+                              className={
+                                editUnitId === unit.id &&
+                                validationErrors["serial_number"]
+                                  ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
+                                  : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
+                              }
+                            />
+                          ) : (
+                            unit.serial_number
+                          )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["serial_number"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["serial_number"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
                         </TableCell>
-                        <TableCell align="center">{unit.status}</TableCell>
                         <TableCell align="center">
-                          <Checkbox
-                            checked={checkedRows.includes(unit.id)}
-                            onChange={() => handleCheckboxClick(unit.id)}
-                          />
+                          {editUnitId === unit.id ? (
+                            <Select
+                              options={options}
+                              value={editValues?.status || null}
+                              onChange={(e) => handleSelectChange(e, "status")}
+                              placeholder={
+                                editValues?.status ? "" : "Select status"
+                              }
+                              className={
+                                editUnitId === unit.id &&
+                                validationErrors["status"]
+                                  ? "border border-red-500"
+                                  : "border border-transparent"
+                              }
+                            />
+                          ) : (
+                            unit.status
+                          )}
+                          <span className="text-sm text-center">
+                            {editUnitId === unit.id &&
+                              validationErrors["status"] && (
+                                <div className="text-sm text-center text-red-500">
+                                  {validationErrors["status"].map(
+                                    (error, errorIndex) => (
+                                      <span key={errorIndex}>{error}</span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                          </span>
+                        </TableCell>
+                        <TableCell align="center">
+                          {editUnitId === unit.id ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                gap: "0.25rem",
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleSaveUnit(unit.id)}
+                                style={{
+                                  padding: "0.5rem 1rem",
+                                  fontWeight: "600",
+                                  color: "white",
+                                  background:
+                                    "linear-gradient(to right, #48C774, #1E90FF)",
+                                  borderRadius: "0.375rem",
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                  transition:
+                                    "background-color 0.3s ease, transform 0.3s ease",
+                                  outline: "none",
+                                }}
+                                onMouseOver={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #36D759, #1C86EE)")
+                                }
+                                onMouseOut={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #48C774, #1E90FF)")
+                                }
+                              >
+                                {loadingUpdate ? (
+                                  <FontAwesomeIcon
+                                    className="animate-spin"
+                                    icon={faSpinner}
+                                  />
+                                ) : (
+                                  <FontAwesomeIcon icon={faFloppyDisk} />
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                style={{
+                                  padding: "0.5rem 1rem",
+                                  fontWeight: "600",
+                                  color: "white",
+                                  background:
+                                    "linear-gradient(to right, #FF4D4D, #FF007F)",
+                                  borderRadius: "0.375rem",
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                  transition:
+                                    "background-color 0.3s ease, transform 0.3s ease",
+                                  outline: "none",
+                                }}
+                                onMouseOver={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #FF3B3B, #FF0055)")
+                                }
+                                onMouseOut={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #FF4D4D, #FF007F)")
+                                }
+                              >
+                                <FontAwesomeIcon icon={faX} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                gap: "0.25rem",
+                              }}
+                            >
+                              <Checkbox
+                                checked={checkedRows.includes(unit.id)}
+                                onChange={() => handleCheckboxClick(unit.id)}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateUnit(unit.id, unit)}
+                                style={{
+                                  padding: "0.5rem 1rem",
+                                  fontWeight: "600",
+                                  color: "white",
+                                  background:
+                                    "linear-gradient(to right, #1E90FF, #1E90FE)",
+                                  borderRadius: "0.375rem",
+                                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                  transition:
+                                    "background-color 0.3s ease, transform 0.3s ease",
+                                  outline: "none",
+                                }}
+                                onMouseOver={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #1C86EE, #1E90FE)")
+                                }
+                                onMouseOut={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "linear-gradient(to right, #1E90FF, #1E90FE)")
+                                }
+                              >
+                                <FontAwesomeIcon icon={faPen} />
+                              </button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -611,7 +1110,7 @@ function EditSet({
             </TableContainer>
             <div className="flex items-center justify-center">
               <p className="p-5 text-xl text-center">
-                <strong>{computerName}&apos;s</strong> Computer Units
+                <strong>{computerName}&apos;s</strong> Computer
               </p>
               <div className="items-end justify-end flex-1 ml-48 text-center">
                 <button
@@ -677,7 +1176,7 @@ function EditSet({
                           >
                             <MenuItem value="Transfer">Transfer</MenuItem>
                             <MenuItem value="Defective">Defective</MenuItem>
-                            <MenuItem value="Delete">Delete</MenuItem>
+                            <MenuItem value="Delete">Remove Unit</MenuItem>
                           </Select>
                         </FormControl>
                         <span className="mb-2">

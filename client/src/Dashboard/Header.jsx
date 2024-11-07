@@ -120,7 +120,7 @@ function Header({ toggleSidebar, isRefresh, title }) {
 
     fetchNotifications();
 
-    const intervalId = setInterval(fetchNotifications, 10000);
+    const intervalId = setInterval(fetchNotifications, 5 * 60 * 1000);
 
     return () => clearInterval(intervalId);
   }, [refreshNotification, isRefresh]);
@@ -310,12 +310,12 @@ function Header({ toggleSidebar, isRefresh, title }) {
     }
   };
 
-  // const imageUrl = profileImg
-  //   ? `http://localhost:8000/${profileImg}`
-  //   : defaultImg;
   const imageUrl = profileImg
-  ? `https://desstrongmotors.com/monitoringback/${profileImg}`
-  : defaultImg;
+    ? `http://localhost:8000/${profileImg}`
+    : defaultImg;
+  // const imageUrl = profileImg
+  // ? `https://desstrongmotors.com/monitoringback/${profileImg}`
+  // : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
@@ -609,12 +609,12 @@ function Header({ toggleSidebar, isRefresh, title }) {
                       <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
                       <Avatar
                         src={
-                          // notif.user.profile_picture
-                          //   ? `http://localhost:8000/${notif.user.profile_picture}`
-                          //   : defaultImg
                           notif.user.profile_picture
-                            ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                            ? `http://localhost:8000/${notif.user.profile_picture}`
                             : defaultImg
+                          // notif.user.profile_picture
+                          //   ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
+                          //   : defaultImg
                         }
                         sx={{ mr: 2 }}
                       />

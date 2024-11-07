@@ -68,8 +68,18 @@ class Unit extends Model
     {
         return $this->hasMany(RecentUser::class);
     }
+
+    public function recentBranches()
+    {
+        return $this->hasMany(RecentBranch::class);
+    }
     public function transferUnits()
     {
         return $this->hasMany(TransferUnit::class)->orderBy('date', 'desc');
+    }
+
+    public function transferBranchUnits()
+    {
+        return $this->hasMany(TransferBranchUnit::class)->orderBy('date', 'desc');
     }
 }
