@@ -116,7 +116,7 @@ function AllUsers() {
         Cell: ({ value }) => {
           return (
             <img
-              src={value ?? defaultImg}
+              src={value ?`${axios.defaults.baseURL}/${value}` : defaultImg}
               alt="Profile Picture"
               style={{ width: "50px", height: "50px", borderRadius: "50%" }}
             />
