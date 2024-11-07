@@ -16,4 +16,9 @@ class Category extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+
+    public function units()
+    {
+        return $this->hasMany(Unit::class);
+    }
 }

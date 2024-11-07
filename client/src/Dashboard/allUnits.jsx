@@ -144,7 +144,7 @@ function AllUnits() {
         accessor: "status",
       },
       {
-        Header: "USERS",
+        Header: "ASSIGNED TO",
         accessor: (row) => {
           const latestTransfer = row.transfer_units.sort(
             (a, b) => new Date(b.date) - new Date(a.date)

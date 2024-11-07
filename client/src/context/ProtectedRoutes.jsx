@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import { Navigate, Outlet } from "react-router-dom";
 import Loading from "./Loading";
+import { useAdmin } from "./AdminContext";
 
-const ProtectedRoutes = () => {
+const ProtectedRoutes = ({ adminOnly = false }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -45,6 +47,7 @@ const ProtectedRoutes = () => {
   if (user.data.request_new_password === 1) {
     return <Navigate to="/change-new-password" />;
   }
+
   return <Outlet />;
 };
 

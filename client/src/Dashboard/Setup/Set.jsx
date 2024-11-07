@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTriangleExclamation,
   faArrowUp,
-  faArrowDown
+  faArrowDown,
+  faUserPen
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -312,7 +313,7 @@ function Set() {
                         onClick={() => handleSort("name")}
                       >
                         <p className="text-base font-semibold">
-                          USERS{" "}
+                          ASSIGNED TO
                           {sortColumn === "name" &&
                             (sortOrder === "asc" ? (
                               <FontAwesomeIcon icon={faArrowDown} />
@@ -321,12 +322,15 @@ function Set() {
                             ))}
                         </p>
                       </TableCell>
+                      <TableCell align="center">
+                        <p className="text-base font-semibold">ACTION</p>
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={8}>
+                        <TableCell colSpan={9}>
                           {[...Array(3)].map((_, i) => (
                             <div key={i} className="w-full p-4 rounded">
                               <div className="flex space-x-4 animate-pulse">
@@ -535,6 +539,14 @@ function Set() {
                                   {row.name}
                                 </button>
                               </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                <button onClick={() => openEditPopup(row.id)}>
+                                  <FontAwesomeIcon className="text-2xl text-blue-500" icon={faUserPen} />
+                                </button>
+                              </TableCell>
                             </TableRow>
                             {/* Show more / Show less button */}
                             <TableRow
@@ -552,7 +564,7 @@ function Set() {
                                   : ""
                               }
                             >
-                              <TableCell colSpan={8} align="center">
+                              <TableCell colSpan={9} align="center">
                                 <button
                                   onClick={() => toggleShowAllRows(row.id)}
                                   style={{ color: "cornflowerblue" }}
@@ -570,7 +582,7 @@ function Set() {
                       ? ""
                       : emptyRows > 0 && (
                           <TableRow style={{ height: 53 * emptyRows }}>
-                            <TableCell colSpan={8}>
+                            <TableCell colSpan={9}>
                               {rows.length === 0 ? (
                                 !searchTerm ? (
                                   <p className="text-xl text-center">

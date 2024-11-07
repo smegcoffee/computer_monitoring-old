@@ -22,7 +22,14 @@ import PrintInformation from "./Dashboard/PopupForComputers/Print";
 import AllLogs from "./Dashboard/AllLogs";
 import AllUnits from "./Dashboard/allUnits";
 import Users from "./Dashboard/Setup/Users";
+import Branches from "./Dashboard/Setup/Branches";
 import { AdminProvider } from "./context/AdminContext";
+import NotAuthorized from "./components/NotAuthorized";
+import BranchCode from "./pages/branch-code/BranchCode";
+import Department from "./pages/department/Department";
+import Supplier from "./pages/supplier/Supplier";
+import Position from "./pages/position/Position";
+import Category from "./pages/categories/Category";
 
 function App() {
   return (
@@ -45,6 +52,11 @@ function App() {
             <Route path="/unit" element={<Unit />}></Route>
             <Route path="/set" element={<Set />}></Route>
             <Route path="/profile" element={<Profile />}></Route>
+            <Route path="/branch-codes" element={<BranchCode />}></Route>
+            <Route path="/departments" element={<Department />}></Route>
+            <Route path="/categories" element={<Category />}></Route>
+            <Route path="/suppliers" element={<Supplier />}></Route>
+            <Route path="/positions" element={<Position />}></Route>
             <Route path="/computers" element={<Computers />}></Route>
             <Route path="/qr" element={<QrC />}></Route>
             <Route
@@ -54,7 +66,9 @@ function App() {
             <Route path="/all-units" element={<AllUnits />}></Route>
             <Route path="/computers/:id" element={<Extract />} />
             <Route path="/user" element={<User />} />
+            <Route path="/setup/branches" element={<Branches />} />
             <Route path="/all-logs" element={<AllLogs />} />
+            <Route path="/not-authorized-user" element={<NotAuthorized />} />
             <Route path="/add" element={<Add />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/print/:id" element={<PrintInformation />} />

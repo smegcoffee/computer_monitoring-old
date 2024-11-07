@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\HasApiTokens;
 
-class Supplier extends Model
+class TransferBranchUnit extends Model
 {
-    use HasFactory, HasApiTokens;
+    use HasFactory;
 
     protected $guarded = [];
 
@@ -17,8 +16,8 @@ class Supplier extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function units()
+    public function branch()
     {
-        return $this->hasMany(Unit::class);
+        return $this->belongsTo(Branch::class);
     }
 }

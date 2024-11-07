@@ -5,10 +5,8 @@ import { useTable, useSortBy } from "react-table";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
-import Swal from "sweetalert2";
 import {
   Breadcrumbs,
-  Slide,
   Table,
   TableBody,
   TableCell,
@@ -19,15 +17,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { format } from "date-fns";
 import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
-import DevicesIcon from "@mui/icons-material/Devices";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 
 function AllLogs() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,15 +28,12 @@ function AllLogs() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  const [open, setOpen] = useState(false);
   const [logs, setLogs] = useState([]);
-  const [selectedLog, setSelectedLog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredLogs, setFilteredLogs] = useState([]);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     setFilteredLogs(logs);
@@ -92,9 +82,6 @@ function AllLogs() {
         setLogs(log);
       } catch (error) {
         console.error("Error all logs:", error);
-        if (error.response.status === 404) {
-          setError(true);
-        }
       } finally {
         setLoading(false);
       }
@@ -102,16 +89,6 @@ function AllLogs() {
 
     fetchLogs();
   }, []);
-
-  const handleClickOpen = (log) => {
-    setSelectedLog(log);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedLog(null);
-  };
 
   const columns = useMemo(
     () => [
@@ -151,8 +128,6 @@ function AllLogs() {
     headerGroups,
     rows,
     prepareRow,
-    state: { sortBy },
-    setSortBy,
   } = useTable(
     {
       columns,
@@ -160,9 +135,6 @@ function AllLogs() {
     },
     useSortBy
   );
-
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const title = "All Logs";
 
@@ -194,7 +166,7 @@ function AllLogs() {
                 sx={{ display: "flex", alignItems: "center" }}
                 color="text.primary"
               >
-                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                <StickyNote2Icon sx={{ mr: 0.5 }} fontSize="inherit" />
                 All Logs
               </Typography>
             </Breadcrumbs>

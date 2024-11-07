@@ -31,6 +31,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import MultipleStopIcon from "@mui/icons-material/MultipleStop";
 import { format } from "date-fns";
 import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
@@ -99,7 +100,7 @@ function TransferedUnits() {
         const unit = response.data.data;
         setUnits(unit);
       } catch (error) {
-        console.error("Error transfered units:", error);
+        console.error("Error user unit transfered:", error);
         if (error.response.status === 404) {
           setError(true);
         }
@@ -130,6 +131,10 @@ function TransferedUnits() {
       {
         Header: "CATEGORY",
         accessor: "category.category_name",
+      },
+      {
+        Header: "SERIAL NUMBER",
+        accessor: "serial_number",
       },
       {
         Header: "STATUS",
@@ -192,7 +197,7 @@ function TransferedUnits() {
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  const title = "Transfered Units";
+  const title = "User Unit Transfered";
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -205,7 +210,9 @@ function TransferedUnits() {
           />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">Transfered Units</p>
+          <p className="pt-10 ml-10 text-2xl font-normal">
+            User Unit Transfered
+          </p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -222,8 +229,18 @@ function TransferedUnits() {
                 sx={{ display: "flex", alignItems: "center" }}
                 color="text.primary"
               >
-                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                <MultipleStopIcon
+                  sx={{ mr: 0.5 }}
+                  fontSize="inherit"
+                />
                 Transfered Units
+              </Typography>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                User Unit Transfered
               </Typography>
             </Breadcrumbs>
           </div>

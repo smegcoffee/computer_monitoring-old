@@ -8,16 +8,24 @@ import {
   faWrench,
   faComputer,
   faX,
-  faTimes,
   faFile,
   faArrowsTurnToDots,
+  faUsers,
+  faAngleRight,
+  faAngleDown,
+  faCodeBranch,
+  faChair,
+  faBoxesPacking,
+  faBuildingUser,
+  faList,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
 import { useAdmin } from "../context/AdminContext";
 
 function SideBar({ isSidebarOpen, toggleSidebar }) {
   const [activeItem, setActiveItem] = useState();
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [transferedOpen, setTransferedOpen] = useState(false);
   const { isAdmin } = useAdmin();
 
   useEffect(() => {
@@ -41,6 +49,21 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
       case "/all-logs":
         setActiveItem("all-logs");
         break;
+      case "/branch-codes":
+        setActiveItem("branch-codes");
+        break;
+      case "/positions":
+        setActiveItem("positions");
+        break;
+      case "/categories":
+        setActiveItem("categories");
+        break;
+      case "/suppliers":
+        setActiveItem("suppliers");
+        break;
+      case "/departments":
+        setActiveItem("departments");
+        break;
       case "/unit":
         setActiveItem("unit");
         break;
@@ -50,6 +73,9 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
       case "/user":
         setActiveItem("user");
         break;
+      case "/setup/branches":
+        setActiveItem("setup-branches");
+        break;
       case "/admin/users-list":
         setActiveItem("users-list");
         break;
@@ -57,6 +83,13 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
         setActiveItem("dashboard");
     }
   }, []);
+
+  const handleSetupOpen = () => {
+    setSetupOpen((prev) => !prev);
+  };
+  const handleTransferedOpen = () => {
+    setTransferedOpen((prev) => !prev);
+  };
 
   return (
     <div
@@ -110,17 +143,6 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               <FontAwesomeIcon icon={faQrcode} /> Scan QR Codes
             </button>
           </Link>
-          <Link to="/transfered-units">
-            <button
-              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
-                activeItem === "transfered-units"
-                  ? "bg-blue-500 text-white active"
-                  : ""
-              } rounded-3xl h-10 cursor-pointer`}
-            >
-              <FontAwesomeIcon icon={faArrowsTurnToDots} /> Transfered Units
-            </button>
-          </Link>
           <Link to="/all-units">
             <button
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
@@ -141,50 +163,164 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               <FontAwesomeIcon icon={faFile} /> All Logs
             </button>
           </Link>
-          <p
-            className={`text-lg font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10 cursor-default`}
-          >
-            <FontAwesomeIcon icon={faWrench} /> Setup
-          </p>
-          <Link to="/unit">
+          <Link to="/branch-codes">
             <button
-              className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${
-                activeItem === "unit" ? "bg-blue-500 text-white active" : ""
-              } rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-40 ml-8 cursor-pointer`}
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "branch-codes"
+                  ? "bg-blue-500 text-white active"
+                  : ""
+              } rounded-3xl h-10 cursor-pointer`}
             >
-              Setup Unit
+              <FontAwesomeIcon icon={faCodeBranch} /> Branch Codes
             </button>
           </Link>
-          <Link to="/set">
+          <Link to="/categories">
             <button
-              className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${
-                activeItem === "set" ? "bg-blue-500 text-white active" : ""
-              } rounded-tl-none rounded-br-none rounded-tr-full rounded-bl-full h-10 w-56 ml-8 cursor-pointer`}
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "categories"
+                  ? "bg-blue-500 text-white active"
+                  : ""
+              } rounded-3xl h-10 cursor-pointer`}
             >
-              Setup Computer Set
+              <FontAwesomeIcon icon={faList} /> Categories
             </button>
           </Link>
-          <Link to="/user">
+          <Link to="/positions">
             <button
-              className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${
-                activeItem === "user" ? "bg-blue-500 text-white active" : ""
-              } rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-44 ml-8 cursor-pointer`}
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "positions"
+                  ? "bg-blue-500 text-white active"
+                  : ""
+              } rounded-3xl h-10 cursor-pointer`}
             >
-              Setup Users
+              <FontAwesomeIcon icon={faChair} /> Positions
+            </button>
+          </Link>
+          <Link to="/suppliers">
+            <button
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "suppliers" ? "bg-blue-500 text-white active" : ""
+              } rounded-3xl h-10 cursor-pointer`}
+            >
+              <FontAwesomeIcon icon={faBoxesPacking} /> Suppliers
+            </button>
+          </Link>
+          <Link to="/departments">
+            <button
+              className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
+                activeItem === "departments"
+                  ? "bg-blue-500 text-white active"
+                  : ""
+              } rounded-3xl h-10 cursor-pointer`}
+            >
+              <FontAwesomeIcon icon={faBuildingUser} /> Departments
             </button>
           </Link>
           {isAdmin && (
             <Link to="/admin/users-list">
               <button
-                className={`text-lg font-medium mt-5 pl-8 text-justify pt-0.5 ${
+                className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify ${
                   activeItem === "users-list"
                     ? "bg-blue-500 text-white active"
                     : ""
-                } rounded-tr-none rounded-bl-none rounded-tl-full rounded-br-full h-10 w-44 ml-8 cursor-pointer`}
+                } rounded-3xl h-10 cursor-pointer`}
               >
-                Users List
+                <FontAwesomeIcon icon={faUsers} /> Users List
               </button>
             </Link>
+          )}
+          <p
+            onClick={handleTransferedOpen}
+            className={`cursor-pointer text-lg flex justify-between font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10`}
+          >
+            <div>
+              <FontAwesomeIcon icon={faArrowsTurnToDots} /> Transfered Units
+            </div>
+            <div>
+              <FontAwesomeIcon
+                icon={transferedOpen ? faAngleDown : faAngleRight}
+              />
+            </div>
+          </p>
+
+          {transferedOpen && (
+            <div className="p-3 text-center bg-gray-200 rounded-lg">
+              <Link to="/transfered-units">
+                <button
+                  className={`text-md font-medium mt-5 px-6 text-justify pt-0.5 ${
+                    activeItem === "transfered-units"
+                      ? "bg-blue-500 text-white active"
+                      : ""
+                  } rounded  h-10 w-full cursor-pointer`}
+                >
+                  User Unit Transfered
+                </button>
+              </Link>
+              <Link to="/transfered-units">
+                <button
+                  className={`text-md font-medium mt-5 mb-6 px-6 text-justify pt-0.5 ${
+                    activeItem === "transfered-units"
+                      ? "bg-blue-500 text-white active"
+                      : ""
+                  } rounded h-10 w-full cursor-pointer`}
+                >
+                  Branch Unit Transfered
+                </button>
+              </Link>
+            </div>
+          )}
+          <p
+            onClick={handleSetupOpen}
+            className={`cursor-pointer text-lg flex justify-between font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10`}
+          >
+            <div>
+              <FontAwesomeIcon icon={faWrench} /> Setup
+            </div>
+            <div>
+              <FontAwesomeIcon icon={setupOpen ? faAngleDown : faAngleRight} />
+            </div>
+          </p>
+          {setupOpen && (
+            <div className="p-3 text-center bg-gray-200 rounded-lg">
+              <Link to="/unit">
+                <button
+                  className={`text-md font-medium mt-5 px-8 text-justify pt-0.5 ${
+                    activeItem === "unit" ? "bg-blue-500 text-white active" : ""
+                  } rounded h-10 w-full cursor-pointer`}
+                >
+                  Setup Unit
+                </button>
+              </Link>
+              <Link to="/set">
+                <button
+                  className={`text-md font-medium mt-5 px-8 text-justify pt-0.5 ${
+                    activeItem === "set" ? "bg-blue-500 text-white active" : ""
+                  } rounded h-10 w-full cursor-pointer`}
+                >
+                  Setup Computer Set
+                </button>
+              </Link>
+              <Link to="/user">
+                <button
+                  className={`text-md font-medium mt-5 px-8 text-justify pt-0.5 ${
+                    activeItem === "user" ? "bg-blue-500 text-white active" : ""
+                  } rounded h-10 w-full cursor-pointer`}
+                >
+                  Setup Users
+                </button>
+              </Link>
+              <Link to="/setup/branches">
+                <button
+                  className={`text-md font-medium mt-5 mb-5 px-8 text-justify pt-0.5 ${
+                    activeItem === "setup-branches"
+                      ? "bg-blue-500 text-white active"
+                      : ""
+                  } rounded h-10 w-full cursor-pointer`}
+                >
+                  Setup Branches
+                </button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
