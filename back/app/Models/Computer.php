@@ -32,10 +32,6 @@ class Computer extends Model
     {
         return $this->belongsToMany(Unit::class, 'computer_unit')->withTimestamps();
     }
-    public function recentUsers()
-    {
-        return $this->hasMany(RecentUser::class);
-    }
     public function installedApplications()
     {
         return $this->hasMany(InstalledApplication::class);

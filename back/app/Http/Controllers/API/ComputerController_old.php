@@ -8,13 +8,11 @@ use App\Models\Computer;
 use App\Models\ComputerUser;
 use App\Models\InstalledApplication;
 use App\Models\Notification;
-use App\Models\RecentUser;
 use App\Models\Remark;
 use App\Models\TransferUnit;
 use App\Models\Unit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Log as ComputerLog;
 
@@ -155,7 +153,7 @@ class ComputerController extends Controller
     public function show(Computer $computer, $id)
     {
 
-        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks', 'remarks.user', 'recentUsers.computerUser', 'recentUsers.unit.category')->find($id);
+        $computer = Computer::with('units', 'computerUser', 'computerUser.branchCode', 'computerUser.position', 'units.category', 'units.supplier', 'installedApplications', 'remarks', 'remarks.user')->find($id);
 
         if (!$computer) {
             return response()->json([
@@ -193,54 +191,7 @@ class ComputerController extends Controller
      */
     public function destroy(Request $request, Computer $computer, $computerId, $unitId)
     {
-        // try {
-        //     $computer = Computer::find($computerId);
-
-        //     if (!$computer) {
-        //         return response()->json([
-        //             'status'            =>              false,
-        //             'message'           =>              'Computer not found.',
-        //         ], 404);
-        //     }
-
-        //     $unit = Unit::findOrFail($unitId);
-
-        //     if (!$unit) {
-        //         return response()->json([
-        //             'status'        =>          false,
-        //             'message'       =>          'Unit not found.',
-        //         ], 404);
-        //     }
-
-        //     $unit->status = 'Vacant';
-        //     $unit->save();
-
-        //     $computer->units()->detach($unitId);
-
-        //     if ($computer->units()->count() === 0) {
-        //         $computer->delete();
-        //     }
-
-
-        //     $user = ComputerUser::find($computer->computer_user_id);
-
-        //     $recentUser = RecentUser::create([
-        //         'computer_id'        =>          $computerId,
-        //         'unit_id'            =>          $unitId,
-        //         'computer_user_id'   =>          $request->computer_user_id
-        //     ], 200);
-
-        //     return response()->json([
-        //         'status'            =>          true,
-        //         'message'           =>          $user->name . ' computer unit deleted successfully. And automatically transfer to ' . $recentUser->computerUser->name,
-        //     ], 200);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'status'            =>          false,
-        //         'message'           =>          'Failed to delete unit from computer.',
-        //         'error'             =>          $e->getMessage(),
-        //     ], 500);
-        // }
+        //
     }
 
     public function installAndRemark(Request $request, $computerId)
@@ -378,7 +329,7 @@ class ComputerController extends Controller
 
                     return response()->json([
                         'status'                =>              true,
-                        'message'               =>              'Unit(s) successfully transferred',
+                        'message'               =>              'Unit(s) successfully transfered',
                     ], 200);
                 }
 

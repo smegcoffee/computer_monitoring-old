@@ -87,7 +87,7 @@ function Specs({
             ></img>
           </div>
           <div className="text-3xl font-medium text-white flex-2 ml-28 mt-7">
-            Computer ID: {id.length === 1 ? id : "NaN"}
+            Computer User: {specsPopupData.name}
           </div>
           <CloseIcon
             onClick={onClose}

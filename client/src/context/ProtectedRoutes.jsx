@@ -3,6 +3,7 @@ import axios from "../api/axios";
 import { Navigate, Outlet } from "react-router-dom";
 import Loading from "./Loading";
 import { useAdmin } from "./AdminContext";
+import Swal from "sweetalert2";
 
 const ProtectedRoutes = ({ adminOnly = false }) => {
   const [user, setUser] = useState(null);

@@ -23,6 +23,7 @@ import {
   TablePagination,
   Typography,
   Breadcrumbs,
+  Tooltip,
 } from "@mui/material";
 import { makeStyles } from "@material-ui/core/styles";
 import DatePicker from "react-datepicker";
@@ -399,13 +400,13 @@ const CustomTableB = (refresh) => {
       <TableContainer className={classes.container}>
         <Table className={classes.table}>
           <TableHead>
-            <TableRow className="bg-red-200">
+            <TableRow className="bg-blue-400">
               <TableCell
                 align="center"
                 className="cursor-pointer rounded-tl-xl"
                 onClick={() => handleSort("unit_code")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   UNIT CODE{" "}
                   {sortColumn === "unit_code" && (
                     <FontAwesomeIcon icon={getSortIcon("unit_code")} />
@@ -417,7 +418,7 @@ const CustomTableB = (refresh) => {
                 align="center"
                 onClick={() => handleSort("date_of_purchase")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   DATE OF PURCHASE{" "}
                   {sortColumn === "date_of_purchase" && (
                     <FontAwesomeIcon icon={getSortIcon("date_of_purchase")} />
@@ -429,7 +430,7 @@ const CustomTableB = (refresh) => {
                 align="center"
                 onClick={() => handleSort("category_name")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   CATEGORY{" "}
                   {sortColumn === "category_name" && (
                     <FontAwesomeIcon icon={getSortIcon("category_name")} />
@@ -441,7 +442,7 @@ const CustomTableB = (refresh) => {
                 align="center"
                 onClick={() => handleSort("description")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   DESCRIPTION{" "}
                   {sortColumn === "description" && (
                     <FontAwesomeIcon icon={getSortIcon("description")} />
@@ -453,7 +454,7 @@ const CustomTableB = (refresh) => {
                 align="center"
                 onClick={() => handleSort("supplier_name")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   SUPPLIER{" "}
                   {sortColumn === "supplier_name" && (
                     <FontAwesomeIcon icon={getSortIcon("supplier_name")} />
@@ -465,7 +466,7 @@ const CustomTableB = (refresh) => {
                 align="center"
                 onClick={() => handleSort("serial_number")}
               >
-                <p className="font-semibold text-base mt-1.5">
+                <p className="font-semibold text-white mt-1.5">
                   SERIAL NO.{" "}
                   {sortColumn === "serial_number" && (
                     <FontAwesomeIcon icon={getSortIcon("serial_number")} />
@@ -474,7 +475,7 @@ const CustomTableB = (refresh) => {
               </TableCell>
               <TableCell className="cursor-pointer" align="center">
                 <p
-                  className="font-semibold text-base mt-1.5"
+                  className="font-semibold text-white mt-1.5"
                   onClick={() => handleSort("status")}
                 >
                   STATUS{" "}
@@ -484,7 +485,7 @@ const CustomTableB = (refresh) => {
                 </p>
               </TableCell>
               <TableCell align="center" className="rounded-tr-xl">
-                <p className="font-semibold text-base mt-1.5">ACTION</p>
+                <p className="font-semibold text-white mt-1.5">ACTION</p>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -776,65 +777,71 @@ const CustomTableB = (refresh) => {
                             gap: "0.25rem",
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => handleSaveUnit(data.id)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              fontWeight: "600",
-                              color: "white",
-                              background:
-                                "linear-gradient(to right, #48C774, #1E90FF)",
-                              borderRadius: "0.375rem",
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              transition:
-                                "background-color 0.3s ease, transform 0.3s ease",
-                              outline: "none",
-                            }}
-                            onMouseOver={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #36D759, #1C86EE)")
-                            }
-                            onMouseOut={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #48C774, #1E90FF)")
-                            }
-                          >
-                            {loadingUpdate ? (
-                              <FontAwesomeIcon
-                                className="animate-spin"
-                                icon={faSpinner}
-                              />
-                            ) : (
-                              <FontAwesomeIcon icon={faFloppyDisk} />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleCancelEdit}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              fontWeight: "600",
-                              color: "white",
-                              background:
-                                "linear-gradient(to right, #FF4D4D, #FF007F)",
-                              borderRadius: "0.375rem",
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              transition:
-                                "background-color 0.3s ease, transform 0.3s ease",
-                              outline: "none",
-                            }}
-                            onMouseOver={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #FF3B3B, #FF0055)")
-                            }
-                            onMouseOut={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #FF4D4D, #FF007F)")
-                            }
-                          >
-                            <FontAwesomeIcon icon={faX} />
-                          </button>
+                          <Tooltip title="Save" arrow placement="top">
+                            <button
+                              className="hover:scale-125"
+                              type="button"
+                              onClick={() => handleSaveUnit(data.id)}
+                              style={{
+                                padding: "0.5rem 1rem",
+                                fontWeight: "600",
+                                color: "white",
+                                background:
+                                  "linear-gradient(to right, #48C774, #1E90FF)",
+                                borderRadius: "0.375rem",
+                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                transition:
+                                  "background-color 0.3s ease, transform 0.3s ease",
+                                outline: "none",
+                              }}
+                              onMouseOver={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #36D759, #1C86EE)")
+                              }
+                              onMouseOut={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #48C774, #1E90FF)")
+                              }
+                            >
+                              {loadingUpdate ? (
+                                <FontAwesomeIcon
+                                  className="animate-spin"
+                                  icon={faSpinner}
+                                />
+                              ) : (
+                                <FontAwesomeIcon icon={faFloppyDisk} />
+                              )}
+                            </button>
+                          </Tooltip>
+                          <Tooltip placement="top" title="Cancel Edit" arrow>
+                            <button
+                              className="hover:scale-125"
+                              type="button"
+                              onClick={handleCancelEdit}
+                              style={{
+                                padding: "0.5rem 1rem",
+                                fontWeight: "600",
+                                color: "white",
+                                background:
+                                  "linear-gradient(to right, #FF4D4D, #FF007F)",
+                                borderRadius: "0.375rem",
+                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                transition:
+                                  "background-color 0.3s ease, transform 0.3s ease",
+                                outline: "none",
+                              }}
+                              onMouseOver={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #FF3B3B, #FF0055)")
+                              }
+                              onMouseOut={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #FF4D4D, #FF007F)")
+                              }
+                            >
+                              <FontAwesomeIcon icon={faX} />
+                            </button>
+                          </Tooltip>
                         </div>
                       ) : (
                         <div
@@ -844,58 +851,64 @@ const CustomTableB = (refresh) => {
                             gap: "0.25rem",
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateUnit(data.id, data)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              fontWeight: "600",
-                              color: "white",
-                              background:
-                                "linear-gradient(to right, #1E90FF, #8A2BE2)",
-                              borderRadius: "0.375rem",
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              transition:
-                                "background-color 0.3s ease, transform 0.3s ease",
-                              outline: "none",
-                            }}
-                            onMouseOver={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #1C86EE, #7A2BCC)")
-                            }
-                            onMouseOut={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #1E90FF, #8A2BE2)")
-                            }
-                          >
-                            <FontAwesomeIcon icon={faPen} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUnit(data.id)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              fontWeight: "600",
-                              color: "white",
-                              background:
-                                "linear-gradient(to right, #FF4D4D, #FF007F)",
-                              borderRadius: "0.375rem",
-                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              transition:
-                                "background-color 0.3s ease, transform 0.3s ease",
-                              outline: "none",
-                            }}
-                            onMouseOver={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #FF3B3B, #FF0055)")
-                            }
-                            onMouseOut={(e) =>
-                              (e.currentTarget.style.background =
-                                "linear-gradient(to right, #FF4D4D, #FF007F)")
-                            }
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
+                          <Tooltip placement="top" title="Edit" arrow>
+                            <button
+                              className="hover:scale-125"
+                              type="button"
+                              onClick={() => handleUpdateUnit(data.id, data)}
+                              style={{
+                                padding: "0.5rem 1rem",
+                                fontWeight: "600",
+                                color: "white",
+                                background:
+                                  "linear-gradient(to right, #1E90FF, #8A2BE2)",
+                                borderRadius: "0.375rem",
+                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                transition:
+                                  "background-color 0.3s ease, transform 0.3s ease",
+                                outline: "none",
+                              }}
+                              onMouseOver={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #1C86EE, #7A2BCC)")
+                              }
+                              onMouseOut={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #1E90FF, #8A2BE2)")
+                              }
+                            >
+                              <FontAwesomeIcon icon={faPen} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip placement="top" title="Delete" arrow>
+                            <button
+                              className="hover:scale-125"
+                              type="button"
+                              onClick={() => handleDeleteUnit(data.id)}
+                              style={{
+                                padding: "0.5rem 1rem",
+                                fontWeight: "600",
+                                color: "white",
+                                background:
+                                  "linear-gradient(to right, #FF4D4D, #FF007F)",
+                                borderRadius: "0.375rem",
+                                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                                transition:
+                                  "background-color 0.3s ease, transform 0.3s ease",
+                                outline: "none",
+                              }}
+                              onMouseOver={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #FF3B3B, #FF0055)")
+                              }
+                              onMouseOut={(e) =>
+                                (e.currentTarget.style.background =
+                                  "linear-gradient(to right, #FF4D4D, #FF007F)")
+                              }
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </Tooltip>
                         </div>
                       )}
                     </TableCell>
@@ -1231,39 +1244,40 @@ const CustomTableA = ({
     } finally {
       setuLoading(false);
       onSubmit(false);
+      toggleModal();
     }
   };
 
   return (
     <div
-      className={`${classes.root} border border-transparent rounded-xl shadow-lg max-h-[45rem] min-h-[40rem] mt-3`}
+      className={`border border-transparent rounded-xl shadow-lg max-h-[45rem] min-h-[20rem]`}
     >
       <form onSubmit={handleAddUnit}>
         <TableContainer
-          className={`${classes.container} overflow-auto max-h-[35rem] min-h-[30rem]`}
+          className={`${classes.container} overflow-auto max-h-[35rem] min-h-[20rem]`}
         >
           <Table className={classes.table}>
             <TableHead>
-              <TableRow className="sticky top-0 z-40 bg-blue-200">
+              <TableRow className="sticky top-0 z-40 bg-[#FF6600]">
                 <TableCell align="center" className="rounded-tl-xl">
-                  <p className="font-semibold text-base mt-1.5">
+                  <p className="font-semibold text-white mt-1.5">
                     DATE OF PURCHASE
                   </p>
                 </TableCell>
                 <TableCell align="center">
-                  <p className="font-semibold text-base mt-1.5">CATEGORY</p>
+                  <p className="font-semibold text-white mt-1.5">CATEGORY</p>
                 </TableCell>
                 <TableCell align="center">
-                  <p className="font-semibold text-base mt-1.5">DESCRIPTION</p>
+                  <p className="font-semibold text-white mt-1.5">DESCRIPTION</p>
                 </TableCell>
                 <TableCell align="center">
-                  <p className="font-semibold text-base mt-1.5">SUPPLIER</p>
+                  <p className="font-semibold text-white mt-1.5">SUPPLIER</p>
                 </TableCell>
                 <TableCell align="center">
-                  <p className="font-semibold text-base mt-1.5">SERIAL NO.</p>
+                  <p className="font-semibold text-white mt-1.5">SERIAL NO.</p>
                 </TableCell>
                 <TableCell align="center">
-                  <p className="font-semibold text-base mt-1.5">STATUS</p>
+                  <p className="font-semibold text-white mt-1.5">STATUS</p>
                 </TableCell>
                 <TableCell align="center" className="rounded-tr-xl">
                   <FontAwesomeIcon icon={faTrash} className="opacity-0" />
@@ -1495,7 +1509,7 @@ const CustomTableA = ({
           <button
             type="submit"
             disabled={uloading}
-            className="w-32 mt-4 mb-5 text-base font-semibold text-white duration-700 bg-green-600 border border-transparent hover:bg-green-700 rounded-3xl h-9"
+            className="w-32 mt-4 mb-5 text-base font-semibold text-white duration-700 bg-[#0033A0] border border-transparent hover:bg-blue-700 rounded-3xl h-9"
           >
             {uloading ? "ADDING..." : "ADD"}
           </button>
@@ -1539,7 +1553,7 @@ function Unit() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -1548,7 +1562,7 @@ function Unit() {
             toggleSidebar={toggleSidebar}
           />
         </div>
-        <div style={{ flex: 2, paddingBottom: "50px" }}>
+        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Setup Unit</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
@@ -1581,7 +1595,7 @@ function Unit() {
           <br /> <br />
           {isOpenModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white min-h-[40rem] max-h-[45rem] max-w-[95%] right-5 top-5 rounded-xl relative">
+              <div className="bg-white min-h-[20rem] max-h-[45rem] max-w-[95%] right-5 top-5 rounded-xl relative">
                 <button
                   className="absolute z-50 text-5xl text-black right-7 top-2 hover:text-gray-700"
                   onClick={toggleModal}
@@ -1617,7 +1631,7 @@ function Unit() {
               <span>Add Unit</span>
             </button>
 
-            <div className="mt-12 px-4 py-6 bg-white rounded-lg max-h-[45rem] overflow-auto">
+            <div className="mt-12 px-4 py-6 rounded-lg max-h-[45rem] overflow-auto">
               <CustomTableB rows={rows} refresh={refresh} />
             </div>
           </div>

@@ -5,16 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Branch extends Model
+class BranchOldDataUnit extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
-
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
 
     public function unit()
     {
@@ -25,20 +20,14 @@ class Branch extends Model
     {
         return $this->belongsTo(BranchCode::class);
     }
-    public function recentUnits()
+
+    public function department()
     {
-        return $this->belongsToMany(Unit::class, 'recent_branches')->withTimestamps();
+        return $this->belongsTo(Department::class);
     }
-    public function recentBranches()
-    {
-        return $this->hasMany(RecentBranch::class);
-    }
+
     public function transferBranchUnits()
     {
         return $this->hasMany(TransferBranchUnit::class);
-    }
-    public function logs()
-    {
-        return $this->hasMany(Log::class);
     }
 }

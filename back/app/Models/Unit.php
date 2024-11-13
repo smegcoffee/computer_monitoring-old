@@ -64,22 +64,23 @@ class Unit extends Model
     {
         return $this->belongsToMany(Computer::class, 'computer_unit')->withTimestamps();
     }
-    public function recentUsers()
-    {
-        return $this->hasMany(RecentUser::class);
-    }
-
-    public function recentBranches()
-    {
-        return $this->hasMany(RecentBranch::class);
-    }
     public function transferUnits()
     {
-        return $this->hasMany(TransferUnit::class)->orderBy('date', 'desc');
+        return $this->hasMany(TransferUnit::class)->orderBy('created_at', 'asc');
     }
 
     public function transferBranchUnits()
     {
-        return $this->hasMany(TransferBranchUnit::class)->orderBy('date', 'desc');
+        return $this->hasMany(TransferBranchUnit::class)->orderBy('created_at', 'asc');
+    }
+
+    public function branchUnits()
+    {
+        return $this->hasMany(BranchUnit::class);
+    }
+
+    public function branchOldDataUnits()
+    {
+        return $this->hasMany(BranchOldDataUnit::class);
     }
 }

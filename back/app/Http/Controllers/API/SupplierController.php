@@ -167,13 +167,13 @@ class SupplierController extends Controller
         if ($units > 0) {
             return response()->json([
                 'status'                =>              false,
-                'message'               =>              'You cannot delete a supplier that is already in use by units.'
+                'message'               =>              'You cannot delete a supplier that is already in used by units.'
             ], 422);
         }
 
         SupplierLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a supplier : ' . $supplier->supplier_name
+            'log_data'          =>              'Deleted the supplier : ' . $supplier->supplier_name
         ]);
 
         $supplier->delete();

@@ -2,11 +2,22 @@ import React, { useState, useEffect, useMemo } from "react";
 import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
-import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowDown,
+  faArrowUp,
+  faArrowUpRightFromSquare,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../api/axios";
+import Swal from "sweetalert2";
 import {
+  AppBar,
   Breadcrumbs,
+  Button,
+  Dialog,
+  DialogContent,
+  IconButton,
   Slide,
   Table,
   TableBody,
@@ -17,13 +28,21 @@ import {
   TableRow,
   TextField,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import MultipleStopIcon from "@mui/icons-material/MultipleStop";
+import { format } from "date-fns";
 import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
 
-function AllUnits() {
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+function TransferedBranchUnits() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -50,16 +69,8 @@ function AllUnits() {
     const filteredData = units.filter(
       (unit) =>
         unit.unit_code.toLowerCase().includes(searchValue) ||
-        unit.date_of_purchase.toLowerCase().includes(searchValue) ||
-        unit.description.toLowerCase().includes(searchValue) ||
         unit.serial_number.toLowerCase().includes(searchValue) ||
-        unit.status.toLowerCase().includes(searchValue) ||
-        unit.supplier.supplier_name.toLowerCase().includes(searchValue) ||
         unit.category.category_name.toLowerCase().includes(searchValue) ||
-        unit.transfer_units
-          .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
-          ?.computer_user?.name.toLowerCase()
-          .includes(searchValue.toLowerCase()) ||
         unit.status.toLowerCase().includes(searchValue)
     );
 
@@ -88,10 +99,10 @@ function AllUnits() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const unit = response.data.data;
+        const unit = response.data.data.filter((unit) => unit.transfer_branch_units.length > 0);
         setUnits(unit);
       } catch (error) {
-        console.error("Error all units:", error);
+        console.error("Error user unit transfered:", error);
         if (error.response.status === 404) {
           setError(true);
         }
@@ -120,23 +131,11 @@ function AllUnits() {
         accessor: "unit_code",
       },
       {
-        Header: "DATE OF PURCHASE",
-        accessor: "date_of_purchase",
-      },
-      {
         Header: "CATEGORY",
         accessor: "category.category_name",
       },
       {
-        Header: "DESCRIPTION",
-        accessor: "description",
-      },
-      {
-        Header: "SUPPLIER",
-        accessor: "supplier.supplier_name",
-      },
-      {
-        Header: "SERIAL NO.",
+        Header: "SERIAL NUMBER",
         accessor: "serial_number",
       },
       {
@@ -144,20 +143,51 @@ function AllUnits() {
         accessor: "status",
       },
       {
-        Header: "ASSIGNED TO",
-        accessor: (row) => {
-          const latestTransfer = row.transfer_units.sort(
-            (a, b) => new Date(b.date) - new Date(a.date)
-          )[0];
-          return latestTransfer?.computer_user?.name || "No user assigned yet";
-        },
+        Header: "ACTION",
+        Cell: ({ row }) => (
+          <Tooltip placement="top" title="View Transfered Details" arrow>
+            <Button
+              className="hover:scale-125"
+              onClick={() => handleClickOpen(row.original)}
+            >
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+            </Button>
+          </Tooltip>
+        ),
+      },
+    ],
+    []
+  );
+
+  const dialogColumns = useMemo(
+    () => [
+      {
+        Header: "STATUS",
+        Cell: ({ row }) =>
+          row.index === 0 ? "First Record" : row.original.status,
+      },
+      {
+        Header: "RECENT BRANCH",
+        accessor: "branch_old_data_unit",
+        Cell: ({ row }) => `${row.original.branch_old_data_unit.branch_code.branch_name_english} (${row.original.branch_old_data_unit.branch_code.branch_name})`,
+      },
+      {
+        Header: "DEPARTMENT",
+        accessor: "branch_old_data_unit.department.department_name",
+      },
+      {
+        Header: "DATE OF TRANSFER",
+        accessor: (row) => format(new Date(row.date), "MMMM dd, yyyy"),
       },
     ],
     []
   );
 
   const data = useMemo(() => filteredUnits, [filteredUnits]);
-
+  const dialogData = useMemo(
+    () => (selectedUnit ? selectedUnit.transfer_branch_units : []),
+    [selectedUnit]
+  );
   const {
     getTableProps,
     getTableBodyProps,
@@ -167,10 +197,19 @@ function AllUnits() {
     state: { sortBy },
   } = useTable({ columns, data }, useSortBy);
 
+  const {
+    getTableProps: getDialogTableProps,
+    getTableBodyProps: getDialogTableBodyProps,
+    headerGroups: dialogHeaderGroups,
+    rows: dialogRows,
+    prepareRow: prepareDialogRow,
+    state: { sortBy: dialogSortBy },
+  } = useTable({ columns: dialogColumns, data: dialogData }, useSortBy);
+
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  const title = "All Units";
+  const title = "User Unit Transfered";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -183,7 +222,9 @@ function AllUnits() {
           />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">All Units</p>
+          <p className="pt-10 ml-10 text-2xl font-normal">
+            User Unit Transfered
+          </p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -200,8 +241,15 @@ function AllUnits() {
                 sx={{ display: "flex", alignItems: "center" }}
                 color="text.primary"
               >
+                <MultipleStopIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Transfered Units
+              </Typography>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
                 <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                All Units
+                User Unit Transfered
               </Typography>
             </Breadcrumbs>
           </div>
@@ -262,7 +310,7 @@ function AllUnits() {
                 <TableBody {...getTableBodyProps()}>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={8}>
+                      <TableCell colSpan={5}>
                         {[...Array(3)].map((_, i) => (
                           <div key={i} className="w-full p-4 rounded">
                             <div className="flex space-x-4 animate-pulse">
@@ -300,7 +348,7 @@ function AllUnits() {
                     ? ""
                     : emptyRows > 0 && (
                         <TableRow style={{ height: 53 * emptyRows }}>
-                          <TableCell colSpan={8}>
+                          <TableCell colSpan={5}>
                             {filteredUnits.length === 0 ? (
                               !searchTerm ? (
                                 <p className="text-xl text-center">
@@ -337,8 +385,111 @@ function AllUnits() {
           </div>
         </div>
       </div>
+      {selectedUnit && (
+        <Dialog
+          fullScreen
+          open={open}
+          onClose={handleClose}
+          TransitionComponent={Transition}
+        >
+          <AppBar sx={{ position: "relative" }}>
+            <Toolbar>
+              <Typography
+                sx={{ ml: 2, flex: 1, textAlign: "center" }}
+                variant="h6"
+                component="div"
+              >
+                {selectedUnit.serial_number} -{" "}
+                {selectedUnit.category.category_name}
+              </Typography>
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleClose}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+          <DialogContent dividers>
+            <div style={{ overflowY: "auto" }}>
+              <TableContainer
+                className="w-full bg-white rounded-lg shadow-md"
+                style={{
+                  maxWidth: "1000px",
+                  margin: "0 auto",
+                  textAlign: "center",
+                  marginTop: "20px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Table {...getDialogTableProps()}>
+                  <TableHead>
+                    {dialogHeaderGroups.map((headerGroup) => (
+                      <TableRow
+                        {...headerGroup.getHeaderGroupProps()}
+                        className="bg-[#FF6600]"
+                      >
+                        {headerGroup.headers.map((column) => (
+                          <TableCell
+                            {...column.getHeaderProps(
+                              column.getSortByToggleProps()
+                            )}
+                            align="center"
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                              color="white"
+                            >
+                              {column.render("Header")}
+                              <span className="ml-2">
+                                {column.isSorted ? (
+                                  column.isSortedDesc ? (
+                                    <FontAwesomeIcon icon={faArrowDown} />
+                                  ) : (
+                                    <FontAwesomeIcon icon={faArrowUp} />
+                                  )
+                                ) : (
+                                  ""
+                                )}
+                              </span>
+                            </Typography>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHead>
+                  <TableBody {...getDialogTableBodyProps()}>
+                    {dialogRows.map((row) => {
+                      prepareDialogRow(row);
+                      return (
+                        <TableRow {...row.getRowProps()}>
+                          {row.cells.map((cell) => (
+                            <TableCell {...cell.getCellProps()} align="center">
+                              {cell.render("Cell")}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })}
+                    {dialogRows.length === 0 && (
+                      <TableRow>
+                        <TableCell align="center" colSpan={4}>
+                          No data found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
 
-export default AllUnits;
+export default TransferedBranchUnits;

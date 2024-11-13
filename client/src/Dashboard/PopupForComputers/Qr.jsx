@@ -78,7 +78,7 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
             ></img>
           </div>
           <div className="mt-8 ml-16 text-3xl font-medium text-white flex-2">
-            Computer ID: {id.length === 1 ? id : "NaN"}
+            Computer User: {qrCodeData.name}
           </div>
           <CloseIcon
             onClick={onClose}

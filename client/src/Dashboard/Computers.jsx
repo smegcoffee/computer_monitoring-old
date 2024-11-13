@@ -27,6 +27,7 @@ import {
   TablePagination,
   TextField,
   Breadcrumbs,
+  Tooltip,
 } from "@mui/material";
 import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
@@ -228,36 +229,46 @@ export const TableComponent = () => {
         accessor: "branch_code.branch_name",
       },
       {
-        Header: "Name and Position",
-        accessor: (row) => `${row.name} (${row.position.position_name})`,
+        Header: "Name",
+        accessor: (row) => `${row.name}`,
+      },
+      {
+        Header: "Position",
+        accessor: (row) => `${row.position.position_name}`,
       },
       {
         Header: "Action",
         Cell: ({ row }) => (
           <div>
             {row.original.action.includes("Specs") && (
-              <Button
-                className="hover:text-blue-500"
-                onClick={() => openSpecsPopup(row.original.id)}
-              >
-                <FontAwesomeIcon icon={faGears} />
-              </Button>
+              <Tooltip placement="top" title="View Specs" arrow>
+                <Button
+                  className="hover:text-blue-500"
+                  onClick={() => openSpecsPopup(row.original.id)}
+                >
+                  <FontAwesomeIcon icon={faGears} />
+                </Button>
+              </Tooltip>
             )}
             {row.original.action.includes("View") && (
-              <Button
-                className="hover:text-blue-500"
-                onClick={() => openViewPopup(row.original.id)}
-              >
-                <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-              </Button>
+              <Tooltip placement="top" title="View Details" arrow>
+                <Button
+                  className="hover:text-blue-500"
+                  onClick={() => openViewPopup(row.original.id)}
+                >
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                </Button>
+              </Tooltip>
             )}
             {row.original.action.includes("Qr") && (
-              <Button
-                className="hover:text-blue-500"
-                onClick={() => openQrPopup(row.original.id)}
-              >
-                <FontAwesomeIcon icon={faQrcode} />
-              </Button>
+              <Tooltip placement="top" title="View QR Code" arrow>
+                <Button
+                  className="hover:text-blue-500"
+                  onClick={() => openQrPopup(row.original.id)}
+                >
+                  <FontAwesomeIcon icon={faQrcode} />
+                </Button>
+              </Tooltip>
             )}
           </div>
         ),
@@ -297,7 +308,7 @@ export const TableComponent = () => {
           }}
         />
       </div>
-      <TableContainer component={Paper} className="w-full table-container">
+      <TableContainer component={Paper} className="table-container">
         <Table {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup) => (
@@ -332,7 +343,7 @@ export const TableComponent = () => {
           <TableBody {...getTableBodyProps()}>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={5}>
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="w-full p-4 rounded">
                       <div className="flex space-x-4 animate-pulse">
@@ -362,7 +373,7 @@ export const TableComponent = () => {
             )}
             {!loading && emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={5}>
                   {filteredData.length === 0 ? (
                     !searchTerm ? (
                       <p className="text-xl text-center">No user to manage.</p>
@@ -426,7 +437,7 @@ function Computers() {
 
   const title = "Monitored Computers";
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -435,7 +446,7 @@ function Computers() {
             toggleSidebar={toggleSidebar}
           />
         </div>
-        <div style={{ flex: 2, paddingBottom: "50px", marginRight: "80px" }}>
+        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">Managed Computers</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
@@ -459,8 +470,8 @@ function Computers() {
             </Breadcrumbs>
           </div>
           <br /> <br />
-          <div className="w-full h-full ml-10">
-            <div className="w-full max-h-full mt-4">
+          <div className="h-full ml-10 w-12/12">
+            <div className="max-h-full mt-4 w-12/12">
               <div>
                 <TableComponent />
               </div>

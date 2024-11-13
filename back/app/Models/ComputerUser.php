@@ -24,13 +24,9 @@ class ComputerUser extends Model
     {
         return $this->belongsTo(Position::class);
     }
-    public function recentUnits()
+    public function department()
     {
-        return $this->belongsToMany(Unit::class, 'recent_users')->withTimestamps();
-    }
-    public function recentUsers()
-    {
-        return $this->hasMany(RecentUser::class);
+        return $this->belongsTo(Department::class);
     }
     public function transferUnits()
     {

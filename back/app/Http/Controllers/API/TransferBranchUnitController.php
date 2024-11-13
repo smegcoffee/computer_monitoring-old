@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-
-use App\Models\RecentUser;
 use Illuminate\Http\Request;
 
-class RecentUserController extends Controller
+class TransferBranchUnitController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -36,7 +34,7 @@ class RecentUserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RecentUser $recentUser)
+    public function show(string $id)
     {
         //
     }
@@ -44,7 +42,7 @@ class RecentUserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RecentUser $recentUser)
+    public function edit(string $id)
     {
         //
     }
@@ -52,7 +50,7 @@ class RecentUserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RecentUser $recentUser)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -60,7 +58,7 @@ class RecentUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RecentUser $recentUser)
+    public function destroy(string $id)
     {
         //
     }

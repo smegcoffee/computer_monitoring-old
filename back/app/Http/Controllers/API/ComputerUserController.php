@@ -131,7 +131,7 @@ class ComputerUserController extends Controller
     }
     public function viewSpecs(ComputerUser $computerUser, $id)
     {
-        $computer_user = ComputerUser::with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier', 'computers.installedApplications', 'computers.remarks', 'computers.recentUsers.unit.category', 'computers.recentUsers.computerUser')->find($id);
+        $computer_user = ComputerUser::with('branchCode', 'position', 'computers', 'computers.units.category', 'computers.units.supplier', 'computers.installedApplications', 'computers.remarks')->find($id);
         if (!$computer_user) {
             return response()->json([
                 'status'            =>          false,

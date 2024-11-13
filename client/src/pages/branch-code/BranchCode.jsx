@@ -68,6 +68,7 @@ function BranchCode() {
     const filteredData = BranchCodes.filter(
       (branchCode) =>
         branchCode.branch_name.toLowerCase().includes(searchValue) ||
+        branchCode.branch_name_english.toLowerCase().includes(searchValue) ||
         branchCode.id.toString().toLowerCase().includes(searchValue) ||
         branchCode.created_at.toLowerCase().includes(searchValue)
     );
@@ -101,7 +102,7 @@ function BranchCode() {
 
         setBranchCodes(branchCodes);
       } catch (error) {
-        console.error("Error all Branch Codes:", error);
+        console.error("Error all Branches:", error);
       } finally {
         setLoading(false);
       }
@@ -135,7 +136,13 @@ function BranchCode() {
         });
 
         if (response.status === 200) {
-          Swal.fire("Deleted!", response.data.message, "success");
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: response.data.message,
+            confirmButtonColor: "#808080",
+            confirmButtonText: "Close",
+          });
         } else {
           throw new Error("Failed to delete");
         }
@@ -143,7 +150,13 @@ function BranchCode() {
     } catch (error) {
       console.error("Error deleting Branch Code:", error);
       if (error.response.status === 422) {
-        Swal.fire("Warning!", error.response.data.message, "warning");
+        Swal.fire({
+          icon: "warning",
+          title: "Warning!",
+          text: error.response.data.message,
+          confirmButtonColor: "#808080",
+          confirmButtonText: "Close",
+        });
       } else {
         throw new Error("Failed to delete");
       }
@@ -163,6 +176,11 @@ function BranchCode() {
       {
         Header: "Branch Code",
         accessor: "branch_name",
+        sortType: "basic",
+      },
+      {
+        Header: "Branch Name",
+        accessor: "branch_name_english",
         sortType: "basic",
       },
       {
@@ -206,10 +224,10 @@ function BranchCode() {
       useSortBy
     );
 
-  const title = "All Branch Codes";
+  const title = "All Branches";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -218,8 +236,8 @@ function BranchCode() {
             toggleSidebar={toggleSidebar}
           />
         </div>
-        <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">All Branch Codes</p>
+        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
+          <p className="pt-10 ml-10 text-2xl font-normal">All Branches</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -237,7 +255,7 @@ function BranchCode() {
                 color="text.primary"
               >
                 <LanIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                All Branch Codes
+                All Branches
               </Typography>
             </Breadcrumbs>
           </div>
@@ -311,7 +329,7 @@ function BranchCode() {
                 <TableBody {...getTableBodyProps()}>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={5}>
                         {[...Array(3)].map((_, i) => (
                           <div key={i} className="w-full p-4 rounded">
                             <div className="flex space-x-4 animate-pulse">
@@ -347,10 +365,10 @@ function BranchCode() {
                   )}
                   {!loading && filteredBranchCodes.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} align="center">
+                      <TableCell colSpan={5} align="center">
                         {searchTerm
                           ? `No "${searchTerm}" result found.`
-                          : "No branch code found."}
+                          : "No data found."}
                       </TableCell>
                     </TableRow>
                   )}

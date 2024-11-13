@@ -98,7 +98,9 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
   };
 
   const handleEmailChange = (event) => {
-    const newValue = event.target.value ? event.target.value : viewPopupData.email;
+    const newValue = event.target.value
+      ? event.target.value
+      : viewPopupData.email;
 
     setUser({
       ...user,
@@ -377,7 +379,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
             </p>
           </div>
           <div className="flex-1 text-3xl font-medium text-center text-white mt-7">
-            <p>Computer ID: {id.length === 1 ? id : "NaN"}</p>
+            <p>Computer ID: {id.length === 1 ? id : "-"}</p>
             <p className="text-base">
               Total Format:{" "}
               {fstatus[0] === 0
@@ -396,7 +398,9 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
               className="relative px-4 py-5 mb-5 text-blue-800 bg-blue-100 border border-blue-400 rounded-md"
               role="alert"
             >
-              <strong className="text-xl font-bold">Recommended Applications!</strong>
+              <strong className="text-xl font-bold">
+                Recommended Applications!
+              </strong>
               <span className="block ml-5 sm:inline animate-bounce">
                 <span className="px-5 py-2 font-bold border rounded-full animate-pulse bg-slate-100 hover:bg-slate-200">
                   Package
@@ -696,7 +700,7 @@ function View({ isOpen, onClose, viewPopupData, setViewPopupData, onSubmit }) {
                 id="customized-dialog-title"
                 className="text-white bg-blue-500"
               >
-                EDIT COMPUTER ID. {id.length === 1 ? id : "NaN"}
+                EDIT COMPUTER ID. {id.length === 1 ? id : ""}
               </DialogTitle>
               <IconButton
                 aria-label="close"

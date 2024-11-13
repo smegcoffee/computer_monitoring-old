@@ -440,7 +440,6 @@ function Dashboard() {
 
         const formattedData = response.data.analytics.map((analytic) => ({
           name: analytic.name,
-          set: analytic.computers_count,
           unit: analytic.units_count,
         }));
         setAnalyticsData(formattedData);
