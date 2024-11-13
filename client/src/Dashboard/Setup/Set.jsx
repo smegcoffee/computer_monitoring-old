@@ -5,7 +5,7 @@ import {
   faTriangleExclamation,
   faArrowUp,
   faArrowDown,
-  faUserPen
+  faUserPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,6 +21,7 @@ import {
   TablePagination,
   TextField,
   Breadcrumbs,
+  Tooltip,
 } from "@mui/material";
 import Add from "./Add";
 import EditSet from "./Editset";
@@ -196,12 +197,12 @@ function Set() {
     setSortOrder(isAscending ? "desc" : "asc");
   };
 
-  const title = "Setup Computer Set";
+  const title = "Assign Computer Set";
 
   const now = DateTime.now().setZone("Asia/Manila").toJSDate();
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -211,7 +212,7 @@ function Set() {
           />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">Setup Computer Set</p>
+          <p className="pt-10 ml-10 text-2xl font-normal">Assign Computer Set</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -236,7 +237,7 @@ function Set() {
                 color="text.primary"
               >
                 <MouseIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Setup Computer Set
+                Assign Computer Set
               </Typography>
             </Breadcrumbs>
           </div>
@@ -261,9 +262,9 @@ function Set() {
               <div className="mt-3.5">
                 <button
                   onClick={openAddPopup}
-                  className="pt-2 pb-2 pl-4 pr-4 text-base font-semibold text-white bg-red-400 border border-transparent rounded-full"
+                  className="pt-2 pb-2 pl-4 pr-4 text-base font-semibold text-white bg-[#0033A0] hover:bg-blue-700 border border-transparent rounded-full"
                 >
-                  Assign Computer Set User
+                  Assign Computer Set to User
                 </button>
               </div>
             </div>
@@ -273,12 +274,12 @@ function Set() {
               <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="simple table">
                   <TableHead>
-                    <TableRow className="bg-red-200">
+                    <TableRow className="bg-blue-400">
                       <TableCell
                         align="center"
                         onClick={() => handleSort("id")}
                       >
-                        <p className="text-base font-semibold">
+                        <p className="font-semibold text-white">
                           ID{" "}
                           {sortColumn === "id" &&
                             (sortOrder === "asc" ? (
@@ -289,30 +290,30 @@ function Set() {
                         </p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">
+                        <p className="font-semibold text-white">
                           DATE OF PURCHASE
                         </p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">CATEGORY</p>
+                        <p className="font-semibold text-white">CATEGORY</p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">DESCRIPTION</p>
+                        <p className="font-semibold text-white">DESCRIPTION</p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">SUPPLIER</p>
+                        <p className="font-semibold text-white">SUPPLIER</p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">SERIAL NO.</p>
+                        <p className="font-semibold text-white">SERIAL NO.</p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">STATUS</p>
+                        <p className="font-semibold text-white">STATUS</p>
                       </TableCell>
                       <TableCell
                         align="center"
                         onClick={() => handleSort("name")}
                       >
-                        <p className="text-base font-semibold">
+                        <p className="font-semibold text-white">
                           ASSIGNED TO
                           {sortColumn === "name" &&
                             (sortOrder === "asc" ? (
@@ -323,7 +324,7 @@ function Set() {
                         </p>
                       </TableCell>
                       <TableCell align="center">
-                        <p className="text-base font-semibold">ACTION</p>
+                        <p className="font-semibold text-white">ACTION</p>
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -543,9 +544,18 @@ function Set() {
                                 align="center"
                                 style={{ borderBottom: "none" }}
                               >
-                                <button onClick={() => openEditPopup(row.id)}>
-                                  <FontAwesomeIcon className="text-2xl text-blue-500" icon={faUserPen} />
-                                </button>
+                                <Tooltip
+                                  placement="top"
+                                  title="Edit Computer Set"
+                                  arrow
+                                >
+                                  <button onClick={() => openEditPopup(row.id)} className="hover:scale-125">
+                                    <FontAwesomeIcon
+                                      className="text-2xl text-blue-500 hover:text-blue-600"
+                                      icon={faUserPen}
+                                    />
+                                  </button>
+                                </Tooltip>
                               </TableCell>
                             </TableRow>
                             {/* Show more / Show less button */}

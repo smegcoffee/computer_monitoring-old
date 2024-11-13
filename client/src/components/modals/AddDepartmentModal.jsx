@@ -1,11 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "../../api/axios";
 import Swal from "sweetalert2";
 
 export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
   const [departmentName, setDepartmentName] = useState("");
+  const [branchCodeId, setBranchCodeId] = useState("");
+  const [branchCode, setBranchCode] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchBranchCodes = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      try {
+        const response = await axios.get("/api/branches", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.status === 200) {
+          setBranchCode(response.data.branches);
+        }
+      } catch (error) {
+        console.error("Error fetching branch codes:", error);
+      }
+    };
+
+    fetchBranchCodes();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +47,7 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
         "api/add-department",
         {
           department_name: departmentName,
+          branch_code_id: branchCodeId,
         },
         {
           headers: {
@@ -28,7 +55,6 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
           },
         }
       );
-      console.log(response)
       if (response.status === 201) {
         const Toast = Swal.mixin({
           toast: true,
@@ -137,7 +163,37 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
                   </span>
                 )}
               </div>
-
+              <div className="mb-4">
+                <label
+                  htmlFor="branch_code_id"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Select Branch Code
+                </label>
+                <select
+                  name="branch_code_id"
+                  onChange={(e) => setBranchCodeId(e.target.value)}
+                  className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id=""
+                >
+                  <option value="" hidden selected>
+                    Select Branch
+                  </option>
+                  <option value="" disabled>
+                    Select Branch
+                  </option>
+                  {branchCode.map((branchCode) => (
+                    <option key={branchCode.id} value={branchCode.id}>
+                      {branchCode.branch_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {validationErrors.branch_code_id && (
+                <span className="text-red-500">
+                  {validationErrors.branch_code_id[0]}
+                </span>
+              )}
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"

@@ -30,6 +30,7 @@ import Department from "./pages/department/Department";
 import Supplier from "./pages/supplier/Supplier";
 import Position from "./pages/position/Position";
 import Category from "./pages/categories/Category";
+import TransferedBranchUnits from "./Dashboard/transferedBranchUnits";
 
 function App() {
   return (
@@ -52,7 +53,7 @@ function App() {
             <Route path="/unit" element={<Unit />}></Route>
             <Route path="/set" element={<Set />}></Route>
             <Route path="/profile" element={<Profile />}></Route>
-            <Route path="/branch-codes" element={<BranchCode />}></Route>
+            <Route path="/branches" element={<BranchCode />}></Route>
             <Route path="/departments" element={<Department />}></Route>
             <Route path="/categories" element={<Category />}></Route>
             <Route path="/suppliers" element={<Supplier />}></Route>
@@ -63,10 +64,14 @@ function App() {
               path="/transfered-units"
               element={<TransferedUnits />}
             ></Route>
+            <Route
+              path="/transfered-branch-units"
+              element={<TransferedBranchUnits />}
+            ></Route>
             <Route path="/all-units" element={<AllUnits />}></Route>
             <Route path="/computers/:id" element={<Extract />} />
             <Route path="/user" element={<User />} />
-            <Route path="/setup/branches" element={<Branches />} />
+            <Route path="/setup/branch-units" element={<Branches />} />
             <Route path="/all-logs" element={<AllLogs />} />
             <Route path="/not-authorized-user" element={<NotAuthorized />} />
             <Route path="/add" element={<Add />} />

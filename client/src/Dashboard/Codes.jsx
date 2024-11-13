@@ -124,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#3f51b5",
+    background: "#0033A0",
     color: "#fff",
     padding: 20,
     fontSize: 24,

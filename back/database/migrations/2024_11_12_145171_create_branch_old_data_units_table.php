@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('branches', function (Blueprint $table) {
+        Schema::create('branch_old_data_units', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_code_id')->nullable()->constrained()->onDelete('restrict');
-            $table->foreignId('department_id')->nullable()->constrained()->onDelete('restrict');
-            $table->string('branch_name')->nullable();
+            $table->foreignId('branch_code_id')->constrained()->onDelete('restrict')->unique();
+            $table->foreignId('unit_id')->constrained()->onDelete('restrict')->unique();
+            $table->foreignId('department_id')->constrained()->onDelete('restrict')->unique();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('branches');
+        Schema::dropIfExists('branch_old_data_units');
     }
 };

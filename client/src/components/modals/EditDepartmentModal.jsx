@@ -9,9 +9,38 @@ export default function EditDepartmentModal({
   id,
 }) {
   const [departmentName, setDepartmentName] = useState("");
+  const [branchCodeId, setBranchCodeId] = useState("");
+  const [branchCode, setBranchCode] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || !id) {
+      return;
+    }
+    const fetchBranchCodes = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      try {
+        const response = await axios.get("/api/branches", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.status === 200) {
+          setBranchCode(response.data.branches);
+        }
+      } catch (error) {
+        console.error("Error fetching branch codes:", error);
+      }
+    };
+
+    fetchBranchCodes();
+  }, [isOpen, id]);
 
   useEffect(() => {
     if (!isOpen || !id) {
@@ -32,6 +61,7 @@ export default function EditDepartmentModal({
 
         if (response.status === 200) {
           setDepartmentName(response.data.department.department_name);
+          setBranchCodeId(response.data.department.branch_code.id);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -57,6 +87,7 @@ export default function EditDepartmentModal({
         `api/update-department/${id}`,
         {
           department_name: departmentName,
+          branch_code_id: branchCodeId,
         },
         {
           headers: {
@@ -84,6 +115,8 @@ export default function EditDepartmentModal({
           });
         })();
         setValidationErrors("");
+        setDepartmentName("");
+        setBranchCodeId("");
         onClose();
       }
     } catch (error) {
@@ -178,7 +211,44 @@ export default function EditDepartmentModal({
                   </span>
                 )}
               </div>
-
+              <div className="mb-4">
+                <label
+                  htmlFor="branch_code_id"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Select Branch Code
+                </label>
+                {dataLoading ? (
+                  <div class="animate-pulse w-full">
+                    <div class="h-10 bg-slate-300 rounded"></div>
+                  </div>
+                ) : (
+                  <select
+                    name="branch_code_id"
+                    value={branchCodeId}
+                    onChange={(e) => setBranchCodeId(e.target.value)}
+                    className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id=""
+                  >
+                    <option value="" hidden selected>
+                      Select Branch
+                    </option>
+                    <option value="" disabled>
+                      Select Branch
+                    </option>
+                    {branchCode.map((branchCode) => (
+                      <option key={branchCode.id} value={branchCode.id}>
+                        {branchCode.branch_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {validationErrors.branch_code_id && (
+                <span className="text-red-500">
+                  {validationErrors.branch_code_id[0]}
+                </span>
+              )}
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"

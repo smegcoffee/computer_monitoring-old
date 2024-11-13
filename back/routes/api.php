@@ -7,7 +7,7 @@ use App\Http\Controllers\API\Auth\LogoutController;
 use App\Http\Controllers\API\Auth\PasswordChangeController;
 use App\Http\Controllers\API\Auth\RegisterController;
 use App\Http\Controllers\API\BranchCodeController;
-use App\Http\Controllers\API\BranchSetupController;
+use App\Http\Controllers\API\BranchUnitController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ComputerController;
 use App\Http\Controllers\API\ComputerUserController;
@@ -59,10 +59,11 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get('/edit-department/{id}', [DepartmentController::class, 'edit']);
     Route::get('/edit-position/{id}', [PositionController::class, 'edit']);
     Route::get('/edit-supplier/{id}', [SupplierController::class, 'edit']);
+    Route::get('/branch-units', [BranchUnitController::class, 'index']);
+    Route::get('/branch-unit-edit/{id}', [BranchUnitController::class, 'edit']);
 
     // POST
     Route::post('/add-category', [CategoryController::class, 'store']);
-    Route::post('/add-branchsetup', [BranchSetupController::class, 'store']);
     Route::post('/add-unit', [UnitController::class, 'store']);
     Route::post('/add-supplier', [SupplierController::class, 'store']);
     Route::post('/add-branch', [BranchCodeController::class, 'store']);
@@ -72,6 +73,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
     Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
+    Route::post('/branch-unit/{branchUnitId}/unit/{unitId}/action', [BranchUnitController::class, 'unitAction']);
     Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::post('/marked-as-read/{notificationId}', [NotificationController::class, 'read']);
@@ -83,6 +85,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/update-department/{id}', [DepartmentController::class, 'update']);
     Route::post('/update-position/{id}', [PositionController::class, 'update']);
     Route::post('/update-supplier/{id}', [SupplierController::class, 'update']);
+    Route::post('/add-branch-unit', [BranchUnitController::class, 'store']);
 
     // PUT
     Route::put('/installed/{computerId}/computer-user/{computerUserId}', [ComputerController::class, 'updateApplicationAndUserDetails']);

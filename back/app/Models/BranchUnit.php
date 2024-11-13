@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RecentBranch extends Model
+class BranchUnit extends Model
 {
     use HasFactory;
 
@@ -16,8 +16,13 @@ class RecentBranch extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function branch()
+    public function branchCode()
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(BranchCode::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

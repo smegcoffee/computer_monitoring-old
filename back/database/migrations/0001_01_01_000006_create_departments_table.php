@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('recent_branches', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('unit_id')->constrained()->onDelete('restrict');
-            $table->foreignId('branch_id')->constrained()->onDelete('restrict');
+            $table->string('department_name')->nullable();
+            $table->foreignId('branch_code_id')->nullable()->constrained()->onDelete('restrict');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('recent_branches');
+        Schema::dropIfExists('departments');
     }
 };

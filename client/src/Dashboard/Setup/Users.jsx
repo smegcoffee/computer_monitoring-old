@@ -197,7 +197,7 @@ function AllUsers() {
     return <Navigate to="/not-authorized-user" />;
   }
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>

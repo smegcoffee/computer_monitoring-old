@@ -167,13 +167,13 @@ class CategoryController extends Controller
         if ($units > 0) {
             return response()->json([
                 'status'                =>              false,
-                'message'               =>              'You cannot delete a category that is already in use by units.'
+                'message'               =>              'You cannot delete a category that is already in used by units.'
             ], 422);
         }
 
         CategoryLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a category : ' . $category->category_name
+            'log_data'          =>              'Deleted the category : ' . $category->category_name
         ]);
 
         $category->delete();

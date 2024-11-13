@@ -16,8 +16,8 @@ class TransferBranchUnit extends Model
         return $this->belongsTo(Unit::class);
     }
 
-    public function branch()
+    public function branchOldDataUnit()
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(BranchOldDataUnit::class);
     }
 }

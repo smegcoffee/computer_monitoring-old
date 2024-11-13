@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import axios from "../../api/axios";
+import axios from "../../../api/axios";
 import { format } from "date-fns";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -60,12 +60,14 @@ function EditSet({
   setEditPopupData,
   onSubmit,
 }) {
-  const [computerUser, setComputerUser] = useState({ data: [] });
-  const [computer, setComputer] = useState({
-    computer_user: "",
+  const [branch, setBranch] = useState({ data: [] });
+  const [department, setDepartment] = useState({ data: [] });
+  const [branchUnit, setBranchUnit] = useState({
+    branch: "",
+    department: "",
   });
   const [loading, setLoading] = useState(true);
-  const [computerName, setComputerName] = useState("");
+  const [branchUnitName, setBranchUnitName] = useState("");
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [transferDate, setTransferDate] = useState(null);
@@ -73,14 +75,14 @@ function EditSet({
   const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [checkedRows, setCheckedRows] = useState([]);
-  const [computerId, setComputerId] = useState("");
+  const [branchUnitId, setBranchUnitId] = useState("");
   const [unit, setUnit] = useState([]);
-  const [markedLoading, setMarkedLoading] = useState(false);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [editUnitId, setEditUnitId] = useState(null);
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
+  const [searchTerm, setSearchTerm] = useState("");
   const [editValues, setEditValues] = useState({
     date_of_purchase: "",
     category: "",
@@ -109,18 +111,45 @@ function EditSet({
     setLoading(true);
     const fetchData = async () => {
       try {
-        if (Array.isArray(editPopupData.computers)) {
-          const allUnits = editPopupData.computers.flatMap((computer) =>
-            computer.units.map((unit) => ({
-              ...unit,
-              computerName: computer.name,
-            }))
+        if (Array.isArray(editPopupData.branch_units)) {
+          const allUnits = editPopupData.branch_units.map((branchUnit) => ({
+            unit: branchUnit.unit,
+            department: branchUnit.department,
+          }));
+
+          setUnit(
+            allUnits.filter(
+              (data) =>
+                data.unit.unit_code
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.date_of_purchase
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.category.category_name
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.description
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.supplier.supplier_name
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.serial_number
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.unit.status
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                data.department.department_name
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase())
+            )
           );
-          setUnit(allUnits);
-          const name = editPopupData.name;
-          const id = editPopupData.computers.map((computer) => computer.id);
-          setComputerName(name);
-          setComputerId(id);
+          const name = `${editPopupData.branch_name_english} (${editPopupData.branch_name})`;
+          const id = editPopupData.branch_units[0].branch_code_id;
+          setBranchUnitName(name);
+          setBranchUnitId(id);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -130,55 +159,92 @@ function EditSet({
     };
 
     fetchData();
-  }, []);
+  }, [isOpen, searchTerm]);
 
   useEffect(() => {
-    const fetchComputerUser = async () => {
+    const fetchBranch = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
         }
-        const response = await axios.get("/api/computer-users", {
+        const response = await axios.get("/api/branches", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setComputerUser(response.data);
+        setBranch(response.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
       }
     };
 
-    fetchComputerUser();
+    fetchBranch();
   }, []);
 
-  const ComputerUser =
-    computerUser.data && computerUser.data.length > 0
-      ? computerUser.data
-          .filter((cu) => cu.id !== editPopupData.id)
-          .map((cu) => ({
-            id: cu.id,
-            name: cu.name,
+  useEffect(() => {
+    const fetchDepartment = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/departments", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setDepartment(response.data);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchDepartment();
+  }, []);
+
+  const Branch =
+    branch.branches && branch.branches.length > 0
+      ? branch.branches
+          .filter((bu) => bu.id !== editPopupData.id)
+          .map((bu) => ({
+            id: bu.id,
+            name: `${bu.branch_name_english} (${bu.branch_name})`,
           }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : [];
+  const Department =
+    department.departments && department.departments.length > 0
+      ? department.departments
+          .filter((dept) => dept.branch_code_id === branchUnit.branch)
+          .map((dept) => ({
+            id: dept.id,
+            name: dept.department_name,
+          }))
+          .sort((a, b) => {
+            if (a.name === "N/A" && b.name !== "N/A") return -1;
+            if (b.name === "N/A" && a.name !== "N/A") return 1;
+
+            return a.name.localeCompare(b.name);
+          })
       : [];
 
   const handleUpdateUnit = (id, data) => {
     setEditUnitId(id);
     setEditValues({
       ...editValues,
-      date_of_purchase: data.date_of_purchase,
+      date_of_purchase: data.unit.date_of_purchase,
       category: {
-        label: data.category.category_name,
-        value: data.category.id,
+        label: data.unit.category.category_name,
+        value: data.unit.category.id,
       },
-      description: data.description,
+      description: data.unit.description,
       supplier: {
-        label: data.supplier.supplier_name,
-        value: data.supplier.id,
+        label: data.unit.supplier.supplier_name,
+        value: data.unit.supplier.id,
       },
-      serial_number: data.serial_number,
-      status: { label: data.status, value: data.status },
+      serial_number: data.unit.serial_number,
+      status: { label: data.unit.status, value: data.unit.status },
     });
     setValidationErrors({});
   };
@@ -359,10 +425,11 @@ function EditSet({
 
       for (const unitId of checkedRows) {
         const response = await axios.post(
-          `/api/computer/${computerId}/unit/${unitId}/action`,
+          `/api/branch-unit/${branchUnitId}/unit/${unitId}/action`,
           {
             action: reason,
-            computer_user: computer.computer_user,
+            branch: branchUnit.branch,
+            department: branchUnit.department,
             date: transferDate || null,
           },
           {
@@ -372,7 +439,7 @@ function EditSet({
           }
         );
 
-        if (response.data.status !== true) {
+        if (response.status !== 200) {
           allSuccess = false;
           console.log("Operation failed for unit:", unitId);
         } else {
@@ -395,27 +462,23 @@ function EditSet({
         }
 
         console.log("Processed unit:", unitId, response.data);
-
-        if (response.status === 200) {
-          onClose();
-        }
       }
 
       if (allSuccess && successMessages.length > 0) {
         const updatedResponse = await axios.get(
-          `/api/computer-user-edit/${editPopupData.id}`,
+          `/api/branch-unit-edit/${editPopupData.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        setEditPopupData(updatedResponse.data.computer_user_data);
+        setEditPopupData(updatedResponse.data.branch_unit_data);
         setCheckedRows([]);
         setTransferDate(null);
         setReason("");
-        setComputer([]);
-        if (updatedResponse.data.computer_user_data.computers.length === 0) {
+        setBranchUnit([]);
+        if (updatedResponse.data.branch_unit_data.branch_units.length === 0) {
           onClose();
         } else {
           setOpen(false);
@@ -451,9 +514,11 @@ function EditSet({
             </ul>
           `,
         });
+
+        onClose();
       }
     } catch (error) {
-      console.error("Error in adding computer set:", error);
+      console.error("Error in adding branch unit:", error);
 
       if (error.response && error.response.data) {
         console.log("Backend error response:", error.response.data);
@@ -479,7 +544,7 @@ function EditSet({
           title: error.response.data.message,
         });
       } else {
-        console.log("ERROR!");
+        console.error("Error submit:", error);
       }
     } finally {
       setsLoading(false);
@@ -490,106 +555,34 @@ function EditSet({
   const handleDateChange = (newDate) => {
     setTransferDate(dayjs(newDate).format("YYYY-MM-DD"));
   };
-
-  const handleMarkedAsClean = async (e) => {
-    e.preventDefault();
-    setMarkedLoading(true);
-    onSubmit(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        `/api/cleaning-complete/${computerId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.status === true) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "green",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "success",
-            title: response.data.message,
-          });
-        })();
-      }
-    } catch (error) {
-      console.error("Error fetching chart data:", error);
-
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
-        setValidationErrors(error.response.data.errors || {});
-
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "red",
-          customClass: {
-            popup: "colored-toast",
-            container: "swalContainer",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-
-        await Toast.fire({
-          icon: "error",
-          title: error.response.data.message,
-        });
-      } else {
-        console.log("ERROR!");
-      }
-    } finally {
-      setMarkedLoading(false);
-      onSubmit(false);
-      onClose();
-    }
-  };
-
   const sortRows = (rows) => {
     return rows.sort((a, b) => {
       let valueA, valueB;
 
       if (sortColumn === "unit_code") {
-        valueA = a.unit_code;
-        valueB = b.unit_code;
+        valueA = a.unit.unit_code;
+        valueB = b.unit.unit_code;
       } else if (sortColumn === "date_of_purchase") {
-        valueA = a.date_of_purchase;
-        valueB = b.date_of_purchase;
+        valueA = a.unit.date_of_purchase;
+        valueB = b.unit.date_of_purchase;
       } else if (sortColumn === "description") {
-        valueA = a.description.toLowerCase();
-        valueB = b.description.toLowerCase();
+        valueA = a.unit.description.toLowerCase();
+        valueB = b.unit.description.toLowerCase();
       } else if (sortColumn === "supplier.supplier_name") {
-        valueA = a.supplier.supplier_name.toLowerCase();
-        valueB = b.supplier.supplier_name.toLowerCase();
+        valueA = a.unit.supplier.supplier_name.toLowerCase();
+        valueB = b.unit.supplier.supplier_name.toLowerCase();
       } else if (sortColumn === "category.category_name") {
-        valueA = a.category.category_name.toLowerCase();
-        valueB = b.category.category_name.toLowerCase();
+        valueA = a.unit.category.category_name.toLowerCase();
+        valueB = b.unit.category.category_name.toLowerCase();
       } else if (sortColumn === "serial_number") {
-        valueA = a.serial_number.toLowerCase();
-        valueB = b.serial_number.toLowerCase();
+        valueA = a.unit.serial_number.toLowerCase();
+        valueB = b.unit.serial_number.toLowerCase();
       } else if (sortColumn === "status") {
-        valueA = a.status.toLowerCase();
-        valueB = b.status.toLowerCase();
+        valueA = a.unit.status.toLowerCase();
+        valueB = b.unit.status.toLowerCase();
+      } else if (sortColumn === "department_name") {
+        valueA = a.department.department_name.toLowerCase();
+        valueB = b.department.department_name.toLowerCase();
       }
 
       if (sortOrder === "asc") {
@@ -599,7 +592,6 @@ function EditSet({
       }
     });
   };
-
   const handleSort = (column) => {
     const isAscending = sortColumn === column && sortOrder === "asc";
     setSortColumn(column);
@@ -607,14 +599,14 @@ function EditSet({
   };
   const handleSelectAll = (event) => {
     if (event.target.checked) {
-      setCheckedRows(unit.map((unit) => unit.id));
+      setCheckedRows(unit.map((unit) => unit.unit.id));
     } else {
       setCheckedRows([]);
     }
   };
 
   const isAllChecked =
-    unit.length > 0 && unit.every((unit) => checkedRows.includes(unit.id));
+    unit.length > 0 && unit.every((unit) => checkedRows.includes(unit.unit.id));
   return (
     <>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
@@ -771,6 +763,24 @@ function EditSet({
                           ))}
                       </Typography>
                     </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      align="center"
+                      onClick={() => handleSort("department_name")}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        style={{ fontWeight: 700 }}
+                      >
+                        ASSIGNED DEPARTMENT
+                        {sortColumn === "department_name" &&
+                          (sortOrder === "asc" ? (
+                            <FontAwesomeIcon icon={faArrowDown} />
+                          ) : (
+                            <FontAwesomeIcon icon={faArrowUp} />
+                          ))}
+                      </Typography>
+                    </TableCell>
                     <TableCell align="center">
                       <Typography
                         variant="subtitle1"
@@ -784,7 +794,7 @@ function EditSet({
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={9}>
+                      <TableCell colSpan={10}>
                         {[...Array(3)].map((_, i) => (
                           <div key={i} className="w-full p-4 rounded">
                             <div className="flex space-x-4 animate-pulse">
@@ -801,13 +811,15 @@ function EditSet({
                       <TableRow key={index}>
                         <TableCell align="center">
                           <Checkbox
-                            checked={checkedRows.includes(unit.id)}
-                            onChange={() => handleCheckboxClick(unit.id)}
+                            checked={checkedRows.includes(unit.unit.id)}
+                            onChange={() => handleCheckboxClick(unit.unit.id)}
                           />
                         </TableCell>
-                        <TableCell align="center">{unit.unit_code}</TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {unit.unit.unit_code}
+                        </TableCell>
+                        <TableCell align="center">
+                          {editUnitId === unit.unit.id ? (
                             <>
                               <DatePicker
                                 selected={editValues?.date_of_purchase}
@@ -815,7 +827,7 @@ function EditSet({
                                 placeholderText=""
                                 dateFormat={"yyyy-MM-dd"}
                                 className={
-                                  editUnitId === unit.id &&
+                                  editUnitId === unit.unit.id &&
                                   validationErrors["date_of_purchase"]
                                     ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
                                     : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
@@ -825,13 +837,13 @@ function EditSet({
                           ) : (
                             <>
                               {format(
-                                new Date(unit.date_of_purchase),
+                                new Date(unit.unit.date_of_purchase),
                                 "yyyy-MM-dd"
                               )}
                             </>
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["date_of_purchase"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["date_of_purchase"].map(
@@ -844,7 +856,7 @@ function EditSet({
                           </span>
                         </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <Select
                               options={Category}
                               value={editValues?.category}
@@ -855,19 +867,19 @@ function EditSet({
                                 editValues?.category ? "" : "Select Category"
                               }
                               className={
-                                editUnitId === unit.id &&
+                                editUnitId === unit.unit.id &&
                                 validationErrors["category"]
                                   ? "border border-red-500"
                                   : "border border-transparent"
                               }
                             />
-                          ) : unit.category ? (
-                            unit.category.category_name
+                          ) : unit.unit.category ? (
+                            unit.unit.category.category_name
                           ) : (
                             "N/A"
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["category"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["category"].map(
@@ -880,7 +892,7 @@ function EditSet({
                           </span>
                         </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <textarea
                               rows={3}
                               type="text"
@@ -892,21 +904,21 @@ function EditSet({
                                 })
                               }
                               className={
-                                editUnitId === unit.id &&
+                                editUnitId === unit.unit.id &&
                                 validationErrors["description"]
                                   ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 pl-2"
                                   : "bg-gray-200 border border-transparent rounded-xl w-4/4 pl-2"
                               }
                             />
                           ) : (
-                            unit?.description
+                            unit?.unit.description
                               .split("\n")
                               .map((line, lineIndex) => (
                                 <div key={lineIndex}>{line}</div>
                               ))
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["description"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["description"].map(
@@ -919,7 +931,7 @@ function EditSet({
                           </span>
                         </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <Select
                               options={Supplier}
                               value={editValues?.supplier}
@@ -930,19 +942,19 @@ function EditSet({
                                 editValues?.supplier ? "" : "Select Supplier"
                               }
                               className={
-                                editUnitId === unit.id &&
+                                editUnitId === unit.unit.id &&
                                 validationErrors["supplier"]
                                   ? "border border-red-500"
                                   : "border border-transparent"
                               }
                             />
-                          ) : unit.supplier ? (
-                            unit.supplier.supplier_name
+                          ) : unit.unit.supplier ? (
+                            unit.unit.supplier.supplier_name
                           ) : (
                             "N/A"
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["supplier"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["supplier"].map(
@@ -955,7 +967,7 @@ function EditSet({
                           </span>
                         </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <input
                               type="text"
                               value={editValues?.serial_number || null}
@@ -967,17 +979,17 @@ function EditSet({
                               }
                               placeholder=""
                               className={
-                                editUnitId === unit.id &&
+                                editUnitId === unit.unit.id &&
                                 validationErrors["serial_number"]
                                   ? "bg-gray-200 border border-red-500 rounded-xl w-4/4 h-9 pl-2"
                                   : "bg-gray-200 border border-transparent rounded-xl w-4/4 h-9 pl-2"
                               }
                             />
                           ) : (
-                            unit.serial_number
+                            unit.unit.serial_number
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["serial_number"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["serial_number"].map(
@@ -990,7 +1002,7 @@ function EditSet({
                           </span>
                         </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <Select
                               options={options}
                               value={editValues?.status || null}
@@ -999,17 +1011,17 @@ function EditSet({
                                 editValues?.status ? "" : "Select status"
                               }
                               className={
-                                editUnitId === unit.id &&
+                                editUnitId === unit.unit.id &&
                                 validationErrors["status"]
                                   ? "border border-red-500"
                                   : "border border-transparent"
                               }
                             />
                           ) : (
-                            unit.status
+                            unit.unit.status
                           )}
                           <span className="text-sm text-center">
-                            {editUnitId === unit.id &&
+                            {editUnitId === unit.unit.id &&
                               validationErrors["status"] && (
                                 <div className="text-sm text-center text-red-500">
                                   {validationErrors["status"].map(
@@ -1021,8 +1033,18 @@ function EditSet({
                               )}
                           </span>
                         </TableCell>
+                        <TableCell
+                          align="center"
+                          className={
+                            editUnitId === unit.unit.id
+                              ? "cursor-not-allowed"
+                              : ""
+                          }
+                        >
+                          {unit.department.department_name}
+                        </TableCell>
                         <TableCell align="center">
-                          {editUnitId === unit.id ? (
+                          {editUnitId === unit.unit.id ? (
                             <div
                               style={{
                                 display: "flex",
@@ -1034,7 +1056,7 @@ function EditSet({
                                 <button
                                   type="button"
                                   className="hover:scale-110"
-                                  onClick={() => handleSaveUnit(unit.id)}
+                                  onClick={() => handleSaveUnit(unit.unit.id)}
                                   style={{
                                     padding: "0.5rem 1rem",
                                     fontWeight: "600",
@@ -1109,7 +1131,7 @@ function EditSet({
                                   className="hover:scale-110"
                                   type="button"
                                   onClick={() =>
-                                    handleUpdateUnit(unit.id, unit)
+                                    handleUpdateUnit(unit.unit.id, unit)
                                   }
                                   style={{
                                     padding: "0.5rem 1rem",
@@ -1141,13 +1163,45 @@ function EditSet({
                       </TableRow>
                     ))
                   )}
+
+                  {unit.length <= 0 && (
+                    <TableCell align="center" colSpan={10}>
+                      {searchTerm && `No results found for "${searchTerm}"`}
+                    </TableCell>
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
             <div className="flex items-center justify-center">
               <p className="p-5 text-xl text-center">
-                <strong>{computerName}&apos;s</strong> Computer
+                <strong>{branchUnitName}&apos;s</strong> units
               </p>
+              <div class="relative w-full max-w-xs mx-auto">
+                <input
+                  type="search"
+                  placeholder="Search..."
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  class="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm0 0l6 6"
+                    />
+                  </svg>
+                </span>
+              </div>
+
               <div className="items-end justify-end flex-1 ml-48 text-center">
                 <button
                   type="button"
@@ -1168,23 +1222,14 @@ function EditSet({
                 >
                   {checkedRows.length === 0 ? "UPDATE" : "UPDATE"}
                 </button>
-                <button
-                  type="button"
-                  disabled={markedLoading}
-                  onClick={handleMarkedAsClean}
-                  className={
-                    markedLoading
-                      ? "h-8 ml-3 text-sm font-semibold text-white bg-green-400 rounded-full w-28 cursor-not-allowed"
-                      : "h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
-                  }
-                >
-                  {markedLoading ? "Cleaning" : "Mark As Clean"}
-                </button>
                 <Modal
                   open={open}
                   onClose={handleClose}
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
+                  BackdropProps={{
+                    onClick: (e) => e.stopPropagation(),
+                  }}
                 >
                   <form onSubmit={handleSubmitEditedSet}>
                     <Box sx={style}>
@@ -1231,20 +1276,20 @@ function EditSet({
                         <Box style={{ marginTop: "10px" }}>
                           <Autocomplete
                             freeSolo
-                            id="user"
+                            id="branch"
                             disableClearable
-                            options={ComputerUser}
+                            options={Branch}
                             getOptionLabel={(option) =>
                               option.name ? option.name : ""
                             }
-                            readOnly={ComputerUser.length === 0}
+                            readOnly={Branch.length === 0}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
                                 label={
-                                  ComputerUser.length === 0
-                                    ? "No user to select"
-                                    : "Assign New User"
+                                  Branch.length === 0
+                                    ? "No branch to select"
+                                    : "Assign New Branch"
                                 }
                                 InputProps={{
                                   ...params.InputProps,
@@ -1260,22 +1305,77 @@ function EditSet({
                               />
                             )}
                             value={
-                              ComputerUser.find(
-                                (option) => option.id === computer.computer_user
+                              Branch.find(
+                                (option) => option.id === branchUnit.branch
                               ) || {}
                             }
                             onChange={(event, newValue) => {
-                              setComputer({
-                                ...computer,
-                                computer_user: newValue.id,
+                              setBranchUnit({
+                                ...branchUnit,
+                                branch: newValue.id,
                               });
                             }}
                           />
                           <span className="mb-2">
-                            {validationErrors.computer_user && (
+                            {validationErrors.branch && (
                               <div className="text-red-500">
                                 <ul>
-                                  {validationErrors.computer_user.map(
+                                  {validationErrors.branch.map(
+                                    (error, index) => (
+                                      <li key={index}>{error}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </span>
+                          <Autocomplete
+                            freeSolo
+                            id="department"
+                            disableClearable
+                            options={Department}
+                            getOptionLabel={(option) =>
+                              option.name ? option.name : ""
+                            }
+                            readOnly={Department.length === 0}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label={
+                                  Department.length === 0
+                                    ? "Select a branch first"
+                                    : "Pick Department"
+                                }
+                                InputProps={{
+                                  ...params.InputProps,
+                                  type: "search",
+                                }}
+                                variant="outlined"
+                                style={{
+                                  marginTop: "10px",
+                                  marginBottom: "10px",
+                                  marginRight: "400px",
+                                }}
+                                sx={{ minWidth: 120 }}
+                              />
+                            )}
+                            value={
+                              Department.find(
+                                (option) => option.id === branchUnit.department
+                              ) || {}
+                            }
+                            onChange={(event, newValue) => {
+                              setBranchUnit({
+                                ...branchUnit,
+                                department: newValue.id,
+                              });
+                            }}
+                          />
+                          <span className="mb-2">
+                            {validationErrors.department && (
+                              <div className="text-red-500">
+                                <ul>
+                                  {validationErrors.department.map(
                                     (error, index) => (
                                       <li key={index}>{error}</li>
                                     )
@@ -1314,10 +1414,12 @@ function EditSet({
                         <Button
                           type="button"
                           onClick={handleClose}
+                          disabled={sloading}
                           variant="contained"
                           style={{
                             backgroundColor: "#333333",
                             marginRight: "10px",
+                            color: "white",
                           }}
                         >
                           CANCEL

@@ -8,6 +8,7 @@ use App\Models\Log;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
 {
@@ -16,7 +17,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::orderBy('created_at', 'desc')->get();
+        $departments = Department::with('branchCode')->orderBy('created_at', 'desc')->get();
 
         if ($departments->count() > 0) {
 
@@ -47,7 +48,10 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'department_name'       =>          ['required', 'max:255', 'unique:departments,department_name'],
+            'department_name'       =>          ['required', 'max:255', Rule::unique('departments')->where(function ($query) use ($request) {
+                return $query->where('branch_code_id', $request->branch_code_id);
+            })],
+            'branch_code_id'        =>          ['required', 'max:255', 'exists:branch_codes,id'],
         ]);
 
         if ($validation->fails()) {
@@ -59,12 +63,13 @@ class DepartmentController extends Controller
         }
 
         $department = Department::create([
-            'department_name'       =>          $request->department_name
+            'department_name'       =>          $request->department_name,
+            "branch_code_id"        =>          $request->branch_code_id
         ]);
 
         Log::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Added a department: ' . $department->department_name
+            'log_data'          =>              'Added a department: ' . $department->department_name . ' and branch code: ' . $department->branchCode->branch_name
         ]);
 
         return response()->json([
@@ -86,7 +91,7 @@ class DepartmentController extends Controller
      */
     public function edit(string $id)
     {
-        $department = Department::find($id);
+        $department = Department::with('branchCode')->find($id);
 
         if (!$department) {
             return response()->json([
@@ -111,6 +116,7 @@ class DepartmentController extends Controller
 
         $validation = Validator::make($request->all(), [
             'department_name'           =>              ['required', 'unique:departments,department_name,' . $department->id],
+            'branch_code_id'            =>              ['required', 'exists:branch_codes,id'],
         ]);
 
         if ($validation->fails()) {
@@ -129,14 +135,16 @@ class DepartmentController extends Controller
         }
 
         $oldDepartmentName = $department->department_name;
+        $oldBranchCode = $department->branchCode->branch_name;
 
         $department->update([
-            'department_name'           =>              $request->department_name
+            'department_name'           =>              $request->department_name,
+            'branch_code_id'            =>              $request->branch_code_id
         ]);
 
         Log::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Updated a department from: ' . $oldDepartmentName . ' to: ' . $department->department_name
+            'log_data'          =>              'Updated a department from: ' . $oldDepartmentName . ' to: ' . $department->department_name . ' and branch code from: ' . $oldBranchCode . ' to: ' . $department->branchCode->branch_name
         ]);
 
         return response()->json([
@@ -160,18 +168,18 @@ class DepartmentController extends Controller
             ], 404);
         }
 
-        $branches = $department->branches()->count();
+        $branches = $department->branchUnits()->count();
 
         if ($branches > 0) {
             return response()->json([
                 'status'        =>          false,
-                'message'       =>          'You cannot delete a department that is already in use by branches.'
+                'message'       =>          'You cannot delete a department that is already in used by branches.'
             ], 422);
         }
 
         Log::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a department : ' . $department->department_name
+            'log_data'          =>              'Deleted the department : ' . $department->department_name . ' that has the branch code: ' . $department->branchCode->branch_name
         ]);
 
         $department->delete();

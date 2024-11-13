@@ -34,7 +34,7 @@ class UnitController extends Controller
             $sortColumn = 'id';
         }
 
-        $allUnitsQuery = Unit::with(['category', 'supplier', 'transferUnits.computerUser']);
+        $allUnitsQuery = Unit::with(['category', 'supplier', 'transferUnits.computerUser', 'transferBranchUnits.branchOldDataUnit.branchCode', 'transferBranchUnits.branchOldDataUnit.department']);
 
         if (in_array($sortColumn, ['category_name', 'supplier_name'])) {
             $allUnitsQuery->join('categories', 'units.category_id', '=', 'categories.id')
@@ -240,7 +240,7 @@ class UnitController extends Controller
 
         UnitLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
+            'log_data'          =>              'Deleted the unit with the category name: ' . $unit->category->category_name . ' and the serial number: ' . $unit->serial_number
         ]);
 
         return response()->json([

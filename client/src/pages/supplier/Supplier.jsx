@@ -135,7 +135,13 @@ function Supplier() {
         });
 
         if (response.status === 200) {
-          Swal.fire("Deleted!", response.data.message, "success");
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: response.data.message,
+            confirmButtonColor: "#808080",
+            confirmButtonText: "Close",
+          });
         } else {
           throw new Error("Failed to delete");
         }
@@ -143,7 +149,13 @@ function Supplier() {
     } catch (error) {
       console.error("Error deleting Supplier:", error);
       if (error.response.status === 422) {
-        Swal.fire("Warning!", error.response.data.message, "warning");
+        Swal.fire({
+          icon: "warning",
+          title: "Warning!",
+          text: error.response.data.message,
+          confirmButtonColor: "#808080",
+          confirmButtonText: "Close",
+        });
       } else {
         throw new Error("Failed to delete");
       }
@@ -209,7 +221,7 @@ function Supplier() {
   const title = "All Suppliers";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -218,7 +230,7 @@ function Supplier() {
             toggleSidebar={toggleSidebar}
           />
         </div>
-        <div style={{ flex: 2, paddingBottom: "50px" }}>
+        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">All Supplier</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">

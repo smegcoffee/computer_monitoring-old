@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 
 export default function AddBranchCodeModal({ isOpen, onClose, isRefresh }) {
   const [branchName, setBranchName] = useState("");
+  const [branchNameEnglish, setBranchNameEnglish] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +22,7 @@ export default function AddBranchCodeModal({ isOpen, onClose, isRefresh }) {
         "api/add-branch",
         {
           branch_name: branchName,
+          branch_name_english: branchNameEnglish,
         },
         {
           headers: {
@@ -48,6 +50,7 @@ export default function AddBranchCodeModal({ isOpen, onClose, isRefresh }) {
           });
         })();
         setBranchName("");
+        setBranchNameEnglish("");
         setValidationErrors("");
         onClose();
       }
@@ -90,7 +93,7 @@ export default function AddBranchCodeModal({ isOpen, onClose, isRefresh }) {
           <div className="w-full p-6 bg-white rounded-lg shadow-lg sm:w-96">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-800">
-                Add Branch Code
+                Add Branches
               </h3>
               <button
                 onClick={onClose}
@@ -133,6 +136,30 @@ export default function AddBranchCodeModal({ isOpen, onClose, isRefresh }) {
                 {validationErrors.branch_name && (
                   <span className="text-red-500">
                     {validationErrors.branch_name[0]}
+                  </span>
+                )}
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="branch_name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Branch Name
+                </label>
+                <input
+                  type="text"
+                  id="branch_name_english"
+                  name="branch_name_english"
+                  value={branchNameEnglish}
+                  onChange={(e) =>
+                    setBranchNameEnglish(e.target.value)
+                  }
+                  className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter branch code"
+                />
+                {validationErrors.branch_name_english && (
+                  <span className="text-red-500">
+                    {validationErrors.branch_name_english[0]}
                   </span>
                 )}
               </div>

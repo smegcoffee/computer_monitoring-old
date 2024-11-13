@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('branch_units', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained()->onDelete('restrict');
+            $table->foreignId('branch_code_id')->constrained()->onDelete('restrict');
             $table->foreignId('unit_id')->constrained()->onDelete('restrict');
+            $table->foreignId('department_id')->constrained()->onDelete('restrict');
             $table->timestamps();
 
-            $table->unique(['branch_id', 'unit_id']);
+            $table->unique(['branch_code_id', 'unit_id', 'department_id']);
         });
     }
 

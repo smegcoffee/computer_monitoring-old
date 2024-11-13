@@ -28,6 +28,7 @@ import {
   TableRow,
   TextField,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -68,6 +69,7 @@ function TransferedUnits() {
     const filteredData = units.filter(
       (unit) =>
         unit.unit_code.toLowerCase().includes(searchValue) ||
+        unit.serial_number.toLowerCase().includes(searchValue) ||
         unit.category.category_name.toLowerCase().includes(searchValue) ||
         unit.status.toLowerCase().includes(searchValue)
     );
@@ -97,7 +99,7 @@ function TransferedUnits() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const unit = response.data.data;
+        const unit = response.data.data.filter((unit) => unit.transfer_units.length > 0);
         setUnits(unit);
       } catch (error) {
         console.error("Error user unit transfered:", error);
@@ -143,9 +145,14 @@ function TransferedUnits() {
       {
         Header: "ACTION",
         Cell: ({ row }) => (
-          <Button onClick={() => handleClickOpen(row.original)}>
-            <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-          </Button>
+          <Tooltip placement="top" title="View Transfered Details" arrow>
+            <Button
+              className="hover:scale-125"
+              onClick={() => handleClickOpen(row.original)}
+            >
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+            </Button>
+          </Tooltip>
         ),
       },
     ],
@@ -156,7 +163,8 @@ function TransferedUnits() {
     () => [
       {
         Header: "STATUS",
-        accessor: "status",
+        Cell: ({ row }) =>
+          row.index === 0 ? "First User" : row.original.status,
       },
       {
         Header: "RECENT USER",
@@ -169,7 +177,6 @@ function TransferedUnits() {
     ],
     []
   );
-
   const data = useMemo(() => filteredUnits, [filteredUnits]);
   const dialogData = useMemo(
     () => (selectedUnit ? selectedUnit.transfer_units : []),
@@ -200,7 +207,7 @@ function TransferedUnits() {
   const title = "User Unit Transfered";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
@@ -209,7 +216,7 @@ function TransferedUnits() {
             toggleSidebar={toggleSidebar}
           />
         </div>
-        <div style={{ flex: 2, paddingBottom: "50px" }}>
+        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
           <p className="pt-10 ml-10 text-2xl font-normal">
             User Unit Transfered
           </p>
@@ -229,10 +236,7 @@ function TransferedUnits() {
                 sx={{ display: "flex", alignItems: "center" }}
                 color="text.primary"
               >
-                <MultipleStopIcon
-                  sx={{ mr: 0.5 }}
-                  fontSize="inherit"
-                />
+                <MultipleStopIcon sx={{ mr: 0.5 }} fontSize="inherit" />
                 Transfered Units
               </Typography>
               <Typography
@@ -266,7 +270,7 @@ function TransferedUnits() {
                   {headerGroups.map((headerGroup) => (
                     <TableRow
                       {...headerGroup.getHeaderGroupProps()}
-                      className="bg-red-400"
+                      className="bg-blue-400"
                     >
                       {headerGroup.headers.map((column) => (
                         <TableCell
@@ -301,7 +305,7 @@ function TransferedUnits() {
                 <TableBody {...getTableBodyProps()}>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={4}>
+                      <TableCell colSpan={5}>
                         {[...Array(3)].map((_, i) => (
                           <div key={i} className="w-full p-4 rounded">
                             <div className="flex space-x-4 animate-pulse">
@@ -339,7 +343,7 @@ function TransferedUnits() {
                     ? ""
                     : emptyRows > 0 && (
                         <TableRow style={{ height: 53 * emptyRows }}>
-                          <TableCell colSpan={4}>
+                          <TableCell colSpan={5}>
                             {filteredUnits.length === 0 ? (
                               !searchTerm ? (
                                 <p className="text-xl text-center">
@@ -385,6 +389,14 @@ function TransferedUnits() {
         >
           <AppBar sx={{ position: "relative" }}>
             <Toolbar>
+              <Typography
+                sx={{ ml: 2, flex: 1, textAlign: "center" }}
+                variant="h6"
+                component="div"
+              >
+                {selectedUnit.serial_number} -{" "}
+                {selectedUnit.category.category_name}
+              </Typography>
               <IconButton
                 edge="start"
                 color="inherit"
@@ -393,9 +405,6 @@ function TransferedUnits() {
               >
                 <CloseIcon />
               </IconButton>
-              <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-                {selectedUnit.unit_code} - {selectedUnit.category.category_name}
-              </Typography>
             </Toolbar>
           </AppBar>
           <DialogContent dividers>
@@ -415,7 +424,7 @@ function TransferedUnits() {
                     {dialogHeaderGroups.map((headerGroup) => (
                       <TableRow
                         {...headerGroup.getHeaderGroupProps()}
-                        className="bg-red-400"
+                        className="bg-[#FF6600]"
                       >
                         {headerGroup.headers.map((column) => (
                           <TableCell

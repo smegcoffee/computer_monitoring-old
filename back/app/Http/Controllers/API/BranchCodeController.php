@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 
 use App\Models\BranchCode;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Log as BranchLog;
@@ -64,7 +65,12 @@ class BranchCodeController extends Controller
     public function store(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'branch_name'           =>              ['required', 'unique:branch_codes,branch_name'],
+            'branch_name'                   =>              ['required', 'unique:branch_codes,branch_name'],
+            'branch_name_english'           =>              ['required'],
+        ], [
+            'branch_name.required'         => 'Branch Code is required.',
+            'branch_name.unique'           => 'Branch Code is already taken.',
+            'branch_name_english.required' => 'Branch Name is required.',
         ]);
 
         if ($validation->fails()) {
@@ -76,17 +82,23 @@ class BranchCodeController extends Controller
         }
 
         $branch = BranchCode::create([
-            'branch_name'           =>              $request->branch_name
+            'branch_name'                   =>              $request->branch_name,
+            'branch_name_english'           =>              $request->branch_name_english
         ], 200);
+
+        Department::create([
+            'branch_code_id'                =>              $branch->id,
+            'department_name'               =>              'N/A'
+        ]);
 
         BranchLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Added a branch code: ' . $branch->branch_name
+            'log_data'          =>              'Added a branch name: ' . $branch->branch_name_english . ' (' . $branch->branch_name . ').'
         ]);
 
         return response()->json([
             'status'                =>              true,
-            'message'               =>              $branch->branch_name . ' Branch added successfully.',
+            'message'               =>              $branch->branch_name_english . '(' . $branch->branch_name . ')' . ' branch added successfully.',
             'id'                    =>              $branch->id
         ], 200);
     }
@@ -128,7 +140,12 @@ class BranchCodeController extends Controller
         $branchCode = BranchCode::find($id);
 
         $validation = Validator::make($request->all(), [
-            'branch_name'           =>              ['required', 'unique:branch_codes,branch_name,' . $branchCode->id],
+            'branch_name'                   =>              ['required', 'unique:branch_codes,branch_name,' . $branchCode->id],
+            'branch_name_english'           =>              ['required'],
+        ], [
+            'branch_name.required'         => 'Branch Code is required.',
+            'branch_name.unique'           => 'Branch Code is already taken.',
+            'branch_name_english.required' => 'Branch Name is required.',
         ]);
 
         if ($validation->fails()) {
@@ -147,19 +164,21 @@ class BranchCodeController extends Controller
         }
 
         $oldBranchName = $branchCode->branch_name;
+        $oldBranchNameEnglish = $branchCode->branch_name_english;
 
         $branchCode->update([
-            'branch_name'           =>              $request->branch_name
+            'branch_name'           =>              $request->branch_name,
+            'branch_name_english'   =>              $request->branch_name_english
         ]);
 
         BranchLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Updated a branch code from: ' . $oldBranchName . ' to: ' . $branchCode->branch_name
+            'log_data'          =>              'Updated a branch name from: ' . $oldBranchNameEnglish . ' to: ' . $branchCode->branch_name_english . ' and branch code from: ' . $oldBranchName . ' to: ' . $branchCode->branch_name . '.'
         ]);
 
         return response()->json([
             'status'                =>              true,
-            'message'               =>              $branchCode->branch_name . ' branch code updated successfully.',
+            'message'               =>              $branchCode->branch_name_english . '(' . $branchCode->branch_name . ')' . ' branch code updated successfully.',
             'id'                    =>              $branchCode->id
         ], 200);
     }
@@ -183,13 +202,13 @@ class BranchCodeController extends Controller
         if ($users > 0) {
             return response()->json([
                 'status'                =>              false,
-                'message'               =>              'You cannot delete a branch code that is already in use by users.'
+                'message'               =>              'You cannot delete a branch code that is already in used by users.'
             ], 422);
         }
 
         BranchLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a branch code: ' . $branchCode->branch_name
+            'log_data'          =>              'Deleted the branch code: ' . $branchCode->branch_name
         ]);
 
         $branchCode->delete();

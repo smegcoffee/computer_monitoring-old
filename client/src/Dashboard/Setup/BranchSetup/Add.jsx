@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { TablePagination } from "@material-ui/core";
 import Swal from "sweetalert2";
-import axios from "../../api/axios";
+import axios from "../../../api/axios";
 import { format } from "date-fns";
 
 function Add({ isOpen, onClose, onSubmit, refresh }) {
@@ -26,12 +26,14 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   const [vacantUnit, setVacantUnit] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [checkedRows, setCheckedRows] = useState([]);
-  const [computerUser, setComputerUser] = useState({ data: [] });
+  const [department, setDepartment] = useState({ departments: [] });
+  const [branch, setBranch] = useState({ data: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
-  const [computer, setComputer] = useState({
-    computer_user: "",
+  const [branchUnit, setBranchUnit] = useState({
+    branch: "",
+    department: "",
   });
   const [vloading, setvLoading] = useState(true);
   const [verror, setvError] = useState(false);
@@ -69,33 +71,73 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   }, [refresh]);
 
   useEffect(() => {
-    const fetchComputerUser = async () => {
+    const fetchDepartment = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
         }
-        const response = await axios.get("/api/computer-users", {
+        const response = await axios.get("/api/departments", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setComputerUser(response.data);
+        setDepartment(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    fetchComputerUser();
+    fetchDepartment();
   }, []);
 
-  const ComputerUser =
-    computerUser.data && computerUser.data.length > 0
-      ? computerUser.data.map((cu) => ({
-          id: cu.id,
-          name: cu.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name))
+  useEffect(() => {
+    const fetchBranchCode = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const response = await axios.get("/api/branches", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setBranch(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchBranchCode();
+  }, []);
+
+  const Department =
+    department.departments && department.departments.length > 0
+      ? department.departments
+          .filter(
+            (department) => department.branch_code_id === branchUnit.branch
+          )
+          .map((dept) => ({
+            id: dept.id,
+            name: dept.department_name,
+          }))
+          .sort((a, b) => {
+            if (a.name === "N/A" && b.name !== "N/A") return -1;
+            if (b.name === "N/A" && a.name !== "N/A") return 1;
+
+            return a.name.localeCompare(b.name);
+          })
+      : [];
+
+  const Branch =
+    branch.branches && branch.branches.length > 0
+      ? branch.branches
+          .map((item) => ({
+            id: item.id,
+            name: `${item.branch_name_english} (${item.branch_name})`,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
       : [];
 
   const handleCheckboxClick = (unitId) => {
@@ -159,10 +201,11 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
         throw new Error("Token not found");
       }
       const response = await axios.post(
-        "api/add-computer",
+        "api/add-branch-unit",
         {
           checkedRows: checkedRows,
-          computer_user: computer.computer_user,
+          branch: branchUnit.branch,
+          department: branchUnit.department,
         },
         {
           headers: {
@@ -190,12 +233,12 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
           });
         })();
         setCheckedRows("");
-        setComputer("");
-        // setComputerUser("");
+        setBranchUnit("");
+        // setDepartment("");
       }
-      console.log("Adding computer set:", response.data);
+      console.log("Adding branch unit:", response.data);
     } catch (error) {
-      console.error("Error in adding computer set:", error);
+      console.error("Error in adding branch unit:", error);
       if (error.response && error.response.data) {
         console.log("Backend error response:", error.response.data);
         setError(error.response.data.message);
@@ -563,17 +606,17 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
                   freeSolo
                   id="user"
                   disableClearable
-                  options={ComputerUser}
+                  options={Branch}
                   getOptionLabel={(option) => (option.name ? option.name : "")}
-                  readOnly={ComputerUser.length === 0}
+                  readOnly={Branch.length === 0}
                   renderInput={(params) => (
                     <TextField
                       required
                       {...params}
                       label={
-                        ComputerUser.length === 0
-                          ? "No user to select"
-                          : "Assign User"
+                        Branch.length === 0
+                          ? "No branch to select"
+                          : "Assign Branch"
                       }
                       InputProps={{
                         ...params.InputProps,
@@ -590,32 +633,70 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
                     />
                   )}
                   value={
-                    ComputerUser.find(
-                      (option) => option.id === computer.computer_user
-                    ) || {}
+                    Branch.find((option) => option.id === branchUnit.branch) ||
+                    {}
                   }
                   onChange={(event, newValue) => {
-                    setComputer({ ...computer, computer_user: newValue.id });
+                    setBranchUnit({ ...branchUnit, branch: newValue.id });
                   }}
                 />
               </div>
-
-              <TextField
-                label="Search Unit"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                variant="outlined"
-                fullWidth
-                sx={{ width: 100 }}
-                size="small"
-                margin="normal"
-                style={{
-                  marginRight: "400px",
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
+              <div className="flex-none">
+                <Autocomplete
+                  freeSolo
+                  id="user"
+                  disableClearable
+                  options={Department}
+                  getOptionLabel={(option) => (option.name ? option.name : "")}
+                  readOnly={Department.length === 0}
+                  renderInput={(params) => (
+                    <TextField
+                      required
+                      {...params}
+                      label={
+                        Department.length === 0
+                          ? "Select branch first"
+                          : "Pick Department"
+                      }
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                      sx={{ width: 300 }}
+                      variant="outlined"
+                      style={{
+                        marginLeft: "20px",
+                        marginTop: "20px",
+                        marginBottom: "20px",
+                        width: "300px",
+                      }}
+                    />
+                  )}
+                  value={
+                    Department.find(
+                      (option) => option.id === branchUnit.department
+                    ) || {}
+                  }
+                  onChange={(event, newValue) => {
+                    setBranchUnit({ ...branchUnit, department: newValue.id });
+                  }}
+                />
+              </div>
+              <div className="flex-none">
+                <TextField
+                  label="Search Unit"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  variant="outlined"
+                  fullWidth
+                  sx={{ width: 100 }}
+                  size="small"
+                  margin="normal"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </div>
               <div className="items-center justify-center flex-1 text-center">
                 <button
                   className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"

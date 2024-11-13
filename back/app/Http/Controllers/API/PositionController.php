@@ -165,13 +165,13 @@ class PositionController extends Controller
         if ($users > 0) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      'You cannot delete a position that is already in use by users.'
+                'message'       =>      'You cannot delete a position that is already in used by users.'
             ], 422);
         }
 
         PositionLog::create([
             'user_id'           =>              auth()->user()->id,
-            'log_data'          =>              'Deleted a position : ' . $position->position_name
+            'log_data'          =>              'Deleted the position : ' . $position->position_name
         ]);
 
         $position->delete();

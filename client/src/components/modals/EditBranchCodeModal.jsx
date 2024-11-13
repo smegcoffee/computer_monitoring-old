@@ -9,6 +9,7 @@ export default function EditBranchCodeModal({
   id,
 }) {
   const [branchName, setBranchName] = useState("");
+  const [branchNameEnglish, setBranchNameEnglish] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
@@ -32,6 +33,7 @@ export default function EditBranchCodeModal({
 
         if (response.status === 200) {
           setBranchName(response.data.branch.branch_name);
+          setBranchNameEnglish(response.data.branch.branch_name_english);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -57,6 +59,7 @@ export default function EditBranchCodeModal({
         `api/update-branch-code/${id}`,
         {
           branch_name: branchName,
+          branch_name_english: branchNameEnglish,
         },
         {
           headers: {
@@ -84,6 +87,8 @@ export default function EditBranchCodeModal({
           });
         })();
         setValidationErrors("");
+        setBranchName("");
+        setBranchNameEnglish("");
         onClose();
       }
     } catch (error) {
@@ -175,6 +180,36 @@ export default function EditBranchCodeModal({
                 {validationErrors.branch_name && (
                   <span className="text-red-500">
                     {validationErrors.branch_name[0]}
+                  </span>
+                )}
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="branch_name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Branch Name
+                </label>
+                {dataLoading ? (
+                  <div class="animate-pulse w-full">
+                    <div class="h-10 bg-slate-300 rounded"></div>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      id="branch_name_english"
+                      name="branch_name_english"
+                      value={branchNameEnglish}
+                      onChange={(e) => setBranchNameEnglish(e.target.value)}
+                      className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter branch name"
+                    />
+                  </>
+                )}
+                {validationErrors.branch_name_english && (
+                  <span className="text-red-500">
+                    {validationErrors.branch_name_english[0]}
                   </span>
                 )}
               </div>

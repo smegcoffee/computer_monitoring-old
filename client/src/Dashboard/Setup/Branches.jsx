@@ -1,188 +1,209 @@
 import React, { useState, useEffect } from "react";
 import SideBar from "../Sidebar";
-import { Link } from "react-router-dom";
-import axios from "../../api/axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Autocomplete,
-  Breadcrumbs,
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  TextField,
+  faArrowUp,
+  faArrowDown,
+  faUserPen,
+  faPenToSquare,
+} from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
+import { makeStyles } from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import {
   Typography,
+  TablePagination,
+  TextField,
+  Breadcrumbs,
+  Tooltip,
 } from "@mui/material";
+import Add from "./BranchSetup/Add";
+import EditSet from "./BranchSetup/Editset";
+import axios from "../../api/axios";
+import { format } from "date-fns";
 import Swal from "sweetalert2";
 import Header from "../../Dashboard/Header";
 import HomeIcon from "@mui/icons-material/Home";
 import SettingsIcon from "@mui/icons-material/Settings";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import MouseIcon from "@mui/icons-material/Mouse";
+import { DateTime } from "luxon";
 
-function Branch() {
+const useStyles = makeStyles({
+  table: {
+    minWidth: 650,
+  },
+});
+
+function Branches() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  const [department, setDepartment] = useState({ departments: [] });
-  const [branchcode, setBranchcode] = useState({ branches: [] });
-  const [loading, setLoading] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({});
-  const [isRefresh, setIsRefresh] = useState(false);
-  const [branch, setBranch] = useState({
-    branch_name: "",
-    department_id: "",
-    branch_code_id: "",
-  });
+  const [isAddPopupOpen, setAddPopupOpen] = useState(false);
+  const classes = useStyles();
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [editPopupData, setEditPopupData] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [branchUnit, setBranchUnit] = useState([]);
+  const [branchUnitRefresh, setBranchUnitRefresh] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showAllRows, setShowAllRows] = useState([]);
+  const [error, setError] = useState(false);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const toggleShowAllRows = (rowId) => {
+    if (showAllRows.includes(rowId)) {
+      setShowAllRows(showAllRows.filter((id) => id !== rowId));
+    } else {
+      setShowAllRows([...showAllRows, rowId]);
+    }
+  };
 
   useEffect(() => {
-    const fetchBrancheCode = async () => {
+    const fetchBranchUnit = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("Token not found");
         }
-        const response = await axios.get("/api/branches", {
+        const response = await axios.get("/api/branch-units", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setBranchcode(response.data);
+        setBranchUnit(response.data.branch_units);
+        setFilteredData(response.data.branch_units);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
-      }
-    };
-
-    fetchBrancheCode();
-  }, []);
-  useEffect(() => {
-    const fetchDepartment = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
+        console.error("Error fetching branch units:", error);
+        if (error.response.status === 404) {
+          setError(true);
         }
-        const response = await axios.get("/api/departments", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setDepartment(response.data);
-      } catch (error) {
-        console.error("Error fetching chart data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDepartment();
-  }, []);
+    fetchBranchUnit();
+  }, [branchUnitRefresh]);
 
-  const Department =
-    department.departments && department.departments.length > 0
-      ? department.departments.map((department) => ({
-          id: department.id,
-          department_name: department.department_name,
-        }))
-      : [];
+  useEffect(() => {
+    filterData(searchTerm);
+  }, [branchUnit]);
 
-  const Branchcode =
-    branchcode.branches && branchcode.branches.length > 0
-      ? branchcode.branches.map((branch) => ({
-          id: branch.id,
-          branch_name: branch.branch_name,
-        }))
-      : [];
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    filterData(value);
+  };
 
-  const handleSubmitBranch = async (event) => {
-    event.preventDefault();
-    setLoading(true);
+  const filterData = (value) => {
+    if (!value.trim()) {
+      setFilteredData(branchUnit);
+    } else {
+      const filtered = branchUnit.Unit.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredData(filtered);
+    }
+    setPage(0);
+  };
+
+  const openAddPopup = () => {
+    setAddPopupOpen(true);
+  };
+
+  const closeAddPopup = () => {
+    setAddPopupOpen(false);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const openEditPopup = async (id) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Token not found");
       }
-
-      const response = await axios.post(
-        "api/add-branchsetup",
-        {
-          branch_name: branch.branch_name,
-          department_id: branch.department_id,
-          branch_code_id: branch.branch_code_id,
+      const response = await axios.get(`/api/branch-unit-edit/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status === 201) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "green",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "success",
-            title: response.data.message,
-          });
-        })();
-        setBranch({
-          branch_name: "",
-          branch_code_id: "",
-          department_id: "",
-        });
-        setValidationErrors("");
+      });
+      if (response.data.status) {
+        setEditPopupData(response.data.branch_unit_data);
+        setIsEditPopupOpen(true);
       }
-      console.log("Adding branch:", response.data);
     } catch (error) {
-      console.error("Error in adding branch:", error);
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setValidationErrors(error.response.data.errors || {});
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "red",
-          customClass: {
-            popup: "colored-toast",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        });
-        (async () => {
-          await Toast.fire({
-            icon: "error",
-            title: error.response.data.message,
-          });
-        })();
-      } else {
-        console.log("ERROR!");
+      console.error("Error fetching data:", error);
+      if (error.response.status === 404) {
+        setError(true);
       }
-    } finally {
       setLoading(false);
-      setIsRefresh(false);
     }
   };
 
-  const title = "Setup Branch";
+  const closeEditPopup = () => {
+    setIsEditPopupOpen(false);
+    setEditPopupData(false);
+  };
+
+  const rows = filteredData;
+
+  const emptyRows =
+    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+
+  const sortRows = (rows) => {
+    return rows.sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "id") {
+        valueA = a.id;
+        valueB = b.id;
+      } else if (sortColumn === "name") {
+        valueA = a.name.toLowerCase();
+        valueB = b.name.toLowerCase();
+      }
+
+      if (sortOrder === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+  };
+
+  const handleSort = (column) => {
+    const isAscending = sortColumn === column && sortOrder === "asc";
+    setSortColumn(column);
+    setSortOrder(isAscending ? "desc" : "asc");
+  };
+
+  const title = "Assign Branch Unit";
+
+  const now = DateTime.now().setZone("Asia/Manila").toJSDate();
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header
-        isRefresh={isRefresh}
-        toggleSidebar={toggleSidebar}
-        title={title}
-      />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <Header toggleSidebar={toggleSidebar} title={title} />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
           <SideBar
@@ -191,7 +212,7 @@ function Branch() {
           />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">Setup Branch</p>
+          <p className="pt-10 ml-10 text-2xl font-normal">Assign Branch Unit</p>
           <div className="mt-2 ml-10">
             <Breadcrumbs aria-label="breadcrumb">
               <Link
@@ -215,152 +236,338 @@ function Branch() {
                 sx={{ display: "flex", alignItems: "center" }}
                 color="text.primary"
               >
-                <GroupAddIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Setup Branch
+                <MouseIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Assign Branch Unit
               </Typography>
             </Breadcrumbs>
           </div>
           <br /> <br />
-          <div className="flex-none mt-10">
-            <Container>
-              <form onSubmit={handleSubmitBranch}>
-                <Card>
-                  <h2 className="flex items-center justify-center p-5 text-2xl font-semibold bg-blue-200">
-                    SET UP BRANCH
-                  </h2>
-                  <CardContent>
-                    <Grid container spacing={3} className="p-5">
-                      {/* First Row */}
-                      <Grid item xs={12} sm={6} md={6}>
-                        <TextField
-                          value={branch.branch_name}
-                          onChange={(e) =>
-                            setBranch({ ...branch, branch_name: e.target.value })
-                          }
-                          id="branch"
-                          label="Branch"
-                          variant="standard"
-                          style={{ width: "100%" }}
-                        />
-                        <div className="mt-1 text-center text-red-500">
-                          {validationErrors.branch_name &&
-                            validationErrors.branch_name.map((error, index) => (
-                              <div key={index}>{error}</div>
-                            ))}
-                        </div>
-                      </Grid>
-
-                      <Grid item xs={12} sm={6} md={6}>
-                        <Autocomplete
-                          freeSolo
-                          id="branch_code_id"
-                          disableClearable
-                          readOnly={Branchcode.length === 0}
-                          options={Branchcode}
-                          getOptionLabel={(option) => option.branch_name || ""}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={
-                                Branchcode.length === 0
-                                  ? "No branch code added yet"
-                                  : "Branch Code"
-                              }
-                              variant="standard"
-                              style={{ width: "100%" }}
-                              InputProps={{
-                                ...params.InputProps,
-                                type: "search",
-                              }}
-                            />
-                          )}
-                          value={
-                            Branchcode.find(
-                              (option) => option.id === branch.branch_code_id
-                            ) || {}
-                          }
-                          onChange={(event, newValue) =>
-                            setBranch({ ...branch, branch_code_id: newValue.id })
-                          }
-                        />
-                        <div className="mt-1 text-center text-red-500">
-                          {validationErrors.branch_code_id &&
-                            validationErrors.branch_code_id.map((error, index) => (
-                              <div key={index}>{error}</div>
-                            ))}
-                        </div>
-                      </Grid>
-                      {branch.branch_code_id === 1 && (
-                        <Grid item xs={12} sm={12} md={12}>
-                          <Autocomplete
-                            freeSolo
-                            id="department"
-                            disableClearable
-                            options={Department}
-                            readOnly={Department.length === 0}
-                            getOptionLabel={(option) =>
-                              option.department_name || ""
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label={
-                                  Department.length === 0
-                                    ? "No department added yet"
-                                    : "Department"
-                                }
-                                variant="standard"
-                                style={{ width: "100%" }}
-                                InputProps={{
-                                  ...params.InputProps,
-                                  type: "search",
-                                }}
-                              />
-                            )}
-                            value={
-                              Department.find(
-                                (option) => option.id === branch.department_id
-                              ) || {}
-                            }
-                            onChange={(event, newValue) =>
-                              setBranch({ ...branch, department_id: newValue.id })
-                            }
-                          />
-                          <div className="mt-1 text-center text-red-500">
-                            {validationErrors.department_id &&
-                              validationErrors.department_id.map(
-                                (error, index) => <div key={index}>{error}</div>
-                              )}
-                          </div>
-                        </Grid>
-                      )}
-
-                      {/* Button Row */}
-                      <Grid
-                        item
-                        xs={12}
-                        className="flex items-center justify-center"
+          <div className="flex items-center justify-center mr-10">
+            <div className="flex justify-end flex-grow">
+              <div className="z-0 mr-5">
+                <TextField
+                  label="Search Branch"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  variant="outlined"
+                  fullWidth
+                  sx={{ width: 300 }}
+                  size="small"
+                  margin="normal"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </div>
+              <div className="mt-3.5">
+                <button
+                  onClick={openAddPopup}
+                  className="pt-2 pb-2 pl-4 pr-4 text-base font-semibold text-white bg-[#0033A0] hover:bg-blue-700 border border-transparent rounded-full"
+                >
+                  Assign Unit to Branch
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-center mt-5 ml-10 mr-10">
+            <div className="z-0 w-full max-h-max rounded-xl">
+              <TableContainer component={Paper}>
+                <Table className={classes.table} aria-label="simple table">
+                  <TableHead>
+                    <TableRow className="bg-blue-400">
+                      <TableCell
+                        align="center"
+                        onClick={() => handleSort("id")}
                       >
-                        <Button
-                          type="submit"
-                          disabled={loading}
-                          variant="contained"
-                          style={{
-                            width: "300px",
-                            fontWeight: "550",
-                            borderRadius: "100px",
-                            fontSize: "16px",
-                            backgroundColor: "green",
-                          }}
-                        >
-                          {loading ? "ADDING..." : "ADD"}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </form>
-            </Container>
+                        <p className="font-semibold text-white">
+                          ID{" "}
+                          {sortColumn === "id" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">
+                          DATE OF PURCHASE
+                        </p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">CATEGORY</p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">DESCRIPTION</p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">SUPPLIER</p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">SERIAL NO.</p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">STATUS</p>
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        onClick={() => handleSort("name")}
+                      >
+                        <p className="font-semibold text-white">
+                          ASSIGNED TO
+                          {sortColumn === "name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </p>
+                      </TableCell>
+                      <TableCell align="center">
+                        <p className="font-semibold text-white">ACTION</p>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={9}>
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="w-full p-4 rounded">
+                              <div className="flex space-x-4 animate-pulse">
+                                <div className="flex-1 py-1 space-y-6">
+                                  <div className="h-10 bg-gray-200 rounded shadow"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      sortRows(rows)
+                        .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+                        .map((row, rowIndex) => (
+                          <React.Fragment key={`${row.id}-${rowIndex}`}>
+                            <TableRow>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.id}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? format(
+                                            new Date(bu.unit.date_of_purchase),
+                                            "yyyy-MM-dd"
+                                          )
+                                        : index < 3
+                                        ? format(
+                                            new Date(bu.unit.date_of_purchase),
+                                            "yyyy-MM-dd"
+                                          )
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? bu.unit.category.category_name
+                                        : index < 3
+                                        ? bu.unit.category.category_name
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? bu.unit.description
+                                            .split("\n")
+                                            .map((line, lineIndex) => (
+                                              <div key={lineIndex}>{line}</div>
+                                            ))
+                                        : index < 3
+                                        ? bu.unit.description
+                                            .split("\n")
+                                            .map((line, lineIndex) => (
+                                              <div key={lineIndex}>{line}</div>
+                                            ))
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? bu.unit.supplier.supplier_name
+                                        : index < 3
+                                        ? bu.unit.supplier.supplier_name
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? bu.unit.serial_number
+                                        : index < 3
+                                        ? bu.unit.serial_number
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                {row.branch_units.map((bu, index) => (
+                                  <React.Fragment key={index}>
+                                    <div>
+                                      {showAllRows.includes(row.id)
+                                        ? bu.unit.status
+                                        : index < 3
+                                        ? bu.unit.status
+                                        : null}
+                                    </div>
+                                  </React.Fragment>
+                                ))}
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                <button onClick={() => openEditPopup(row.id)}>
+                                  {row.branch_name_english} ({row.branch_name})
+                                </button>
+                              </TableCell>
+                              <TableCell
+                                align="center"
+                                style={{ borderBottom: "none" }}
+                              >
+                                <Tooltip
+                                  placement="top"
+                                  title="Edit Branch Unit"
+                                  arrow
+                                >
+                                  <button
+                                    onClick={() => openEditPopup(row.id)}
+                                    className="hover:scale-125"
+                                  >
+                                    <FontAwesomeIcon
+                                      className="text-2xl text-blue-500 hover:text-blue-600"
+                                      icon={faPenToSquare}
+                                    />
+                                  </button>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                            {/* Show more / Show less button */}
+                            <TableRow>
+                              <TableCell colSpan={9} align="center">
+                                <button
+                                  onClick={() => toggleShowAllRows(row.id)}
+                                  style={{ color: "cornflowerblue" }}
+                                >
+                                  {showAllRows.includes(row.id)
+                                    ? "Show less"
+                                    : "Show more"}
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          </React.Fragment>
+                        ))
+                    )}
+                    {loading
+                      ? ""
+                      : emptyRows > 0 && (
+                          <TableRow style={{ height: 53 * emptyRows }}>
+                            <TableCell colSpan={9}>
+                              {rows.length === 0 ? (
+                                !searchTerm ? (
+                                  <p className="text-xl text-center">
+                                    No branch unit found.
+                                  </p>
+                                ) : (
+                                  <p className="text-xl text-center">
+                                    No "{searchTerm}" result found.
+                                  </p>
+                                )
+                              ) : (
+                                ""
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 15, 20, 25]}
+                  component="div"
+                  count={rows.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage={
+                    <Typography variant="subtitle" fontWeight={600}>
+                      Entries Per Page:
+                    </Typography>
+                  }
+                />
+              </TableContainer>
+              {isEditPopupOpen && (
+                <EditSet
+                  isOpen={isEditPopupOpen}
+                  onClose={closeEditPopup}
+                  row={selectedRow}
+                  editPopupData={editPopupData}
+                  setEditPopupData={setEditPopupData}
+                  onSubmit={setBranchUnitRefresh}
+                />
+              )}
+
+              {isAddPopupOpen && (
+                <Add
+                  isOpen={isAddPopupOpen}
+                  onClose={closeAddPopup}
+                  onSubmit={setBranchUnitRefresh}
+                  refresh={branchUnitRefresh}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -368,4 +575,4 @@ function Branch() {
   );
 }
 
-export default Branch;
+export default Branches;
