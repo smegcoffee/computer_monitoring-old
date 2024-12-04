@@ -97,7 +97,7 @@ function Category() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const categories = response.data.data;
+        const categories = response.data.data || [];
 
         setCategories(categories);
       } catch (error) {
@@ -335,7 +335,7 @@ function Category() {
                         ))}
                       </TableCell>
                     </TableRow>
-                  ) : (
+                  ) : (rows &&
                     rows
                       .slice(
                         page * rowsPerPage,

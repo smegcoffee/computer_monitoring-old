@@ -98,7 +98,7 @@ function BranchCode() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const branchCodes = response.data.branches;
+        const branchCodes = response.data.branches || [];
 
         setBranchCodes(branchCodes);
       } catch (error) {

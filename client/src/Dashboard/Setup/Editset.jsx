@@ -349,109 +349,45 @@ function EditSet({
       if (!token) {
         throw new Error("Token not found");
       }
-
-      let transferCount = 0;
-      let defectiveCount = 0;
-      let deleteCount = 0;
-
-      let allSuccess = true;
-      const successMessages = [];
-
-      for (const unitId of checkedRows) {
-        const response = await axios.post(
-          `/api/computer/${computerId}/unit/${unitId}/action`,
-          {
-            action: reason,
-            computer_user: computer.computer_user,
-            date: transferDate || null,
+      const response = await axios.post(
+        `/api/computer/${computerId}/unit/action`,
+        {
+          action: reason,
+          computer_user: computer.computer_user,
+          date: transferDate || null,
+          checkRows: checkedRows,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.data.status !== true) {
-          allSuccess = false;
-          console.log("Operation failed for unit:", unitId);
-        } else {
-          switch (reason) {
-            case "Transfer":
-              transferCount++;
-              successMessages.push(`Transferred unit ${unitId}`);
-              break;
-            case "Defective":
-              defectiveCount++;
-              successMessages.push(`Marked unit ${unitId} as defective`);
-              break;
-            case "Delete":
-              deleteCount++;
-              successMessages.push(`Deleted unit ${unitId}`);
-              break;
-            default:
-              break;
-          }
         }
+      );
 
-        console.log("Processed unit:", unitId, response.data);
+      console.log("Processed unit:", checkedRows, response.data);
 
-        if (response.status === 200) {
-          onClose();
-        }
-      }
-
-      if (allSuccess && successMessages.length > 0) {
-        const updatedResponse = await axios.get(
-          `/api/computer-user-edit/${editPopupData.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setEditPopupData(updatedResponse.data.computer_user_data);
+      if (response.status === 200) {
         setCheckedRows([]);
         setTransferDate(null);
         setReason("");
         setComputer([]);
-        if (updatedResponse.data.computer_user_data.computers.length === 0) {
-          onClose();
-        } else {
-          setOpen(false);
-        }
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-right",
-          iconColor: "green",
-          customClass: {
-            popup: "colored-toast",
-            container: "swalContainer",
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 3000,
-          timerProgressBar: true,
-        });
-
-        await Toast.fire({
-          icon: "success",
-          title: `Successfully processed: ${successMessages.length} unit(s)`,
-          html: `
-            <ul>
-              ${
-                transferCount > 0 ? `<li>${transferCount} transferred</li>` : ""
-              }
-              ${
-                defectiveCount > 0
-                  ? `<li>${defectiveCount} marked defective</li>`
-                  : ""
-              }
-              ${deleteCount > 0 ? `<li>${deleteCount} deleted</li>` : ""}
-            </ul>
-          `,
-        });
+        onClose();
       }
+      Swal.fire({
+        icon: "success",
+        toast: true,
+        title: response.data.message,
+        position: "top-right",
+        iconColor: "green",
+        customClass: {
+          popup: "colored-toast",
+          container: "swalContainer",
+        },
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 3000,
+        timerProgressBar: true,
+      });
     } catch (error) {
       console.error("Error in adding computer set:", error);
 
