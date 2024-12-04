@@ -47,7 +47,6 @@ function App() {
           <Route element={<ChangePassword />}>
             <Route path="/change-new-password" element={<Reset />}></Route>
           </Route>
-
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<DashBoard />}></Route>
             <Route path="/unit" element={<Unit />}></Route>

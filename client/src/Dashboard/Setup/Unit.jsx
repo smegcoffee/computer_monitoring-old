@@ -1212,6 +1212,7 @@ const CustomTableA = ({
         ]);
         setCategorySearchTerms([""]);
         setSupplierSearchTerms([""]);
+        toggleModal();
       }
     } catch (error) {
       console.error("Error: ", error);
@@ -1244,7 +1245,6 @@ const CustomTableA = ({
     } finally {
       setuLoading(false);
       onSubmit(false);
-      toggleModal();
     }
   };
 
