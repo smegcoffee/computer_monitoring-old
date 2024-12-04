@@ -97,7 +97,7 @@ function Supplier() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const suppliers = response.data.data;
+        const suppliers = response.data.data || [];
 
         setSuppliers(suppliers);
       } catch (error) {

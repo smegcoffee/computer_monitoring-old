@@ -69,15 +69,14 @@ function LoginForm({ fields }) {
         navigate("/dashboard");
         localStorage.setItem("token", response.data.token);
       } else {
-        setLoading(false);
         setError("Login failed.");
       }
     } catch (error) {
       console.error("Error:", error);
-      if (error.response && error.response.status === 409) {
+      if (error.response.status === 409) {
         localStorage.setItem("token", error.response.data.token);
         navigate("/change-new-password");
-      } else if (error.response && error.response.data) {
+      } else if (error.response.status === 400) {
         setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
@@ -93,7 +92,7 @@ function LoginForm({ fields }) {
           timerProgressBar: true,
         });
 
-        await Toast.fire({
+        Toast.fire({
           icon: "error",
           title: error.response.data.message,
         });

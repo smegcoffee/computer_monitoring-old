@@ -97,7 +97,7 @@ function Position() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const positions = response.data.positions;
+        const positions = response.data.positions || [];
 
         setPositions(positions);
       } catch (error) {

@@ -72,7 +72,7 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::post('/add-computer-user', [ComputerUserController::class, 'store']);
     Route::post('/add-computer', [ComputerController::class, 'store']);
     Route::post('/send-email', [EmailController::class, 'sendNotificationToAllUsers']);
-    Route::post('/computer/{computerId}/unit/{unitId}/action', [ComputerController::class, 'unitAction']);
+    Route::post('/computer/{computerId}/unit/action', [ComputerController::class, 'unitAction']);
     Route::post('/branch-unit/{branchUnitId}/unit/{unitId}/action', [BranchUnitController::class, 'unitAction']);
     Route::post('/computers/install-application/add-remarks/{computerId}', [ComputerController::class, 'installAndRemark']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
