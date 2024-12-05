@@ -99,9 +99,20 @@ export const TableComponent = () => {
     if (!value.trim()) {
       setFilteredData(computerUser);
     } else {
-      const filtered = computerUser.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
+      const filtered = computerUser.filter(
+        (item) =>
+          item.name.toLowerCase().includes(value.toLowerCase()) ||
+          item.position.position_name
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          item.branch_code.branch_name
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          item?.branch_code?.branch_name_english
+            ?.toLowerCase()
+            .includes(value.toLowerCase())
       );
+      console.log(filtered);
       setFilteredData(filtered);
     }
     setPage(0);
