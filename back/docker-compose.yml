@@ -26,7 +26,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      SERVICE_NAME: computer-mysql
     ports:
       - "3307:3306"
     volumes:
@@ -34,7 +34,7 @@ services:
     networks:
       - computer-monitoring
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "computer-mysql"]
       interval: 10s
       timeout: 5s
       retries: 5
