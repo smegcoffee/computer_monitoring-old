@@ -13,9 +13,9 @@ services:
       - ./:/var/www
       - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
-      - computer-monitoring
+      - computer
 
-  computer-mysql:
+  mysql:
     image: mysql:8.0
     container_name: computer-mysql
     restart: unless-stopped
@@ -26,15 +26,15 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
-      SERVICE_NAME: computer-mysql
+      SERVICE_NAME: mysql
     ports:
-      - "3307:3306"
+      - "3307:3307"
     volumes:
       - computer_data:/var/lib/mysql
     networks:
-      - computer-monitoring
+      - computer
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "computer-mysql"]
+      test: ["CMD", "mysqladmin", "ping", "-h","mysql"] 
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,7 +51,7 @@ services:
       PMA_USER: smct
       PMA_PASSWORD: ${DB_PASSWORD}
     networks:
-      - computer-monitoring
+      - computer
 
   computer-nginx:
     image: nginx:alpine
@@ -63,11 +63,11 @@ services:
       - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./:/var/www
     networks:
-      - computer-monitoring
+      - computer
 
 volumes:
   computer_data:
 
 networks:
-  computer-monitoring:
+  computer:
     driver: bridge
