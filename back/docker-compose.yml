@@ -23,22 +23,21 @@ services:
       MYSQL_DATABASE: computer_monitoring
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
       SERVICE_NAME: computer-mysql
-    expose:
-      - "3307"
+    ports:
+      - "3307:3307"  # Expose MySQL on port 3307
     volumes:
       - computer_data:/var/lib/mysql
     networks:
       - computer
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psmct"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+
 
   computer-phpmyadmin:
     image: phpmyadmin/phpmyadmin
