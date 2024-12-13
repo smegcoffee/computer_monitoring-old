@@ -27,8 +27,8 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
       SERVICE_NAME: computer-mysql
-    ports:
-      - "3307:3306"
+    expose:
+      - "3307"
     volumes:
       - computer_data:/var/lib/mysql
     networks:
