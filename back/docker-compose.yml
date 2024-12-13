@@ -34,7 +34,7 @@ services:
     networks:
       - computer
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h","mysql"] 
+      test: ["CMD", "mysqladmin", "ping", "-h","computer-mysql"] 
       interval: 10s
       timeout: 5s
       retries: 5
