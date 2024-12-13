@@ -15,7 +15,7 @@ services:
     networks:
       - computer
 
-  mysql:
+  computer-mysql:
     image: mysql:8.0
     container_name: computer-mysql
     restart: unless-stopped
@@ -26,7 +26,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      SERVICE_NAME: computer-mysql
     ports:
       - "3307:3307"
     volumes:
