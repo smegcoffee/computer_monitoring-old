@@ -156,7 +156,7 @@ function SignUp() {
           confirmButtonText: "Ok",
           html: "You will redirected to Login page <br>Thank you!",
         }).then(function () {
-          window.location = "/login";
+          window.location = "/monitoring/login";
         });
         setSuccess(response.data.message);
         setError("");
@@ -206,12 +206,17 @@ function SignUp() {
     }
   };
 
+  useEffect(() => {
+    document.title = "Computer Monitoring - Signup";
+  });
   return (
     <div className="relative min-h-screen">
       <Backg />
       <div className="flex flex-col items-center pt-20" style={{ zIndex: 1 }}>
         <img src={smct} alt="SMCT Logo" className="block h-32 m-0 w-72"></img>
-        <h1 className="mt-5 text-4xl font-bold">COMPUTER MONITORING SYSTEM</h1>
+        <h1 className="mt-5 text-xl font-bold md:text-4xl">
+          COMPUTER MONITORING SYSTEM
+        </h1>
         <h1 className="mt-2 text-4xl font-medium">Sign Up</h1>
         <form onSubmit={handleSubmit}>
           <div className="w-full max-w-2xl p-4 mt-10 rounded">
@@ -223,7 +228,7 @@ function SignUp() {
                   id="firstName"
                   className={
                     validationErrors.firstName
-                      ? " w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? " w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : " w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="First Name"
@@ -247,7 +252,7 @@ function SignUp() {
                   id="lastName"
                   className={
                     validationErrors.lastName
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Last Name"
@@ -273,7 +278,7 @@ function SignUp() {
                   id="contactNumber"
                   className={
                     validationErrors.contactNumber
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Contact Number"
@@ -297,7 +302,7 @@ function SignUp() {
                   id="email"
                   className={
                     validationErrors.email
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Email"
@@ -342,7 +347,7 @@ function SignUp() {
                 id="username"
                 className={
                   validationErrors.username
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Username"
@@ -368,7 +373,7 @@ function SignUp() {
                 id="password"
                 className={
                   validationErrors.password
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Password"
@@ -394,7 +399,7 @@ function SignUp() {
                 id="password_confirmation"
                 className={
                   validationErrors.password_confirmation
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Confirm Password"

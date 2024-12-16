@@ -1,74 +1,38 @@
 import React, { useState, useEffect } from "react";
 import SideBar from "../Sidebar";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import axios from "../../api/axios";
 import {
   Autocomplete,
+  Breadcrumbs,
   Button,
   Card,
   CardContent,
   Container,
   Grid,
   TextField,
+  Typography,
 } from "@mui/material";
 import Swal from "sweetalert2";
-
-function Header() {
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      console.log(token);
-      if (!token) {
-        return;
-      }
-
-      await axios.get("/api/logout", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      localStorage.removeItem("token");
-      window.location = "/login";
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-  return (
-    <div>
-      <div className="h-20 bg-blue-800 w-full flex justify-between items-center">
-        <div className="flex-grow text-center">
-          <p className="text-white text-4xl font-bold">
-            COMPUTER MONITORING SYSTEM
-          </p>
-        </div>
-        <Link onClick={handleLogout}>
-          <FontAwesomeIcon
-            icon={faRightFromBracket}
-            className="text-white mr-8"
-          />{" "}
-        </Link>
-      </div>
-    </div>
-  );
-}
+import Header from "../../Dashboard/Header";
+import HomeIcon from "@mui/icons-material/Home";
+import SettingsIcon from "@mui/icons-material/Settings";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 function User() {
-  const [position_name, setPositionName] = useState("");
-  const [branch_name, setBranchName] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const [position, setPosition] = useState({ positions: [] });
   const [branchcode, setBranchcode] = useState({ branches: [] });
-  const [ploading, setpLoading] = useState(false);
-  const [bloading, setbLoading] = useState(false);
   const [uloading, setuLoading] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
-  const [success, setSuccess] = useState();
-  const [status, setStatus] = useState('');
+  const [isRefresh, setIsRefresh] = useState(false);
   const [user, setUser] = useState({
     name: "",
+    email: "",
     position: "",
     branch_code: "",
   });
@@ -76,508 +40,347 @@ function User() {
   useEffect(() => {
     const fetchBrancheCode = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('Token not found');
+          throw new Error("Token not found");
         }
-        const response = await axios.get('/api/branches', {
+        const response = await axios.get("/api/branches", {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setBranchcode(response.data);
       } catch (error) {
-        console.error('Error fetching chart data:', error);
+        console.error("Error fetching chart data:", error);
       }
     };
 
     fetchBrancheCode();
-  }, [branchcode]);
+  }, []);
   useEffect(() => {
     const fetchPosition = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('Token not found');
+          throw new Error("Token not found");
         }
-        const response = await axios.get('/api/positions', {
+        const response = await axios.get("/api/positions", {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         setPosition(response.data);
       } catch (error) {
-        console.error('Error fetching chart data:', error);
+        console.error("Error fetching chart data:", error);
       }
     };
 
     fetchPosition();
-  }, [position]);
+  }, []);
 
   // This is a sample data for Position
-  const Position = position.positions && position.positions.length > 0 ? position.positions.map(pos => ({
-    id: pos.id,
-    position_name: pos.position_name
-  })) : [];
-
+  const Position =
+    position.positions && position.positions.length > 0
+      ? position.positions.map((pos) => ({
+          id: pos.id,
+          position_name: pos.position_name,
+        }))
+      : [];
 
   // This is a sample data for Branchcode
-  const Branchcode = branchcode.branches && branchcode.branches.length > 0 ? branchcode.branches.map(branch => ({
-    id: branch.id,
-    branch_name: branch.branch_name
-  })) : [];
-
-
+  const Branchcode =
+    branchcode.branches && branchcode.branches.length > 0
+      ? branchcode.branches.map((branch) => ({
+          id: branch.id,
+          branch_name: branch.branch_name,
+        }))
+      : [];
 
   const handleSubmitUser = async (event) => {
     event.preventDefault();
     setuLoading(true);
+    setIsRefresh(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('Token not found');
+        throw new Error("Token not found");
       }
 
-      const response = await axios.post("api/add-computer-user", {
-        name: user.name,
-        position: user.position,
-        branch_code: user.branch_code,
-      },
+      const response = await axios.post(
+        "api/add-computer-user",
+        {
+          name: user.name,
+          email: user.email,
+          position: user.position,
+          branch_code: user.branch_code,
+        },
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
-          position: 'top-right',
-          iconColor: 'green',
+          position: "top-right",
+          iconColor: "green",
           customClass: {
-            popup: 'colored-toast',
+            popup: "colored-toast",
           },
           showConfirmButton: false,
           showCloseButton: true,
           timer: 2500,
           timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'success',
-              title: response.data.message,
-            })
-          })();
-        setSuccess(response.data.message);
-        setUser({
-          name: '',
-          position: '',
-          branch_code: '',
         });
-        setError('');
-        setValidationErrors('');
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+        setUser({
+          name: "",
+          email: "",
+          position: "",
+          branch_code: "",
+        });
+        setValidationErrors("");
       }
       console.log("Adding user:", response.data);
     } catch (error) {
       console.error("Error in adding user:", error);
       if (error.response && error.response.data) {
         console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
-          position: 'top-right',
-          iconColor: 'red',
+          position: "top-right",
+          iconColor: "red",
           customClass: {
-            popup: 'colored-toast',
+            popup: "colored-toast",
           },
           showConfirmButton: false,
           showCloseButton: true,
           timer: 2500,
           timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'error',
-              title: error.response.data.message,
-            })
-          })();
+        });
+        (async () => {
+          await Toast.fire({
+            icon: "error",
+            title: error.response.data.message,
+          });
+        })();
       } else {
         console.log("ERROR!");
       }
     } finally {
       setuLoading(false);
+      setIsRefresh(false);
     }
   };
 
-  const handleSubmitPosition = async (event) => {
-    event.preventDefault();
-    setpLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token not found');
-      }
-
-      const response = await axios.post("api/add-position", {
-        position_name: position_name,
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      if (response.data.status === true) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-right',
-          iconColor: 'green',
-          customClass: {
-            popup: 'colored-toast',
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'success',
-              title: response.data.message,
-            })
-          })();
-        setSuccess(response.data.message);
-        setPositionName('');
-        setError('');
-        setValidationErrors('');
-      }
-      console.log("Adding position:", response.data);
-    } catch (error) {
-      console.error("Error in adding position:", error);
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
-        setValidationErrors(error.response.data.errors || {});
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-right',
-          iconColor: 'red',
-          customClass: {
-            popup: 'colored-toast',
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'error',
-              title: error.response.data.message,
-            })
-          })();
-      } else {
-        console.log("ERROR!");
-      }
-    } finally {
-      setpLoading(false);
-    }
-  };
-
-  const handleSubmitBranchCode = async (event) => {
-    event.preventDefault();
-    setbLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token not found');
-      }
-
-      const response = await axios.post("api/add-branch", {
-        branch_name: branch_name,
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      if (response.data.status === true) {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-right',
-          iconColor: 'green',
-          customClass: {
-            popup: 'colored-toast',
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'success',
-              title: response.data.message,
-            })
-          })();
-        setSuccess(response.data.message);
-        setBranchName('');
-        setError('');
-        setValidationErrors('');
-      }
-      console.log("Adding branch code:", response.data);
-    } catch (error) {
-      console.error("Error in adding branch code:", error);
-      if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
-        setValidationErrors(error.response.data.errors || {});
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-right',
-          iconColor: 'red',
-          customClass: {
-            popup: 'colored-toast',
-          },
-          showConfirmButton: false,
-          showCloseButton: true,
-          timer: 2500,
-          timerProgressBar: true,
-        })
-          ; (async () => {
-            await Toast.fire({
-              icon: 'error',
-              title: error.response.data.message,
-            })
-          })();
-      } else {
-        console.log("ERROR!");
-      }
-    } finally {
-      setbLoading(false);
-    }
-  };
-
+  const title = "Setup User";
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <Header />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <Header
+        isRefresh={isRefresh}
+        toggleSidebar={toggleSidebar}
+        title={title}
+      />
       <div style={{ display: "flex", flex: 1 }}>
         <div>
-          <SideBar />
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
         </div>
         <div style={{ flex: 2, paddingBottom: "50px" }}>
-          <p className="font-normal text-2xl pt-10 ml-10">
+          <p className="pt-10 ml-10 text-2xl font-normal">
             Setup Computer User
           </p>
-          <p className="font-light text-lg ml-10">
-            <Link to="/dashboard" className="text-blue-800">
-              Home
-            </Link>{" "}
-            &gt; Setup
-          </p>
-          <br /> <br />
-          <div className="flex justify-center items-center ml-10 mr-10">
-            <div className="border border-transparent rounded-xl shadow-lg max-h-max w-1/2 mr-5">
-              <form onSubmit={handleSubmitPosition}>
-                <div className="flex items-center text-center justify-center">
-                  <div className="bg-red-200 h-10 w-full rounded-tl-xl rounded-tr-xl">
-                    <p className="font-semibold text-base mt-1.5">
-                      ADD NEW POSITION
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-center pt-5 pr-5 pl-5 pb-4">
-                  <input
-                    type="text"
-                    value={position_name}
-                    onChange={(e) => setPositionName(e.target.value)}
-                    placeholder="Input position..."
-                    className={validationErrors.position_name ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5" : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"}
-                  />
-                </div>
-                <span>
-                  {validationErrors.position_name && (
-                    <div className="text-red-500 text-center">
-                      {validationErrors.position_name.map((error, index) => (
-                        <span key={index}>{error}</span>
-                      ))}
-                    </div>
-                  )}
-                </span>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={ploading}
-                    className="mb-5 border border-transparent duration-700 bg-green-600 hover:bg-green-700 text-white rounded-3xl w-32 h-9 text-base font-semibold"
-                  >
-                    {ploading ? 'ADDING...' : 'ADD'}
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div className="border border-transparent rounded-xl shadow-lg max-h-max w-1/2">
-              <form onSubmit={handleSubmitBranchCode}>
-                <div className="flex items-center text-center justify-center">
-                  <div className="bg-red-200 h-10 w-full rounded-tl-xl rounded-tr-xl">
-                    <p className="font-semibold text-base mt-1.5">
-                      ADD NEW BRANCH CODE
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-center pt-5 pr-5 pl-5 pb-4">
-                  <input
-                    type="text"
-                    value={branch_name}
-                    onChange={(e) => setBranchName(e.target.value)}
-                    placeholder="Input branch code..."
-                    className={validationErrors.branch_name ? "bg-gray-200 border border-red-500 rounded-xl w-3/4 h-9 pl-5" : "bg-gray-200 border border-transparent rounded-xl w-3/4 h-9 pl-5"}
-                  />
-                </div>
-                <span>
-                  {validationErrors.branch_name && (
-                    <div className="text-red-500 text-center">
-                      {validationErrors.branch_name.map((error, index) => (
-                        <span key={index}>{error}</span>
-                      ))}
-                    </div>
-                  )}
-                </span>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={bloading}
-                    className="mb-5 border border-transparent duration-700 bg-green-600 hover:bg-green-700 text-white rounded-3xl w-32 h-9 text-base font-semibold"
-                  >
-                    {bloading ? 'ADDING...' : 'ADD'}
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+              >
+                <SettingsIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup
+              </Typography>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <GroupAddIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Setup Users
+              </Typography>
+            </Breadcrumbs>
           </div>
+          <br /> <br />
           <div className="flex-none mt-10">
             <Container>
               <form onSubmit={handleSubmitUser}>
                 <Card>
-                  <h2 className="flex justify-center items-center bg-blue-200 p-5 text-2xl font-semibold">
+                  <h2 className="flex items-center justify-center p-5 text-2xl font-semibold text-white bg-blue-400">
                     SET UP USERS
                   </h2>
                   <CardContent>
-                    <Grid
-                      container
-                      className="flex p-5 text-center"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Grid item>
+                    <Grid container spacing={3} className="p-5">
+                      {/* First Row */}
+                      <Grid item xs={12} sm={6} md={6}>
                         <TextField
                           value={user.name}
                           onChange={(e) =>
                             setUser({ ...user, name: e.target.value })
                           }
                           id="name-user"
-                          label="Name"
+                          label="Full Name"
                           variant="standard"
-                          style={{ marginRight: "20px", width: "300px" }}
+                          style={{ width: "100%" }}
                         />
-
-                        <span>
-                          {validationErrors.name && (
-                            <div className="text-red-500 text-center">
-                              {validationErrors.name.map((error, index) => (
-                                <span key={index}>{error}</span>
-                              ))}
-                            </div>
-                          )}
-                        </span>
-                        
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.name &&
+                            validationErrors.name.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
-                      <Grid item>
+
+                      <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                          value={user.email}
+                          onChange={(e) =>
+                            setUser({ ...user, email: e.target.value })
+                          }
+                          id="email-user"
+                          label="Email (optional)"
+                          variant="standard"
+                          style={{ width: "100%" }}
+                        />
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.email &&
+                            validationErrors.email.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
+                      </Grid>
+
+                      {/* Second Row */}
+                      <Grid item xs={12} sm={6} md={6}>
                         <Autocomplete
                           freeSolo
                           id="position-user"
                           disableClearable
                           options={Position}
-                          getOptionLabel={(option) => option.position_name ? option.position_name : ''}
+                          readOnly={Position.length === 0}
+                          getOptionLabel={(option) =>
+                            option.position_name || ""
+                          }
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Position"
+                              label={
+                                Position.length === 0
+                                  ? "No position added yet"
+                                  : "Position"
+                              }
                               variant="standard"
-                              style={{ marginRight: "20px", width: "300px" }}
+                              style={{ width: "100%" }}
                               InputProps={{
                                 ...params.InputProps,
                                 type: "search",
                               }}
                             />
                           )}
-                          value={Position.find((option) => option.id === user.position) || {}}
-                          onChange={(event, newValue) => {
-                            setUser({ ...user, position: newValue.id });
-                          }}
+                          value={
+                            Position.find(
+                              (option) => option.id === user.position
+                            ) || {}
+                          }
+                          onChange={(event, newValue) =>
+                            setUser({ ...user, position: newValue.id })
+                          }
                         />
-
-                        <span>
-                          {validationErrors.position && (
-                            <div className="text-red-500 text-center">
-                              {validationErrors.position.map((error, index) => (
-                                <span key={index}>{error}</span>
-                              ))}
-                            </div>
-                          )}
-                        </span>
-                        
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.position &&
+                            validationErrors.position.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
 
-                      <Grid item>
+                      <Grid item xs={12} sm={6} md={6}>
                         <Autocomplete
                           freeSolo
                           id="branch_code-user"
                           disableClearable
+                          readOnly={Branchcode.length === 0}
                           options={Branchcode}
-                          getOptionLabel={(option) => option.branch_name ? option.branch_name : ''}
+                          getOptionLabel={(option) => option.branch_name || ""}
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Branchcode"
+                              label={
+                                Branchcode.length === 0
+                                  ? "No branch Code added yet"
+                                  : "Branch Code"
+                              }
                               variant="standard"
-                              style={{ marginRight: "20px", width: "300px" }}
+                              style={{ width: "100%" }}
                               InputProps={{
                                 ...params.InputProps,
                                 type: "search",
                               }}
                             />
                           )}
-                          value={Branchcode.find((option) => option.id === user.branch_code) || {}}
-                          onChange={(event, newValue) => {
-                            setUser({ ...user, branch_code: newValue.id });
-                          }}
+                          value={
+                            Branchcode.find(
+                              (option) => option.id === user.branch_code
+                            ) || {}
+                          }
+                          onChange={(event, newValue) =>
+                            setUser({ ...user, branch_code: newValue.id })
+                          }
                         />
-
-                        <span>
-                          {validationErrors.branch_code && (
-                            <div className="text-red-500 text-center">
-                              {validationErrors.branch_code.map((error, index) => (
-                                <span key={index}>{error}</span>
-                              ))}
-                            </div>
-                          )}
-                        </span>
-                        
+                        <div className="mt-1 text-center text-red-500">
+                          {validationErrors.branch_code &&
+                            validationErrors.branch_code.map((error, index) => (
+                              <div key={index}>{error}</div>
+                            ))}
+                        </div>
                       </Grid>
-                      <Grid item>
+
+                      {/* Button Row */}
+                      <Grid
+                        item
+                        xs={12}
+                        className="flex items-center justify-center"
+                      >
                         <Button
                           type="submit"
                           disabled={uloading}
                           variant="contained"
                           style={{
-                            marginTop: "20px",
                             width: "300px",
                             fontWeight: "550",
                             borderRadius: "100px",
                             fontSize: "16px",
-                            backgroundColor: "green",
+                            backgroundColor: "#0033A0",
+                            color: "white"
                           }}
                         >
-                          {uloading ? 'ADDING...' : 'ADD'}
+                          {uloading ? "ADDING..." : "ADD"}
                         </Button>
                       </Grid>
                     </Grid>

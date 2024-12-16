@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'request_new_password',
     ];
 
     /**
@@ -39,12 +40,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'date_of_purchase'  =>  'datetime'
         ];
     }
 
-    public function branch()
+    public function branchCode()
     {
         return $this->belongsTo(BranchCode::class);
+    }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'user_notifications')->withPivot('read_at')->withTimestamps();
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
+    }
+
+    public function remarks()
+    {
+        return $this->hasMany(Remark::class);
     }
 }

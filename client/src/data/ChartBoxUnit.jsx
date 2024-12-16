@@ -1,54 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../api/axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDesktop } from '@fortawesome/free-solid-svg-icons';
-import { ChartBox } from '../Dashboard/Db2';
+import React, { useState, useEffect } from "react";
+import axios from "../api/axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDesktop } from "@fortawesome/free-solid-svg-icons";
+import { ChartBox } from "../Dashboard/Db2";
 
-const ChartBoxUser = () => {
+const ChartBoxUser = ({
+  dashboardData,
+  dashboardWeeklyUnits,
+  dashboardUnitPercent,
+  dashboardLoading
+}) => {
   const [chartDataUnit, setChartDataUnit] = useState([]);
+  const [weeklyUnits, setWeeklyUnits] = useState([]);
+  const [unitPercent, setUnitPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchChartDataUnit = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Token not found');
-        }
-        const response = await axios.get('/api/dashboard', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setChartDataUnit(response.data);
+        setChartDataUnit(dashboardData);
+        setWeeklyUnits(dashboardWeeklyUnits);
+        setUnitPercent(dashboardUnitPercent);
       } catch (error) {
-        console.error('Error fetching chart data:', error);
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchChartDataUnit();
-  }, []);
+    fetchData();
+  }, [dashboardData, dashboardWeeklyUnits, dashboardUnitPercent, dashboardLoading]);
 
   const chartBox1 = {
     color: "#000080",
     icon: <FontAwesomeIcon icon={faDesktop} />,
     title: "Total Units",
-    number: chartDataUnit.totalUnits,
+    number: loading ? "Loading..." : chartDataUnit.totalUnits,
     dataKey: "Units",
-    percentage: 25,
-    chartData: [
-      { name: "Sun", Units: 400 },
-      { name: "Mon", Units: 600 },
-      { name: "Tue", Units: 500 },
-      { name: "Wed", Units: 700 },
-      { name: "Thu", Units: 400 },
-      { name: "Fri", Units: 500 },
-      { name: "Sat", Units: 450 },
-    ],
+    percentage: loading ? "..." : unitPercent,
+    chartData: weeklyUnits,
   };
 
-  return (
-    <ChartBox {...{...chartBox1}} />
-  );
+  return <ChartBox {...{ ...chartBox1 }} />;
 };
 
 export default ChartBoxUser;

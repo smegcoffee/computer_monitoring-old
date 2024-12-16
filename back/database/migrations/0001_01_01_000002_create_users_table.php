@@ -23,10 +23,11 @@ return new class extends Migration
             $table->boolean('request_new_password')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string("role")->default("user");
             $table->rememberToken();
             $table->timestamps();
 
-            
+
             $table->foreign('branch_code_id')->references('id')->on('branch_codes')->onDelete('restrict');
         });
 

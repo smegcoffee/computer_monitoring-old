@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Log as CategoryLog;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
@@ -15,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $allCategories = Category::all();
+        $allCategories = Category::orderBy('created_at', 'desc')->get();
 
         if ($allCategories->count() > 0) {
             return response()->json([
@@ -61,6 +62,11 @@ class CategoryController extends Controller
             'category_name'          =>          $request->category_name
         ]);
 
+        CategoryLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Added a category: ' . $category->category_name
+        ]);
+
         return response()->json([
             'status'                =>              true,
             'message'               =>              $category->category_name . " category added successfully.",
@@ -80,24 +86,101 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit($id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Category not found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              'Category fetched successfully.',
+            'category'              =>              $category
+        ], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
-        //
+        $category = Category::find($id);
+
+        $validation = Validator::make($request->all(), [
+            'category_name'           =>              ['required', 'unique:categories,category_name,' . $category->id],
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Something went wrong. Please fix.',
+                'errors'        =>          $validation->errors()
+            ], 422);
+        }
+
+        if (!$category) {
+            return response()->json([
+                'status'        =>          false,
+                'message'       =>          'Category not found.'
+            ], 404);
+        }
+
+        $oldCategoryName = $category->category_name;
+
+        $category->update([
+            'category_name'           =>              $request->category_name
+        ]);
+
+        CategoryLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Updated a category from: ' . $oldCategoryName . ' to: ' . $category->category_name
+        ]);
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              $category->category_name . ' category updated successfully.',
+            'id'                    =>              $category->id
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'status'            =>          false,
+                'message'           =>          'Category  not found.'
+            ], 404);
+        }
+
+        $units = $category->units()->count();
+
+        if ($units > 0) {
+            return response()->json([
+                'status'                =>              false,
+                'message'               =>              'You cannot delete a category that is already in used by units.'
+            ], 422);
+        }
+
+        CategoryLog::create([
+            'user_id'           =>              auth()->user()->id,
+            'log_data'          =>              'Deleted the category : ' . $category->category_name
+        ]);
+
+        $category->delete();
+
+        return response()->json([
+            'status'                =>              true,
+            'message'               =>              'Category  deleted successfully.'
+        ], 200);
     }
 }

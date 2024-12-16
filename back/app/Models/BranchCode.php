@@ -20,4 +20,20 @@ class BranchCode extends Model
     {
         return $this->hasMany(ComputerUser::class);
     }
+
+    public function departments()
+    {
+        return $this->hasMany(Department::class);
+    }
+
+    public function branchUnits()
+    {
+        return $this->hasMany(BranchUnit::class);
+    }
+
+    public function branchOldDataUnits()
+    {
+        return $this->hasMany(BranchOldDataUnit::class);
+    }
+
 }

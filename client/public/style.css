@@ -1,0 +1,18 @@
+* {
+  box-sizing: border-box;
+  font-size: 12px;
+  font-family: "Quicksand", sans-serif;
+  /* font-family: "Montserrat", sans-serif; */
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100%;
+}
+.swalContainer {
+  z-index: 9999;
+}

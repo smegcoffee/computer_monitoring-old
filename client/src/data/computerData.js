@@ -63,3 +63,27 @@ export const tableData = [
       information: ['Cleaned- 04/05/2024', 'Formatted- 01/22/2024'],
     },
   ];
+
+  export const units = [
+    {
+      unit: 146,
+      category: "Monitor",
+      status: "Used",
+      recent: "Noreen Darunday",
+      date: "2024/07/11"
+    },
+    {
+      unit: 147,
+      category: "Monitor",
+      status: "Used",
+      recent: "Noreen Darunday",
+      date: "2024/07/11"
+    },
+    {
+      unit: 148,
+      category: "Monitor",
+      status: "Used",
+      recent: "Noreen Darunday",
+      date: "2024/07/11"
+    },
+  ];

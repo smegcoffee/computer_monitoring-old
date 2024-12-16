@@ -12,13 +12,14 @@ import {
   TextField,
   Autocomplete,
 } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { TablePagination } from "@material-ui/core";
 import Swal from "sweetalert2";
 import axios from "../../api/axios";
 import { format } from "date-fns";
 
-function Add({ isOpen, onClose, onSubmit }) {
-  const [user, setUser] = useState("");
+function Add({ isOpen, onClose, onSubmit, refresh }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,8 +33,10 @@ function Add({ isOpen, onClose, onSubmit }) {
   const [computer, setComputer] = useState({
     computer_user: "",
   });
-  const [vacant, setVacant] = useState(false);
   const [vloading, setvLoading] = useState(true);
+  const [verror, setvError] = useState(false);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     setFilteredData(vacantUnit);
@@ -54,12 +57,16 @@ function Add({ isOpen, onClose, onSubmit }) {
         setVacantUnit(response.data.vacant || []);
         setvLoading(false);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data:", error);
+        if (error.response.status === 404) {
+          setvError(true);
+        }
+        setvLoading(false);
       }
     };
 
     fetchUnit();
-  }, [vacant]);
+  }, [refresh]);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
@@ -75,12 +82,12 @@ function Add({ isOpen, onClose, onSubmit }) {
         });
         setComputerUser(response.data);
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
     fetchComputerUser();
-  }, [computerUser]);
+  }, []);
 
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
@@ -88,6 +95,7 @@ function Add({ isOpen, onClose, onSubmit }) {
           id: cu.id,
           name: cu.name,
         }))
+        .sort((a, b) => a.name.localeCompare(b.name))
       : [];
 
   const handleCheckboxClick = (unitId) => {
@@ -143,8 +151,8 @@ function Add({ isOpen, onClose, onSubmit }) {
 
   const handleSubmitAssignedUser = async (event) => {
     event.preventDefault();
-    setVacant(true);
     onSubmit(true);
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -181,8 +189,9 @@ function Add({ isOpen, onClose, onSubmit }) {
             title: response.data.message,
           });
         })();
+        setCheckedRows("");
         setComputer("");
-        setComputerUser("");
+        // setComputerUser("");
       }
       console.log("Adding computer set:", response.data);
     } catch (error) {
@@ -213,10 +222,63 @@ function Add({ isOpen, onClose, onSubmit }) {
         console.log("ERROR!");
       }
     } finally {
-      setVacant(false);
       onSubmit(false);
+      setLoading(false);
     }
   };
+
+  const sortRows = (rows) => {
+    return rows.sort((a, b) => {
+      let valueA, valueB;
+
+      if (sortColumn === "unit_code") {
+        valueA = a.unit_code;
+        valueB = b.unit_code;
+      } else if (sortColumn === "date_of_purchase") {
+        valueA = a.date_of_purchase;
+        valueB = b.date_of_purchase;
+      } else if (sortColumn === "description") {
+        valueA = a.description.toLowerCase();
+        valueB = b.description.toLowerCase();
+      } else if (sortColumn === "supplier.supplier_name") {
+        valueA = a.supplier.supplier_name.toLowerCase();
+        valueB = b.supplier.supplier_name.toLowerCase();
+      } else if (sortColumn === "category.category_name") {
+        valueA = a.category.category_name.toLowerCase();
+        valueB = b.category.category_name.toLowerCase();
+      } else if (sortColumn === "serial_number") {
+        valueA = a.serial_number.toLowerCase();
+        valueB = b.serial_number.toLowerCase();
+      } else if (sortColumn === "status") {
+        valueA = a.status.toLowerCase();
+        valueB = b.status.toLowerCase();
+      }
+
+      if (sortOrder === "asc") {
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+      } else {
+        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+      }
+    });
+  };
+
+  const handleSort = (column) => {
+    const isAscending = sortColumn === column && sortOrder === "asc";
+    setSortColumn(column);
+    setSortOrder(isAscending ? "desc" : "asc");
+  };
+
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      setCheckedRows(filteredData.map((unit) => unit.id));
+    } else {
+      setCheckedRows([]);
+    }
+  };
+
+  const isAllChecked =
+    filteredData.length > 0 &&
+    filteredData.every((unit) => checkedRows.includes(unit.id));
 
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
@@ -236,77 +298,145 @@ function Add({ isOpen, onClose, onSubmit }) {
               >
                 <Table>
                   <TableHead>
-                    <TableRow className="bg-red-200">
+                    <TableRow className="bg-[#FF6600]">
                       <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          UNIT CODE
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          DATE OF PURCHASE
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          CATEGORY
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          DESCRIPTION
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          SUPPLIER
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          SERIAL NO.
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                        >
-                          STATUS
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          label="Search Unit"
-                          value={searchTerm}
-                          onChange={handleSearchChange}
-                          variant="outlined"
-                          fullWidth
-                          sx={{ width: 100 }}
-                          size="small"
-                          margin="normal"
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
+                        <Checkbox
+                          checked={isAllChecked}
+                          onChange={handleSelectAll}
                         />
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("unit_code")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          UNIT CODE{" "}
+                          {sortColumn === "unit_code" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("date_of_purchase")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          DATE OF PURCHASE{" "}
+                          {sortColumn === "date_of_purchase" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("category.category_name")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          CATEGORY{" "}
+                          {sortColumn === "category.category_name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("description")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          DESCRIPTION{" "}
+                          {sortColumn === "description" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("supplier.supplier_name")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          SUPPLIER{" "}
+                          {sortColumn === "supplier.supplier_name" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("serial_number")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          SERIAL NO.{" "}
+                          {sortColumn === "serial_number" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        className="cursor-pointer"
+                        align="center"
+                        onClick={() => handleSort("status")}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          style={{ fontWeight: 700 }}
+                          className="text-white"
+                        >
+                          STATUS{" "}
+                          {sortColumn === "status" &&
+                            (sortOrder === "asc" ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            ))}
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -326,10 +456,38 @@ function Add({ isOpen, onClose, onSubmit }) {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredData
+                      sortRows(filteredData)
                         .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
                         .map((un, index) => (
                           <TableRow key={index}>
+                            <TableCell align="center">
+                              <Checkbox
+                                checked={checkedRows.includes(un.id)}
+                                onChange={() => handleCheckboxClick(un.id)}
+                                sx={
+                                  validationErrors.checkedRows
+                                    ? {
+                                        "& .MuiSvgIcon-root": {
+                                          border: "2px solid",
+                                          borderColor: "red",
+                                          borderRadius: "4px",
+                                        },
+                                        "&.Mui-checked .MuiSvgIcon-root": {
+                                          borderColor: "secondary.main",
+                                        },
+                                      }
+                                    : {}
+                                }
+                              />
+                              <br />
+                              {validationErrors.checkedRows ? (
+                                <p className="text-xs text-red-500">
+                                  Please check one or more first.
+                                </p>
+                              ) : (
+                                ""
+                              )}
+                            </TableCell>
                             <TableCell align="center">{un.unit_code}</TableCell>
                             <TableCell align="center">
                               {format(
@@ -341,7 +499,11 @@ function Add({ isOpen, onClose, onSubmit }) {
                               {un.category.category_name}
                             </TableCell>
                             <TableCell align="center">
-                              {un.description}
+                              {un.description
+                                .split("\n")
+                                .map((line, lineIndex) => (
+                                  <div key={lineIndex}>{line}</div>
+                                ))}
                             </TableCell>
                             <TableCell align="center">
                               {un.supplier.supplier_name}
@@ -350,12 +512,6 @@ function Add({ isOpen, onClose, onSubmit }) {
                               {un.serial_number}
                             </TableCell>
                             <TableCell align="center">{un.status}</TableCell>
-                            <TableCell align="center">
-                              <Checkbox
-                                checked={checkedRows.includes(un.id)}
-                                onChange={() => handleCheckboxClick(un.id)}
-                              />
-                            </TableCell>
                           </TableRow>
                         ))
                     )}
@@ -401,7 +557,7 @@ function Add({ isOpen, onClose, onSubmit }) {
                 />
               </TableContainer>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-4">
               <div className="flex-none">
                 <Autocomplete
                   freeSolo
@@ -423,12 +579,12 @@ function Add({ isOpen, onClose, onSubmit }) {
                         ...params.InputProps,
                         type: "search",
                       }}
+                      sx={{ width: 300 }}
                       variant="outlined"
                       style={{
                         marginLeft: "20px",
                         marginTop: "20px",
                         marginBottom: "20px",
-                        marginRight: "400px",
                         width: "300px",
                       }}
                     />
@@ -443,6 +599,23 @@ function Add({ isOpen, onClose, onSubmit }) {
                   }}
                 />
               </div>
+
+              <TextField
+                label="Search Unit"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                variant="outlined"
+                fullWidth
+                sx={{ width: 100 }}
+                size="small"
+                margin="normal"
+                style={{
+                  marginRight: "400px",
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
               <div className="items-center justify-center flex-1 text-center">
                 <button
                   className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
@@ -454,15 +627,19 @@ function Add({ isOpen, onClose, onSubmit }) {
                   <button
                     disabled
                     type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full cursor-not-allowed"
+                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
                   >
                     {loading ? "ADDING..." : "ADD"}
                   </button>
                 ) : (
                   <button
-                    disabled={loading}
+                    disabled={loading || checkedRows.length === 0}
                     type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                    className={
+                      loading || checkedRows.length === 0
+                        ? "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
+                        : "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                    }
                   >
                     {loading ? "ADDING..." : "ADD"}
                   </button>

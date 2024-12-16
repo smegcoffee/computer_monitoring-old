@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('computer_id')->constrained()->onDelete('restrict');
             $table->foreignId('unit_id')->constrained()->onDelete('restrict');
             $table->timestamps();
+
+            $table->unique(['computer_id', 'unit_id']);
         });
     }
 

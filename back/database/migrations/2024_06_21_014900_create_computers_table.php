@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('computers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('computer_user_id')->nullable();
-            $table->string('status')->nullable();
-            $table->string('remarks')->nullable();
+            $table->integer('formatted_status')->default(0)->nullable();
+            $table->integer('remarks')->default(0)->nullable();
+            $table->string('date_cleaning')->nullable();
             $table->timestamps();
 
 

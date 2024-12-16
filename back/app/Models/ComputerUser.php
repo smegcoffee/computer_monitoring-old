@@ -16,4 +16,24 @@ class ComputerUser extends Model
     {
         return $this->hasMany(Computer::class)->with('units');
     }
+    public function branchCode()
+    {
+        return $this->belongsTo(BranchCode::class);
+    }
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+    public function transferUnits()
+    {
+        return $this->hasMany(TransferUnit::class);
+    }
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
+    }
 }

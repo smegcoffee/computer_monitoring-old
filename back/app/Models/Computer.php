@@ -26,10 +26,30 @@ class Computer extends Model
     }
     public function computerUser()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(ComputerUser::class);
     }
     public function units()
     {
-        return $this->belongsToMany(Unit::class, 'computer_unit');
+        return $this->belongsToMany(Unit::class, 'computer_unit')->withTimestamps();
+    }
+    public function installedApplications()
+    {
+        return $this->hasMany(InstalledApplication::class);
+    }
+
+    public function remarks()
+    {
+        return $this->hasMany(Remark::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($computer) {
+            $computer->installedApplications()->delete();
+
+            $computer->remarks()->delete();
+        });
     }
 }

@@ -67,13 +67,9 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-
-        $user = User::where('email', $request->email)->first();
-
-
         $validation = Validator::make($request->all(), [
-            'email'         =>          ['required', 'email', 'regex:/^\S+@\S+\.\S+$/'],
-            'password'      =>          ['required', 'min:8']
+            'username_or_email'         =>          ['required'],
+            'password'                  =>          ['required', 'min:8']
         ]);
 
         if ($validation->fails()) {
@@ -84,16 +80,19 @@ class LoginController extends Controller
             ], 400);
         }
 
+        $user = User::where('email', $request->username_or_email)
+            ->orWhere('username', $request->username_or_email)
+            ->first();
 
         if (!$user) {
             return response()->json([
                 'status'        =>      false,
-                'message'       =>      "This email is not exists or not verified yet",
+                'message'       =>      "This email or username does not exist or is not verified yet",
             ], 400);
         }
 
         $login = auth()->attempt([
-            'email'         =>          $request->email,
+            'email'         =>          filter_var($request->username_or_email, FILTER_VALIDATE_EMAIL) ? $request->username_or_email : $user->email,
             'password'      =>          $request->password
         ]);
 
@@ -103,6 +102,9 @@ class LoginController extends Controller
                 'message'       =>          'Invalid Credentials'
             ], 400);
         } elseif ($user->request_new_password == true) {
+
+            auth()->user()->tokens()->delete();
+
             return response()->json([
                 'status'            =>          true,
                 'message'           =>          'You need to change your password first',
@@ -111,6 +113,9 @@ class LoginController extends Controller
                 'id'                =>          auth()->user()->id
             ], 409);
         } else {
+
+            auth()->user()->tokens()->delete();
+
             return response()->json([
                 'status'        =>      true,
                 'message'       =>      "Welcome " . $user->email . " you are now login",

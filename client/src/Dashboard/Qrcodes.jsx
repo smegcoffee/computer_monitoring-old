@@ -1,66 +1,61 @@
-import React from 'react';
-import SideBar from './Sidebar';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import SideBar from "./Sidebar";
+import { Link } from "react-router-dom";
 //import { QrReader } from 'react-qr-reader';
-import Codes from './Codes';
-import axios from '../api/axios';
-
-
-function Header() {
-    const handleLogout = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            console.log(token);
-            if (!token) {
-                return;
-            }
-
-            await axios.get('/api/logout', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            localStorage.removeItem('token');
-            window.location = "/login";
-        } catch (error) {
-            console.error('Error logging out:', error);
-        }
-    };
-    return (
-        <div>
-            <div className='h-20 bg-blue-800 w-full flex justify-between items-center'>
-                <div className='flex-grow text-center'>
-                    <p className='text-white text-4xl font-bold'>COMPUTER MONITORING SYSTEM</p>
-                </div>
-                <Link onClick={handleLogout}><FontAwesomeIcon icon={faRightFromBracket} className='text-white mr-8' /> </Link>
-            </div>
-        </div>
-    );
-}
+import Codes from "./Codes";
+import Header from "./Header";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import { Breadcrumbs, Typography } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 
 function QrC() {
+  const title = "Scan QR Codes";
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <Header />
-            <div style={{ display: 'flex', flex: 1 }}>
-                <div>
-                    <SideBar />
-                </div>
-                <div style={{ flex: 2, paddingBottom: '50px' }}>
-                    <p className='font-normal text-2xl pt-10 ml-10'>Scan QR Codes</p>
-                    <p className='font-light text-lg ml-10'><Link to="/dashboard" className='text-blue-800'>Home</Link> &gt; Scan QR</p>
-                    <br /> <br />
-                    <div className='flex text-center justify-center items-center'>
-                        <Codes/>
-                    </div>
-                </div>
-            </div>
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <Header toggleSidebar={toggleSidebar} title={title} />
+      <div style={{ display: "flex", flex: 1 }}>
+        <div>
+          <SideBar
+            isSidebarOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
         </div>
-    );
+        <div style={{ flex: 2, paddingBottom: "50px" }}>
+          <p className="pt-10 ml-10 text-2xl font-normal">Scan QR Codes</p>
+          <div className="mt-2 ml-10">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link
+                underline="hover"
+                sx={{ display: "flex", alignItems: "center" }}
+                color="inherit"
+                path
+                to="/dashboard"
+              >
+                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Home
+              </Link>
+              <Typography
+                sx={{ display: "flex", alignItems: "center" }}
+                color="text.primary"
+              >
+                <QrCodeScannerIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+                Scan QR
+              </Typography>
+            </Breadcrumbs>
+          </div>
+          <br /> <br />
+          <div className="flex items-center justify-center text-center">
+            <Codes />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default QrC;
