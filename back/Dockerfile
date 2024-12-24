@@ -20,6 +20,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy your Laravel project into the container
 COPY . /var/www
 
+RUN npm install
+
+RUN npm build
+
 # Set file permissions (optional)
 RUN chown -R www-data:www-data /var/www
 
