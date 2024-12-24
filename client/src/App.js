@@ -79,7 +79,7 @@ function App() {
             <Route path="/admin/users-list" element={<Users />} />
           </Route>
         </Routes>
-      </Router>
+      </BrowserRouter>
     </AdminProvider>
   );
 }
