@@ -1,6 +1,6 @@
 import "./styles/Tailwind.css";
 import LogIn from "./Request/Login";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Forgot from "./Request/Forgot";
 import SignUp from "./Request/Signup";
 import DashBoard from "./Dashboard/Dashboard";
@@ -35,7 +35,7 @@ import TransferedBranchUnits from "./Dashboard/transferedBranchUnits";
 function App() {
   return (
     <AdminProvider>
-      <Router basename="/monitoring">
+      <BrowserRouter>
         <Routes>
           <Route element={<AuthContext />}>
             <Route path="/login" element={<LogIn />}></Route>
