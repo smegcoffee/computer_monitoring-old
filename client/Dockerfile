@@ -13,6 +13,9 @@ RUN npm install --force
 # Copy the remaining application files to the working directory
 COPY . .
 
+# Set the homepage for React
+RUN sed -i 's/"homepage": ""/"homepage": "\/monitoring"/' package.json
+
 # Build the application
 RUN npm run build
 
