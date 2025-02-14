@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import smct from "../img/smct.png";
 import bg from "../img/bg.png";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
-
-//This is for the Searchable Dropdown
 
 const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +87,6 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   );
 };
 
-// END OF THE SEARCHABLE DROPDOWN
 
 function Backg() {
   return (
@@ -118,7 +115,7 @@ function SignUp() {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await axios.get("/api/branch-code");
+        const response = await api.get("/branch-code");
         setBranches(response.data);
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -129,8 +126,6 @@ function SignUp() {
   }, []);
 
   const [loading, setLoading] = useState(false);
-  //eslint-disable-next-line
-  const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const options = branches.branches.map((branch) => ({
@@ -146,7 +141,7 @@ function SignUp() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("/api/register", inputValues);
+      const response = await api.post("/register", inputValues);
       if (response.data.status === true) {
         Swal.fire({
           icon: "success",
@@ -159,7 +154,6 @@ function SignUp() {
           window.location = "/login";
         });
         setSuccess(response.data.message);
-        setError("");
         setValidationErrors("");
         setInputValues({
           firstName: "",
@@ -177,8 +171,7 @@ function SignUp() {
       console.error("Error: ", error);
       setSuccess("");
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -198,20 +191,23 @@ function SignUp() {
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    document.title = "Computer Monitoring - Signup";
+  });
   return (
     <div className="relative min-h-screen">
       <Backg />
       <div className="flex flex-col items-center pt-20" style={{ zIndex: 1 }}>
         <img src={smct} alt="SMCT Logo" className="block h-32 m-0 w-72"></img>
-        <h1 className="mt-5 text-4xl font-bold">COMPUTER MONITORING SYSTEM</h1>
+        <h1 className="mt-5 text-xl font-bold md:text-4xl">
+          COMPUTER MONITORING SYSTEM
+        </h1>
         <h1 className="mt-2 text-4xl font-medium">Sign Up</h1>
         <form onSubmit={handleSubmit}>
           <div className="w-full max-w-2xl p-4 mt-10 rounded">
@@ -223,7 +219,7 @@ function SignUp() {
                   id="firstName"
                   className={
                     validationErrors.firstName
-                      ? " w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? " w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : " w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="First Name"
@@ -247,7 +243,7 @@ function SignUp() {
                   id="lastName"
                   className={
                     validationErrors.lastName
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Last Name"
@@ -273,7 +269,7 @@ function SignUp() {
                   id="contactNumber"
                   className={
                     validationErrors.contactNumber
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Contact Number"
@@ -297,7 +293,7 @@ function SignUp() {
                   id="email"
                   className={
                     validationErrors.email
-                      ? "w-full h-12 px-4 rounded-md border border-gray-300 mr-2 border-red-500"
+                      ? "w-full h-12 px-4 rounded-md border mr-2 border-red-500"
                       : "w-full h-12 px-4 rounded-md border border-gray-300 mr-2"
                   }
                   placeholder="Email"
@@ -342,7 +338,7 @@ function SignUp() {
                 id="username"
                 className={
                   validationErrors.username
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Username"
@@ -368,7 +364,7 @@ function SignUp() {
                 id="password"
                 className={
                   validationErrors.password
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Password"
@@ -394,7 +390,7 @@ function SignUp() {
                 id="password_confirmation"
                 className={
                   validationErrors.password_confirmation
-                    ? "w-full h-12 px-4 rounded-md border border-gray-300 border-red-500"
+                    ? "w-full h-12 px-4 rounded-md border border-red-500"
                     : "w-full h-12 px-4 rounded-md border border-gray-300"
                 }
                 placeholder="Confirm Password"

@@ -1,54 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../api/axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers } from '@fortawesome/free-solid-svg-icons';
-import { ChartBox } from '../Dashboard/Db2';
+import { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers } from "@fortawesome/free-solid-svg-icons";
+import { ChartBox } from "../Dashboard/Db2";
 
-const ChartBoxUser = () => {
+const ChartBoxUser = ({
+  dashboardData,
+  dashboardWeeklyUsers,
+  dashboardUserPercent,
+  dashboardLoading,
+}) => {
   const [chartDataUser, setChartDataUser] = useState([]);
+  const [weeklyUsers, setWeeklyUsers] = useState([]);
+  const [userPercent, setUserPercent] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchChartDataUser = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Token not found');
-        }
-        const response = await axios.get('/api/dashboard', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setChartDataUser(response.data);
+        setChartDataUser(dashboardData);
+        setWeeklyUsers(dashboardWeeklyUsers);
+        setUserPercent(dashboardUserPercent);
       } catch (error) {
-        console.error('Error fetching chart data:', error);
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(dashboardLoading);
       }
     };
-
-    fetchChartDataUser();
-  }, []);
+    fetchData();
+  }, [
+    dashboardData,
+    dashboardWeeklyUsers,
+    dashboardUserPercent,
+    dashboardLoading,
+  ]);
 
   const chartBoxUser = {
     color: "#ffff00",
     icon: <FontAwesomeIcon icon={faUsers} />,
     title: "Total Users",
-    number: chartDataUser.totalUsers,
+    number: loading ? "Loading..." : chartDataUser.totalUsers,
     dataKey: "Users",
-    percentage: 45,
-    chartData: [
-      { name: "Sun", Users: 400 },
-      { name: "Mon", Users: 600 },
-      { name: "Tue", Users: 500 },
-      { name: "Wed", Users: 700 },
-      { name: "Thu", Users: 400 },
-      { name: "Fri", Users: 500 },
-      { name: "Sat", Users: 450 },
-    ],
+    percentage: loading ? "..." : userPercent,
+    chartData: weeklyUsers,
   };
 
-  return (
-    <ChartBox {...chartBoxUser} />
-  );
+  return <ChartBox {...chartBoxUser} />;
 };
 
 export default ChartBoxUser;
