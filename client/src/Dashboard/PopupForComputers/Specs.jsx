@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import smct from "./../../img/smct.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,33 +15,37 @@ import { format } from "date-fns";
 import CloseIcon from "@mui/icons-material/Close";
 import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { useTable, useSortBy } from "react-table";
+import api from "../../api/axios";
 
-function Specs({
-  isOpen,
-  onClose,
-  specsData,
-  specsPopupData,
-  setSpecsPopupData,
-}) {
-  const [id, setId] = useState("");
+function Specs({ isOpen, onClose, specsId }) {
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [computerUser, setComputerUser] = useState("");
 
   useEffect(() => {
-    // Flatten units from each computer into rows
-    if (Array.isArray(specsPopupData.computers)) {
-      const specsData = specsPopupData.computers.flatMap((computer) =>
-        computer.units.map((unit) => ({
-          ...unit,
-          computerName: computer.name,
-        }))
-      );
-      setUnits(specsData);
-      const id = specsPopupData.computers.map((comp) => comp.id);
-      setId(id);
+    if (!isOpen || !specsId) {
+      return;
     }
-    setLoading(false);
-  }, [specsPopupData]);
+    const fetchSpecsData = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get(`computer-user-specs/${specsId}`);
+        if (response.status === 200) {
+          const specs = response.data.computer_user_specs;
+          const computers = specs.computers;
+          const units = computers[0].units;
+          setComputerUser(specs.name);
+          setUnits(units);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSpecsData();
+  }, [isOpen, specsId]);
 
   const columns = useMemo(
     () => [
@@ -51,7 +55,8 @@ function Specs({
       { Header: "SUPPLIER", accessor: "supplier.supplier_name" },
       {
         Header: "DATE OF PURCHASE",
-        accessor: (row) => format(new Date(row.date_of_purchase), "MMMM dd, yyyy"),
+        accessor: (row) =>
+          format(new Date(row.date_of_purchase), "MMMM dd, yyyy"),
       },
       { Header: "SERIAL NUMBER", accessor: "serial_number" },
     ],
@@ -69,14 +74,20 @@ function Specs({
       useSortBy
     );
 
+  const handleClose = () => {
+    onClose();
+    setUnits([]);
+  };
+
   if (!isOpen) {
-    return null; // Render nothing if isOpen is false
+    return null;
   }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
         className="bg-white shadow-md rounded-2xl"
-        style={{ maxWidth: "100vh", maxHeight: "100vh" }}
+        style={{ maxWidth: "100vh", maxHeight: "85vh" }}
       >
         <div className="relative flex p-5 bg-blue-500 rounded-tr-2xl rounded-tl-2xl">
           <div className="flex-none">
@@ -87,14 +98,14 @@ function Specs({
             ></img>
           </div>
           <div className="text-3xl font-medium text-white flex-2 ml-28 mt-7">
-            Computer User: {specsPopupData.name}
+            Computer User: {loading ? "Loading..." : computerUser}
           </div>
           <CloseIcon
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute text-white cursor-pointer right-5 top-5"
           />
         </div>
-        <div className="max-h-screen mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify">
+        <div className="max-h-[calc(85vh-130px)] mt-6 mb-4 ml-6 mr-6 overflow-y-scroll text-justify">
           <h2 className="mb-4 text-xl font-semibold">Specifications:</h2>
           <TableContainer component={Paper}>
             <Table {...getTableProps()}>

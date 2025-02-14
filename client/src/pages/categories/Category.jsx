@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
-import SideBar from "../../Dashboard/Sidebar";
+import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
 import {
@@ -10,7 +9,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import {
   Breadcrumbs,
   Table,
@@ -24,7 +23,6 @@ import {
   Typography,
 } from "@mui/material";
 import { format } from "date-fns";
-import Header from "../../Dashboard/Header";
 import HomeIcon from "@mui/icons-material/Home";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import AddCategoryModal from "../../components/modals/AddCategoryModal";
@@ -32,11 +30,6 @@ import Swal from "sweetalert2";
 import EditCategoryModal from "../../components/modals/EditCategoryModal";
 
 function Category() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   const [Categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -88,15 +81,7 @@ function Category() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/categories", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/categories");
         const categories = response.data.data || [];
 
         setCategories(categories);
@@ -123,16 +108,7 @@ function Category() {
         confirmButtonText: "Yes, delete it!",
       });
       if (result.isConfirmed) {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-
-        const response = await axios.delete(`/api/category-delete/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.delete(`category-delete/${id}`);
 
         if (response.status === 200) {
           Swal.fire({
@@ -218,173 +194,153 @@ function Category() {
       useSortBy
     );
 
-  const title = "All Categories";
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header toggleSidebar={toggleSidebar} title={title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <div>
-          <SideBar
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-          />
-        </div>
-        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">All Category</p>
-          <div className="mt-2 ml-10">
-            <Breadcrumbs aria-label="breadcrumb">
-              <Link
-                underline="hover"
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-                path
-                to="/dashboard"
-              >
-                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Home
-              </Link>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <FormatListBulletedIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                All Category
-              </Typography>
-            </Breadcrumbs>
+    <>
+      <p className="pt-10 ml-10 text-2xl font-normal">All Category</p>
+      <div className="mt-2 ml-10">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+            path
+            to="/dashboard"
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <FormatListBulletedIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            All Category
+          </Typography>
+        </Breadcrumbs>
+      </div>
+      <br /> <br />
+      <div className="h-full ml-10 mr-10">
+        {/* Search bar */}
+        <div className="flex items-center justify-between">
+          <div>
+            <TextField
+              label="Search..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              variant="outlined"
+              fullWidth
+              sx={{ width: 300 }}
+              size="small"
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
           </div>
-          <br /> <br />
-          <div className="h-full ml-10 mr-10">
-            {/* Search bar */}
-            <div className="flex items-center justify-between">
-              <div>
-                <TextField
-                  label="Search..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ width: 300 }}
-                  size="small"
-                  margin="normal"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </div>
-              <div>
-                <button
-                  onClick={openAddModal}
-                  className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          <div>
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <FontAwesomeIcon icon={faPlus} /> Add Category
+            </button>
+          </div>
+        </div>
+        <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow
+                  className="bg-blue-400"
+                  {...headerGroup.getHeaderGroupProps()}
                 >
-                  <FontAwesomeIcon icon={faPlus} /> Add Category
-                </button>
-              </div>
-            </div>
-            <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
-              <Table {...getTableProps()}>
-                <TableHead>
-                  {headerGroups.map((headerGroup) => (
-                    <TableRow
-                      className="bg-blue-400"
-                      {...headerGroup.getHeaderGroupProps()}
+                  {headerGroup.headers.map((column) => (
+                    <TableCell
+                      align="center"
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      style={{ cursor: "pointer" }}
                     >
-                      {headerGroup.headers.map((column) => (
-                        <TableCell
-                          align="center"
-                          {...column.getHeaderProps(
-                            column.getSortByToggleProps()
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        color={"white"}
+                      >
+                        {column.render("Header")}
+                        <span className="ml-2">
+                          {column.isSorted ? (
+                            column.isSortedDesc ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            )
+                          ) : (
+                            ""
                           )}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color={"white"}
-                          >
-                            {column.render("Header")}
-                            <span className="ml-2">
-                              {column.isSorted ? (
-                                column.isSortedDesc ? (
-                                  <FontAwesomeIcon icon={faArrowDown} />
-                                ) : (
-                                  <FontAwesomeIcon icon={faArrowUp} />
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </span>
-                          </Typography>
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                        </span>
+                      </Typography>
+                    </TableCell>
                   ))}
-                </TableHead>
-                <TableBody {...getTableBodyProps()}>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={4}>
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-full p-4 rounded">
-                            <div className="flex space-x-4 animate-pulse">
-                              <div className="flex-1 py-1 space-y-6">
-                                <div className="h-10 bg-gray-200 rounded shadow"></div>
-                              </div>
-                            </div>
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="w-full p-4 rounded">
+                        <div className="flex space-x-4 animate-pulse">
+                          <div className="flex-1 py-1 space-y-6">
+                            <div className="h-10 bg-gray-200 rounded shadow"></div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows &&
+                rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                    prepareRow(row);
+                    return (
+                      <TableRow {...row.getRowProps()}>
+                        {row.cells.map((cell) => (
+                          <TableCell align="center" {...cell.getCellProps()}>
+                            {cell.render("Cell")}
+                          </TableCell>
                         ))}
-                      </TableCell>
-                    </TableRow>
-                  ) : (rows &&
-                    rows
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((row) => {
-                        prepareRow(row);
-                        return (
-                          <TableRow {...row.getRowProps()}>
-                            {row.cells.map((cell) => (
-                              <TableCell
-                                align="center"
-                                {...cell.getCellProps()}
-                              >
-                                {cell.render("Cell")}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })
-                  )}
-                  {!loading && filteredCategories.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        {searchTerm
-                          ? `No "${searchTerm}" result found.`
-                          : "No category found."}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              <TablePagination
-                rowsPerPageOptions={[10, 15, 20]}
-                component="div"
-                count={filteredCategories.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage={
-                  <Typography variant="subtitle" fontWeight={600}>
-                    Entries Per Page:
-                  </Typography>
-                }
-              />
-            </TableContainer>
-          </div>
-        </div>
+                      </TableRow>
+                    );
+                  })
+              )}
+              {!loading && filteredCategories.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    {searchTerm
+                      ? `No "${searchTerm}" result found.`
+                      : "No category found."}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[10, 15, 20]}
+            component="div"
+            count={filteredCategories.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={
+              <Typography variant="subtitle" fontWeight={600}>
+                Entries Per Page:
+              </Typography>
+            }
+          />
+        </TableContainer>
       </div>
       <AddCategoryModal
         isOpen={isAddModalOpen}
@@ -397,7 +353,7 @@ function Category() {
         isRefresh={setIsRefresh}
         id={categoryId}
       />
-    </div>
+    </>
   );
 }
 

@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
-import SideBar from "./Sidebar";
+import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import {
   Breadcrumbs,
-  Slide,
   Table,
   TableBody,
   TableCell,
@@ -16,28 +14,18 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Toolbar,
   Typography,
 } from "@mui/material";
-import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
 
 function AllUnits() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  const [open, setOpen] = useState(false);
-  const [selectedUnit, setSelectedUnit] = useState(null);
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUnits, setFilteredUnits] = useState([]);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     setFilteredUnits(units);
@@ -49,18 +37,18 @@ function AllUnits() {
 
     const filteredData = units.filter(
       (unit) =>
-        unit.unit_code.toLowerCase().includes(searchValue) ||
-        unit.date_of_purchase.toLowerCase().includes(searchValue) ||
-        unit.description.toLowerCase().includes(searchValue) ||
-        unit.serial_number.toLowerCase().includes(searchValue) ||
-        unit.status.toLowerCase().includes(searchValue) ||
-        unit.supplier.supplier_name.toLowerCase().includes(searchValue) ||
-        unit.category.category_name.toLowerCase().includes(searchValue) ||
+        unit.unit_code?.toLowerCase().includes(searchValue) ||
+        unit.date_of_purchase?.toLowerCase().includes(searchValue) ||
+        unit.description?.toLowerCase().includes(searchValue) ||
+        unit.serial_number?.toLowerCase().includes(searchValue) ||
+        unit.status?.toLowerCase().includes(searchValue) ||
+        unit.supplier.supplier_name?.toLowerCase().includes(searchValue) ||
+        unit.category.category_name?.toLowerCase().includes(searchValue) ||
         unit.transfer_units
           .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
-          ?.computer_user?.name.toLowerCase()
-          .includes(searchValue.toLowerCase()) ||
-        unit.status.toLowerCase().includes(searchValue)
+          ?.computer_user?.name?.toLowerCase()
+          .includes(searchValue?.toLowerCase()) ||
+        unit.status?.toLowerCase().includes(searchValue)
     );
 
     setFilteredUnits(filteredData);
@@ -79,22 +67,11 @@ function AllUnits() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/units", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/units");
         const unit = response.data.data;
         setUnits(unit);
       } catch (error) {
         console.error("Error all units:", error);
-        if (error.response.status === 404) {
-          setError(true);
-        }
       } finally {
         setLoading(false);
       }
@@ -102,16 +79,6 @@ function AllUnits() {
 
     fetchUnits();
   }, []);
-
-  const handleClickOpen = (unit) => {
-    setSelectedUnit(unit);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedUnit(null);
-  };
 
   const columns = useMemo(
     () => [
@@ -164,180 +131,158 @@ function AllUnits() {
     headerGroups,
     rows,
     prepareRow,
-    state: { sortBy },
   } = useTable({ columns, data }, useSortBy);
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  const title = "All Units";
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header toggleSidebar={toggleSidebar} title={title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <div>
-          <SideBar
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-          />
-        </div>
-        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">All Units</p>
-          <div className="mt-2 ml-10">
-            <Breadcrumbs aria-label="breadcrumb">
-              <Link
-                underline="hover"
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-                path
-                to="/dashboard"
-              >
-                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Home
-              </Link>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                All Units
-              </Typography>
-            </Breadcrumbs>
-          </div>
-          <br /> <br />
-          <div className="h-full ml-10 mr-10">
-            {/* Search bar */}
-            <TextField
-              label="Search..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              variant="outlined"
-              fullWidth
-              sx={{ width: 300 }}
-              size="small"
-              margin="normal"
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
-              <Table {...getTableProps()}>
-                <TableHead>
-                  {headerGroups.map((headerGroup) => (
-                    <TableRow
-                      {...headerGroup.getHeaderGroupProps()}
-                      className="bg-blue-400"
+    <>
+      <p className="pt-10 ml-10 text-2xl font-normal">All Units</p>
+      <div className="mt-2 ml-10">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+            path
+            to="/dashboard"
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            All Units
+          </Typography>
+        </Breadcrumbs>
+      </div>
+      <br /> <br />
+      <div className="h-full ml-10 mr-10">
+        {/* Search bar */}
+        <TextField
+          label="Search..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          variant="outlined"
+          fullWidth
+          sx={{ width: 300 }}
+          size="small"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow
+                  {...headerGroup.getHeaderGroupProps()}
+                  className="bg-blue-400"
+                >
+                  {headerGroup.headers.map((column) => (
+                    <TableCell
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      align="center"
                     >
-                      {headerGroup.headers.map((column) => (
-                        <TableCell
-                          {...column.getHeaderProps(
-                            column.getSortByToggleProps()
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        color="white"
+                      >
+                        {column.render("Header")}
+                        <span className="ml-2">
+                          {column.isSorted ? (
+                            column.isSortedDesc ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            )
+                          ) : (
+                            ""
                           )}
-                          align="center"
-                        >
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="white"
-                          >
-                            {column.render("Header")}
-                            <span className="ml-2">
-                              {column.isSorted ? (
-                                column.isSortedDesc ? (
-                                  <FontAwesomeIcon icon={faArrowDown} />
-                                ) : (
-                                  <FontAwesomeIcon icon={faArrowUp} />
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </span>
-                          </Typography>
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                        </span>
+                      </Typography>
+                    </TableCell>
                   ))}
-                </TableHead>
-                <TableBody {...getTableBodyProps()}>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={8}>
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-full p-4 rounded">
-                            <div className="flex space-x-4 animate-pulse">
-                              <div className="flex-1 py-1 space-y-6">
-                                <div className="h-10 bg-gray-200 rounded shadow"></div>
-                              </div>
-                            </div>
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8}>
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="w-full p-4 rounded">
+                        <div className="flex space-x-4 animate-pulse">
+                          <div className="flex-1 py-1 space-y-6">
+                            <div className="h-10 bg-gray-200 rounded shadow"></div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                    prepareRow(row);
+                    return (
+                      <TableRow {...row.getRowProps()}>
+                        {row.cells.map((cell) => (
+                          <TableCell {...cell.getCellProps()} align="center">
+                            {cell.render("Cell")}
+                          </TableCell>
                         ))}
+                      </TableRow>
+                    );
+                  })
+              )}
+              {loading
+                ? ""
+                : emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={8}>
+                        {filteredUnits.length === 0 ? (
+                          !searchTerm ? (
+                            <p className="text-xl text-center">
+                              No units to found.
+                            </p>
+                          ) : (
+                            <p className="text-xl text-center">
+                              No "{searchTerm}" result found.
+                            </p>
+                          )
+                        ) : (
+                          ""
+                        )}{" "}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    rows
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((row) => {
-                        prepareRow(row);
-                        return (
-                          <TableRow {...row.getRowProps()}>
-                            {row.cells.map((cell) => (
-                              <TableCell
-                                {...cell.getCellProps()}
-                                align="center"
-                              >
-                                {cell.render("Cell")}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })
                   )}
-                  {loading
-                    ? ""
-                    : emptyRows > 0 && (
-                        <TableRow style={{ height: 53 * emptyRows }}>
-                          <TableCell colSpan={8}>
-                            {filteredUnits.length === 0 ? (
-                              !searchTerm ? (
-                                <p className="text-xl text-center">
-                                  No units to found.
-                                </p>
-                              ) : (
-                                <p className="text-xl text-center">
-                                  No "{searchTerm}" result found.
-                                </p>
-                              )
-                            ) : (
-                              ""
-                            )}{" "}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                </TableBody>
-              </Table>
-              <TablePagination
-                rowsPerPageOptions={[10, 15, 20]}
-                component="div"
-                count={filteredUnits.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage={
-                  <Typography variant="subtitle" fontWeight={600}>
-                    Entries Per Page:
-                  </Typography>
-                }
-              />
-            </TableContainer>
-          </div>
-        </div>
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[10, 15, 20]}
+            component="div"
+            count={filteredUnits.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={
+              <Typography variant="subtitle" fontWeight={600}>
+                Entries Per Page:
+              </Typography>
+            }
+          />
+        </TableContainer>
       </div>
-    </div>
+    </>
   );
 }
 

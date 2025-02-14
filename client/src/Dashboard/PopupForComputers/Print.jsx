@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import "../../styles/Printing.css";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import "../../styles/printing.css";
 import header from "../../img/headerForPrinting.png";
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import { format } from "date-fns";
 
 const PrintInformation = () => {
@@ -19,19 +19,18 @@ const PrintInformation = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id) {
+      return;
+    }
     const fetchComputerData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get(`/api/computers/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.data.status) {
+        const response = await api.get(`computers/${id}`);
+        console.log(response);
+        if (response.status === 200) {
           setComputer(response.data.computer);
+
+          window.print();
+          window.onafterprint = handleAfterPrint;
         } else {
           console.error("Fetch error:", response.data.message);
         }
@@ -43,23 +42,11 @@ const PrintInformation = () => {
     };
 
     fetchComputerData();
-  }, []);
+  }, [id]);
 
-  useEffect(() => {
-    const handleAfterPrint = () => {
-      window.location.href = "/monitoring/computers";
-    };
-
-    window.onload = () => {
-      window.print();
-      window.onafterprint = handleAfterPrint;
-    };
-
-    return () => {
-      window.onload = null;
-      window.onafterprint = null;
-    };
-  }, []);
+  const handleAfterPrint = () => {
+    window.location.href = "/computers";
+  };
 
   useEffect(() => {
     document.title = loading
@@ -72,8 +59,8 @@ const PrintInformation = () => {
   if (loading) {
     return (
       <div>
-        <div class="flex items-center justify-center min-h-screen bg-gray-100">
-          <div class="w-16 h-16 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="w-16 h-16 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
           <p className="absolute mt-24 text-xl text-center">
             <strong>Loading...</strong>
           </p>
@@ -82,7 +69,7 @@ const PrintInformation = () => {
     );
   }
   return (
-    <div>
+    <div className="fixed inset-0 w-full h-full bg-white z-[100] ">
       <img src={header} alt="Header" />
       <p className="text-xl">
         User ID: <b>{computer?.computer_user_id}</b>
@@ -106,7 +93,7 @@ const PrintInformation = () => {
             "No formatting has been applied yet."
           ) : (
             <span
-              class={
+              className={
                 computer?.formatted_status >= 10
                   ? "bg-red-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
                   : "bg-yellow-500 text-white text-sm font-semibold px-4 py-1 rounded-full"
@@ -184,7 +171,12 @@ const PrintInformation = () => {
           {computer?.installed_applications.length === 0
             ? "No records yet."
             : computer?.installed_applications.map((item, idx) => (
-                <span className="px-5 py-2 border rounded-full bg-slate-100 hover:bg-slate-200" key={idx}>{item.application_content}</span>
+                <span
+                  className="px-5 py-2 border rounded-full bg-slate-100 hover:bg-slate-200"
+                  key={idx}
+                >
+                  {item.application_content}
+                </span>
               ))}
         </div>
       ) : (

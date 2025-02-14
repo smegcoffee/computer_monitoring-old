@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTable, useSortBy } from "react-table";
 import {
   faArrowDown,
   faArrowUp,
   faArrowUpRightFromSquare,
-  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
-import Swal from "sweetalert2";
+import api from "../api/axios";
 import {
   AppBar,
   Breadcrumbs,
@@ -34,20 +31,14 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import MultipleStopIcon from "@mui/icons-material/MultipleStop";
 import { format } from "date-fns";
-import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
-import DevicesIcon from "@mui/icons-material/Devices";
+import ApartmentIcon from "@mui/icons-material/Apartment";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 function TransferedBranchUnits() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   const [open, setOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [units, setUnits] = useState([]);
@@ -56,7 +47,6 @@ function TransferedBranchUnits() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUnits, setFilteredUnits] = useState([]);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     setFilteredUnits(units);
@@ -90,22 +80,13 @@ function TransferedBranchUnits() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/units", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const unit = response.data.data.filter((unit) => unit.transfer_branch_units.length > 0);
+        const response = await api.get("/units");
+        const unit = response.data.data.filter(
+          (unit) => unit.transfer_branch_units.length > 0
+        );
         setUnits(unit);
       } catch (error) {
         console.error("Error user unit transfered:", error);
-        if (error.response.status === 404) {
-          setError(true);
-        }
       } finally {
         setLoading(false);
       }
@@ -169,7 +150,8 @@ function TransferedBranchUnits() {
       {
         Header: "RECENT BRANCH",
         accessor: "branch_old_data_unit",
-        Cell: ({ row }) => `${row.original.branch_old_data_unit.branch_code.branch_name_english} (${row.original.branch_old_data_unit.branch_code.branch_name})`,
+        Cell: ({ row }) =>
+          `${row.original.branch_old_data_unit.branch_code.branch_name_english} (${row.original.branch_old_data_unit.branch_code.branch_name})`,
       },
       {
         Header: "DEPARTMENT",
@@ -194,7 +176,6 @@ function TransferedBranchUnits() {
     headerGroups,
     rows,
     prepareRow,
-    state: { sortBy },
   } = useTable({ columns, data }, useSortBy);
 
   const {
@@ -203,187 +184,163 @@ function TransferedBranchUnits() {
     headerGroups: dialogHeaderGroups,
     rows: dialogRows,
     prepareRow: prepareDialogRow,
-    state: { sortBy: dialogSortBy },
   } = useTable({ columns: dialogColumns, data: dialogData }, useSortBy);
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  const title = "User Unit Transfered";
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header toggleSidebar={toggleSidebar} title={title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <div>
-          <SideBar
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-          />
-        </div>
-        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">
-            User Unit Transfered
-          </p>
-          <div className="mt-2 ml-10">
-            <Breadcrumbs aria-label="breadcrumb">
-              <Link
-                underline="hover"
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-                path
-                to="/dashboard"
-              >
-                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Home
-              </Link>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <MultipleStopIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Transfered Units
-              </Typography>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <DevicesIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                User Unit Transfered
-              </Typography>
-            </Breadcrumbs>
-          </div>
-          <br /> <br />
-          <div className="h-full ml-10 mr-10">
-            {/* Search bar */}
-            <TextField
-              label="Search..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              variant="outlined"
-              fullWidth
-              sx={{ width: 300 }}
-              size="small"
-              margin="normal"
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
-              <Table {...getTableProps()}>
-                <TableHead>
-                  {headerGroups.map((headerGroup) => (
-                    <TableRow
-                      {...headerGroup.getHeaderGroupProps()}
-                      className="bg-blue-400"
+    <>
+      <p className="pt-10 ml-10 text-2xl font-normal">Branch Unit Transfered</p>
+      <div className="mt-2 ml-10">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+            path
+            to="/dashboard"
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <MultipleStopIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Transfered Branch Units
+          </Typography>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <ApartmentIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Branch Unit Transfered
+          </Typography>
+        </Breadcrumbs>
+      </div>
+      <br /> <br />
+      <div className="h-full ml-10 mr-10">
+        {/* Search bar */}
+        <TextField
+          label="Search..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          variant="outlined"
+          fullWidth
+          sx={{ width: 300 }}
+          size="small"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TableContainer className="mt-1 bg-white rounded-lg shadow-md">
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow
+                  {...headerGroup.getHeaderGroupProps()}
+                  className="bg-blue-400"
+                >
+                  {headerGroup.headers.map((column) => (
+                    <TableCell
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      align="center"
                     >
-                      {headerGroup.headers.map((column) => (
-                        <TableCell
-                          {...column.getHeaderProps(
-                            column.getSortByToggleProps()
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        color="white"
+                      >
+                        {column.render("Header")}
+                        <span className="ml-2">
+                          {column.isSorted ? (
+                            column.isSortedDesc ? (
+                              <FontAwesomeIcon icon={faArrowDown} />
+                            ) : (
+                              <FontAwesomeIcon icon={faArrowUp} />
+                            )
+                          ) : (
+                            ""
                           )}
-                          align="center"
-                        >
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="white"
-                          >
-                            {column.render("Header")}
-                            <span className="ml-2">
-                              {column.isSorted ? (
-                                column.isSortedDesc ? (
-                                  <FontAwesomeIcon icon={faArrowDown} />
-                                ) : (
-                                  <FontAwesomeIcon icon={faArrowUp} />
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </span>
-                          </Typography>
-                        </TableCell>
-                      ))}
-                    </TableRow>
+                        </span>
+                      </Typography>
+                    </TableCell>
                   ))}
-                </TableHead>
-                <TableBody {...getTableBodyProps()}>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={5}>
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="w-full p-4 rounded">
-                            <div className="flex space-x-4 animate-pulse">
-                              <div className="flex-1 py-1 space-y-6">
-                                <div className="h-10 bg-gray-200 rounded shadow"></div>
-                              </div>
-                            </div>
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="w-full p-4 rounded">
+                        <div className="flex space-x-4 animate-pulse">
+                          <div className="flex-1 py-1 space-y-6">
+                            <div className="h-10 bg-gray-200 rounded shadow"></div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                    prepareRow(row);
+                    return (
+                      <TableRow {...row.getRowProps()}>
+                        {row.cells.map((cell) => (
+                          <TableCell {...cell.getCellProps()} align="center">
+                            {cell.render("Cell")}
+                          </TableCell>
                         ))}
+                      </TableRow>
+                    );
+                  })
+              )}
+              {loading
+                ? ""
+                : emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={5}>
+                        {filteredUnits.length === 0 ? (
+                          !searchTerm ? (
+                            <p className="text-xl text-center">
+                              No units to found.
+                            </p>
+                          ) : (
+                            <p className="text-xl text-center">
+                              No "{searchTerm}" result found.
+                            </p>
+                          )
+                        ) : (
+                          ""
+                        )}{" "}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    rows
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((row) => {
-                        prepareRow(row);
-                        return (
-                          <TableRow {...row.getRowProps()}>
-                            {row.cells.map((cell) => (
-                              <TableCell
-                                {...cell.getCellProps()}
-                                align="center"
-                              >
-                                {cell.render("Cell")}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })
                   )}
-                  {loading
-                    ? ""
-                    : emptyRows > 0 && (
-                        <TableRow style={{ height: 53 * emptyRows }}>
-                          <TableCell colSpan={5}>
-                            {filteredUnits.length === 0 ? (
-                              !searchTerm ? (
-                                <p className="text-xl text-center">
-                                  No units to found.
-                                </p>
-                              ) : (
-                                <p className="text-xl text-center">
-                                  No "{searchTerm}" result found.
-                                </p>
-                              )
-                            ) : (
-                              ""
-                            )}{" "}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                </TableBody>
-              </Table>
-              <TablePagination
-                rowsPerPageOptions={[10, 15, 20]}
-                component="div"
-                count={filteredUnits.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage={
-                  <Typography variant="subtitle" fontWeight={600}>
-                    Entries Per Page:
-                  </Typography>
-                }
-              />
-            </TableContainer>
-          </div>
-        </div>
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[10, 15, 20]}
+            component="div"
+            count={filteredUnits.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={
+              <Typography variant="subtitle" fontWeight={600}>
+                Entries Per Page:
+              </Typography>
+            }
+          />
+        </TableContainer>
       </div>
       {selectedUnit && (
         <Dialog
@@ -488,7 +445,7 @@ function TransferedBranchUnits() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }
 

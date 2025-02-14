@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp, faArrowDown } from "@fortawesome/free-solid-svg-icons";
-import { TablePagination } from "@material-ui/core";
+import { TablePagination } from "@mui/material";
 import Swal from "sweetalert2";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import { format } from "date-fns";
 
 function Add({ isOpen, onClose, onSubmit, refresh }) {
@@ -28,13 +28,11 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   const [checkedRows, setCheckedRows] = useState([]);
   const [computerUser, setComputerUser] = useState({ data: [] });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [computer, setComputer] = useState({
     computer_user: "",
   });
   const [vloading, setvLoading] = useState(true);
-  const [verror, setvError] = useState(false);
   const [sortColumn, setSortColumn] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -45,22 +43,11 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   useEffect(() => {
     const fetchUnit = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/units", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/units");
         setVacantUnit(response.data.vacant || []);
         setvLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
-        if (error.response.status === 404) {
-          setvError(true);
-        }
         setvLoading(false);
       }
     };
@@ -71,15 +58,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
   useEffect(() => {
     const fetchComputerUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/computer-users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/computer-users");
         setComputerUser(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -91,11 +70,12 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
 
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
-      ? computerUser.data.map((cu) => ({
-          id: cu.id,
-          name: cu.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name))
+      ? computerUser.data
+          .map((cu) => ({
+            id: cu.id,
+            name: cu.name,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
       : [];
 
   const handleCheckboxClick = (unitId) => {
@@ -154,22 +134,10 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     onSubmit(true);
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        "api/add-computer",
-        {
-          checkedRows: checkedRows,
-          computer_user: computer.computer_user,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("/add-computer", {
+        checkedRows: checkedRows,
+        computer_user: computer.computer_user,
+      });
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -193,12 +161,10 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
         setComputer("");
         // setComputerUser("");
       }
-      console.log("Adding computer set:", response.data);
     } catch (error) {
       console.error("Error in adding computer set:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -219,7 +185,7 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       onSubmit(false);
@@ -281,374 +247,360 @@ function Add({ isOpen, onClose, onSubmit, refresh }) {
     filteredData.every((unit) => checkedRows.includes(unit.id));
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-gray-800 bg-opacity-50">
-      <div
-        className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-xl"
-        style={{ minWidth: "1100px", maxWidth: "100vh", maxHeight: "100vh" }}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-800 bg-opacity-50 h-screen">
+      <form
+        onSubmit={handleSubmitAssignedUser}
+        className="max-h-full overflow-hidden"
       >
-        <div className="text-justify">
-          <form onSubmit={handleSubmitAssignedUser}>
-            <div className="flex-none">
-              <TableContainer
-                component={Paper}
-                style={{
-                  borderTopLeftRadius: "10px",
-                  borderTopRightRadius: "10px",
-                }}
-              >
-                <Table>
-                  <TableHead>
-                    <TableRow className="bg-[#FF6600]">
-                      <TableCell align="center">
-                        <Checkbox
-                          checked={isAllChecked}
-                          onChange={handleSelectAll}
-                        />
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("unit_code")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          UNIT CODE{" "}
-                          {sortColumn === "unit_code" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("date_of_purchase")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          DATE OF PURCHASE{" "}
-                          {sortColumn === "date_of_purchase" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("category.category_name")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          CATEGORY{" "}
-                          {sortColumn === "category.category_name" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("description")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          DESCRIPTION{" "}
-                          {sortColumn === "description" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("supplier.supplier_name")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          SUPPLIER{" "}
-                          {sortColumn === "supplier.supplier_name" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("serial_number")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          SERIAL NO.{" "}
-                          {sortColumn === "serial_number" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        className="cursor-pointer"
-                        align="center"
-                        onClick={() => handleSort("status")}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          style={{ fontWeight: 700 }}
-                          className="text-white"
-                        >
-                          STATUS{" "}
-                          {sortColumn === "status" &&
-                            (sortOrder === "asc" ? (
-                              <FontAwesomeIcon icon={faArrowDown} />
-                            ) : (
-                              <FontAwesomeIcon icon={faArrowUp} />
-                            ))}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {vloading ? (
-                      <TableRow>
-                        <TableCell colSpan={8}>
-                          {[...Array(3)].map((_, i) => (
-                            <div key={i} className="w-full p-4 rounded">
-                              <div className="flex space-x-4 animate-pulse">
-                                <div className="flex-1 py-1 space-y-6">
-                                  <div className="h-10 bg-gray-200 rounded shadow"></div>
-                                </div>
-                              </div>
+        <div className="flex-none w-full mx-auto overflow-hidden bg-white rounded-t-xl">
+          <TableContainer
+            component={Paper}
+            style={{
+              maxHeight: "80vh",
+            }}
+          >
+            <Table className="max-h-[80vh]">
+              <TableHead className="sticky top-0 z-50">
+                <TableRow className="bg-[#FF6600]">
+                  <TableCell align="center">
+                    <Checkbox
+                      checked={isAllChecked}
+                      onChange={handleSelectAll}
+                    />
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("unit_code")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      UNIT CODE{" "}
+                      {sortColumn === "unit_code" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("date_of_purchase")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      DATE OF PURCHASE{" "}
+                      {sortColumn === "date_of_purchase" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("category.category_name")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      CATEGORY{" "}
+                      {sortColumn === "category.category_name" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("description")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      DESCRIPTION{" "}
+                      {sortColumn === "description" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("supplier.supplier_name")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      SUPPLIER{" "}
+                      {sortColumn === "supplier.supplier_name" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("serial_number")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      SERIAL NO.{" "}
+                      {sortColumn === "serial_number" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    align="center"
+                    onClick={() => handleSort("status")}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      style={{ fontWeight: 700 }}
+                      className="text-white"
+                    >
+                      STATUS{" "}
+                      {sortColumn === "status" &&
+                        (sortOrder === "asc" ? (
+                          <FontAwesomeIcon icon={faArrowDown} />
+                        ) : (
+                          <FontAwesomeIcon icon={faArrowUp} />
+                        ))}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody className="overflow-y-auto">
+                {vloading ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="w-full p-4 rounded">
+                          <div className="flex space-x-4 animate-pulse">
+                            <div className="flex-1 py-1 space-y-6">
+                              <div className="h-10 bg-gray-200 rounded shadow"></div>
                             </div>
+                          </div>
+                        </div>
+                      ))}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortRows(filteredData)
+                    .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+                    .map((un, index) => (
+                      <TableRow key={index}>
+                        <TableCell align="center">
+                          <Checkbox
+                            checked={checkedRows.includes(un.id)}
+                            onChange={() => handleCheckboxClick(un.id)}
+                            sx={
+                              validationErrors.checkedRows
+                                ? {
+                                    "& .MuiSvgIcon-root": {
+                                      border: "2px solid",
+                                      borderColor: "red",
+                                      borderRadius: "4px",
+                                    },
+                                    "&.Mui-checked .MuiSvgIcon-root": {
+                                      borderColor: "secondary.main",
+                                    },
+                                  }
+                                : {}
+                            }
+                          />
+                          <br />
+                          {validationErrors.checkedRows ? (
+                            <p className="text-xs text-red-500">
+                              Please check one or more first.
+                            </p>
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+                        <TableCell align="center">{un.unit_code}</TableCell>
+                        <TableCell align="center">
+                          {format(new Date(un.date_of_purchase), "yyyy-MM-dd")}
+                        </TableCell>
+                        <TableCell align="center">
+                          {un.category.category_name}
+                        </TableCell>
+                        <TableCell align="center">
+                          {un.description.split("\n").map((line, lineIndex) => (
+                            <div key={lineIndex}>{line}</div>
                           ))}
                         </TableCell>
+                        <TableCell align="center">
+                          {un.supplier.supplier_name}
+                        </TableCell>
+                        <TableCell align="center">{un.serial_number}</TableCell>
+                        <TableCell align="center">{un.status}</TableCell>
                       </TableRow>
-                    ) : (
-                      sortRows(filteredData)
-                        .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-                        .map((un, index) => (
-                          <TableRow key={index}>
-                            <TableCell align="center">
-                              <Checkbox
-                                checked={checkedRows.includes(un.id)}
-                                onChange={() => handleCheckboxClick(un.id)}
-                                sx={
-                                  validationErrors.checkedRows
-                                    ? {
-                                        "& .MuiSvgIcon-root": {
-                                          border: "2px solid",
-                                          borderColor: "red",
-                                          borderRadius: "4px",
-                                        },
-                                        "&.Mui-checked .MuiSvgIcon-root": {
-                                          borderColor: "secondary.main",
-                                        },
-                                      }
-                                    : {}
-                                }
-                              />
-                              <br />
-                              {validationErrors.checkedRows ? (
-                                <p className="text-xs text-red-500">
-                                  Please check one or more first.
-                                </p>
-                              ) : (
-                                ""
-                              )}
-                            </TableCell>
-                            <TableCell align="center">{un.unit_code}</TableCell>
-                            <TableCell align="center">
-                              {format(
-                                new Date(un.date_of_purchase),
-                                "yyyy-MM-dd"
-                              )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {un.category.category_name}
-                            </TableCell>
-                            <TableCell align="center">
-                              {un.description
-                                .split("\n")
-                                .map((line, lineIndex) => (
-                                  <div key={lineIndex}>{line}</div>
-                                ))}
-                            </TableCell>
-                            <TableCell align="center">
-                              {un.supplier.supplier_name}
-                            </TableCell>
-                            <TableCell align="center">
-                              {un.serial_number}
-                            </TableCell>
-                            <TableCell align="center">{un.status}</TableCell>
-                          </TableRow>
-                        ))
-                    )}
+                    ))
+                )}
 
-                    {vloading
-                      ? ""
-                      : emptyRows > 0 && (
-                          <TableRow style={{ height: 53 * emptyRows }}>
-                            <TableCell colSpan={8}>
-                              {filteredData.length === 0 ? (
-                                !searchTerm ? (
-                                  <p className="text-xl text-center">
-                                    No vacant units found.
-                                  </p>
-                                ) : (
-                                  <p className="text-xl text-center">
-                                    No "{searchTerm}" result found.
-                                  </p>
-                                )
-                              ) : (
-                                ""
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )}
-                  </TableBody>
-                </Table>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10]}
-                  component="div"
-                  count={filteredData.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={(event, newPage) =>
-                    handleChangePage(event, newPage)
+                {vloading
+                  ? ""
+                  : emptyRows > 0 && (
+                      <TableRow style={{ height: 53 * emptyRows }}>
+                        <TableCell colSpan={8}>
+                          {filteredData.length === 0 ? (
+                            !searchTerm ? (
+                              <p className="text-xl text-center">
+                                No vacant units found.
+                              </p>
+                            ) : (
+                              <p className="text-xl text-center">
+                                No "{searchTerm}" result found.
+                              </p>
+                            )
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+              </TableBody>
+            </Table>
+            <TablePagination
+              className="sticky bottom-0 bg-white"
+              rowsPerPageOptions={[5, 10]}
+              component="div"
+              count={filteredData.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(event, newPage) =>
+                handleChangePage(event, newPage)
+              }
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage={
+                <Typography variant="subtitle" fontWeight={600}>
+                  Entries Per Page:{" "}
+                </Typography>
+              }
+            />
+          </TableContainer>
+        </div>
+        <div className="flex items-center justify-between space-x-4 bg-white rounded-b-xl">
+          <div className="flex items-center gap-2">
+            <Autocomplete
+              freeSolo
+              id="user"
+              disableClearable
+              options={ComputerUser}
+              getOptionLabel={(option) => (option.name ? option.name : "")}
+              readOnly={ComputerUser.length === 0}
+              renderInput={(params) => (
+                <TextField
+                  required
+                  {...params}
+                  label={
+                    ComputerUser.length === 0
+                      ? "No user to select"
+                      : "Assign User"
                   }
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  labelRowsPerPage={
-                    <Typography variant="subtitle" fontWeight={600}>
-                      Entries Per Page:{" "}
-                    </Typography>
-                  }
-                />
-              </TableContainer>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex-none">
-                <Autocomplete
-                  freeSolo
-                  id="user"
-                  disableClearable
-                  options={ComputerUser}
-                  getOptionLabel={(option) => (option.name ? option.name : "")}
-                  readOnly={ComputerUser.length === 0}
-                  renderInput={(params) => (
-                    <TextField
-                      required
-                      {...params}
-                      label={
-                        ComputerUser.length === 0
-                          ? "No user to select"
-                          : "Assign User"
-                      }
-                      InputProps={{
-                        ...params.InputProps,
-                        type: "search",
-                      }}
-                      sx={{ width: 300 }}
-                      variant="outlined"
-                      style={{
-                        marginLeft: "20px",
-                        marginTop: "20px",
-                        marginBottom: "20px",
-                        width: "300px",
-                      }}
-                    />
-                  )}
-                  value={
-                    ComputerUser.find(
-                      (option) => option.id === computer.computer_user
-                    ) || {}
-                  }
-                  onChange={(event, newValue) => {
-                    setComputer({ ...computer, computer_user: newValue.id });
+                  InputProps={{
+                    ...params.InputProps,
+                    type: "search",
+                  }}
+                  sx={{ width: 300 }}
+                  variant="outlined"
+                  style={{
+                    marginLeft: "20px",
+                    marginTop: "20px",
+                    marginBottom: "20px",
+                    width: "300px",
                   }}
                 />
-              </div>
+              )}
+              value={
+                ComputerUser.find(
+                  (option) => option.id === computer.computer_user
+                ) || {}
+              }
+              onChange={(event, newValue) => {
+                setComputer({ ...computer, computer_user: newValue.id });
+              }}
+            />
 
-              <TextField
-                label="Search Unit"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                variant="outlined"
-                fullWidth
-                sx={{ width: 100 }}
-                size="small"
-                margin="normal"
-                style={{
-                  marginRight: "400px",
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-              <div className="items-center justify-center flex-1 text-center">
-                <button
-                  className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
-                  onClick={onClose}
-                >
-                  CANCEL
-                </button>
-                {filteredData.length === 0 ? (
-                  <button
-                    disabled
-                    type="submit"
-                    className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
-                  >
-                    {loading ? "ADDING..." : "ADD"}
-                  </button>
-                ) : (
-                  <button
-                    disabled={loading || checkedRows.length === 0}
-                    type="submit"
-                    className={
-                      loading || checkedRows.length === 0
-                        ? "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
-                        : "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
-                    }
-                  >
-                    {loading ? "ADDING..." : "ADD"}
-                  </button>
-                )}
-              </div>
-            </div>
-          </form>
+            <TextField
+              label="Search Unit"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              variant="outlined"
+              fullWidth
+              sx={{ width: 100 }}
+              size="small"
+              margin="normal"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </div>
+          <div className="flex items-end justify-end px-5 text-center">
+            <button
+              className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
+              onClick={onClose}
+            >
+              CANCEL
+            </button>
+            {filteredData.length === 0 ? (
+              <button
+                disabled
+                type="submit"
+                className="w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
+              >
+                {loading ? "ADDING..." : "ADD"}
+              </button>
+            ) : (
+              <button
+                disabled={loading || checkedRows.length === 0}
+                type="submit"
+                className={
+                  loading || checkedRows.length === 0
+                    ? "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-300 rounded-full cursor-not-allowed"
+                    : "w-24 h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full"
+                }
+              >
+                {loading ? "ADDING..." : "ADD"}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

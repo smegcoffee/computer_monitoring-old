@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import smct from "../img/smct.png";
 import bg from "../img/bg.png";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -9,8 +9,6 @@ import { Link } from "react-router-dom";
 
 function Placeholder({ texts }) {
   const [inputValues, setInputValues] = useState(texts.map(() => ""));
-  const [error, setError] = useState();
-  const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +22,7 @@ function Placeholder({ texts }) {
     event.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.put("/api/forgot-password", {
+      const response = await api.put("/forgot-password", {
         email: inputValues[0],
       });
       if (response.data.status === true) {
@@ -36,18 +34,14 @@ function Placeholder({ texts }) {
           confirmButtonText: "Ok",
           html: "You will redirected to Login page <br>Thank you!",
         }).then(function () {
-          window.location = "/monitoring/login";
+          window.location = "/login";
         });
-        setSuccess(response.data.message);
-        setError("");
         setValidationErrors("");
       }
-      console.log("Password reset email sent!", response.data);
     } catch (error) {
       console.error("Error sending password reset email:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         Swal.fire({
           icon: "error",
@@ -56,8 +50,6 @@ function Placeholder({ texts }) {
           confirmButtonColor: "#1e88e5",
           confirmButtonText: "Ok",
         });
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);

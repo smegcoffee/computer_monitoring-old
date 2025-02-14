@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import defaultImg from "../img/profile.png";
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
-import Header from "./Header";
-import SideBar from "./Sidebar";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import StorageUtils from "../utils/StorageUtils";
+import { useAuth } from "../context/AuthContext";
 
 const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -64,22 +62,10 @@ const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
   };
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setUser(userData);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, [userData]);
-
-  useEffect(() => {
-    if (user && user.data.branch_code.branch_name) {
-      setSearchTerm(user.data.branch_code.branch_name);
+    if (userData && userData.branch_code.branch_name) {
+      setSearchTerm(userData.branch_code.branch_name);
     }
-  }, [user]);
+  }, [userData]);
 
   return (
     <div ref={dropdownRef} className="relative flex items-center mt-4">
@@ -114,11 +100,9 @@ const SearchableDropdown = ({ options, placeholder, onSelect, userData }) => {
   );
 };
 
-function Placeholder({ onSubmit }) {
-  const [error, setError] = useState();
+function Placeholder() {
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState();
   const [inputValues, setInputValues] = useState({
     firstName: "",
     lastName: "",
@@ -131,49 +115,29 @@ function Placeholder({ onSubmit }) {
     newPassword_confirmation: "",
     profile_picture: null,
   });
-  const [image, setImage] = useState("");
   const [preview, setPreview] = useState(null);
-  const [user, setUser] = useState(null);
+  const [branches, setBranches] = useState({ branches: [] });
+  const { user, setIsRefresh } = useAuth();
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
+    setInputValues({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      contactNumber: user.contactNumber,
+      branch_code_id: user.branch_code.id,
+      username: user.username,
+      email: user.email,
+      profile_picture: user.profile_picture,
+      oldPassword: "",
+      newPassword: "",
+      newPassword_confirmation: "",
+    });
+  }, [user]);
 
-        const response = await axios.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setInputValues({
-          ...inputValues,
-          firstName: response.data.data.firstName,
-          lastName: response.data.data.lastName,
-          contactNumber: response.data.data.contactNumber,
-          branch_code_id: response.data.data.branch_code.id,
-          username: response.data.data.username,
-          email: response.data.data.email,
-          profile_picture: response.data.data.profile_picture,
-          oldPassword: "",
-          newPassword: "",
-          newPassword_confirmation: "",
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-  const [branches, setBranches] = useState({ branches: [] });
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await axios.get("/api/branch-code");
+        const response = await api.get("/branch-code");
         setBranches(response.data);
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -191,7 +155,6 @@ function Placeholder({ onSubmit }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file);
       setInputValues({ ...inputValues, profile_picture: file });
       setPreview(URL.createObjectURL(file));
     }
@@ -200,12 +163,8 @@ function Placeholder({ onSubmit }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    onSubmit(true);
+    setIsRefresh(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
       const formData = new FormData();
       formData.append("firstName", inputValues.firstName);
       formData.append("lastName", inputValues.lastName);
@@ -220,17 +179,12 @@ function Placeholder({ onSubmit }) {
         inputValues.newPassword_confirmation
       );
       formData.append("profile_picture", inputValues.profile_picture);
-      const response = await axios.post("/api/profile/update", formData, {
+      const response = await api.post("/profile/update", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
       if (response.data.status === true) {
-        setPreview(
-          // `http://localhost:8000/${response.data.data.profile_picture}`
-          `https://desstrongmotors.com/monitoringback/${response.data.data.profile_picture}`
-        );
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
@@ -249,8 +203,6 @@ function Placeholder({ onSubmit }) {
             title: response.data.message,
           });
         })();
-        setSuccess(response.data.message);
-        setError("");
         setValidationErrors("");
         inputValues.oldPassword = "";
         inputValues.newPassword = "";
@@ -259,10 +211,8 @@ function Placeholder({ onSubmit }) {
       }
     } catch (error) {
       console.error("Error: ", error);
-      setSuccess("");
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -282,27 +232,21 @@ function Placeholder({ onSubmit }) {
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
-      onSubmit(false);
+      setIsRefresh(false);
     }
   };
-
-  const imageUrl = inputValues.profile_picture
-    // ? `http://localhost:8000/${inputValues.profile_picture}`
-    // : defaultImg;
-  ? `https://desstrongmotors.com/monitoringback/${inputValues.profile_picture}`
-  : defaultImg;
   return (
     <div className="w-full max-w-2xl p-4 mt-10 rounded">
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="flex flex-col items-center justify-center w-full mt-4">
           <div className="flex flex-col items-center justify-center p-4 border shadow-xl w-80 h-80 rounded-xl">
             <LazyLoadImage
-              src={preview ? preview : imageUrl}
+              src={
+                preview ? preview : StorageUtils(inputValues.profile_picture)
+              }
               alt="Profile"
               effect="blur"
               className="w-48 h-48 rounded-full"
@@ -324,7 +268,7 @@ function Placeholder({ onSubmit }) {
             <p className="pt-2 text-lg font-semibold text-center">
               {user ? (
                 <>
-                  {`${user.data.firstName} ${user.data.lastName}`}
+                  {`${user.firstName} ${user.lastName}`}
                   <FontAwesomeIcon
                     icon={faCircleCheck}
                     className="pl-2 text-blue-500"
@@ -575,27 +519,9 @@ function Placeholder({ onSubmit }) {
 }
 
 const Profile = () => {
-  const title = "Profile";
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isRefresh, setIsRefresh] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
-    <div className="flex flex-col h-screen min-h-screen">
-      <Header
-        isRefresh={isRefresh}
-        toggleSidebar={toggleSidebar}
-        title={title}
-      />
-      <div className="flex flex-1">
-        <SideBar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <div className="flex flex-col items-center justify-center w-full p-4 space-y-4">
-          <Placeholder onSubmit={setIsRefresh} />
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-center w-full p-4 space-y-4">
+      <Placeholder />
     </div>
   );
 };

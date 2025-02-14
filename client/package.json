@@ -1,5 +1,4 @@
 {
-  "homepage": "/monitoring",
   "name": "cms",
   "version": "0.1.0",
   "private": true,
@@ -16,11 +15,15 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^22.13.1",
     "ajv": "^8.17.1",
     "autoprefixer": "^10.4.19",
     "axios": "^1.7.2",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.11",
     "html-to-image": "^1.11.11",
+    "js-cookie": "^3.0.5",
     "luxon": "^3.4.4",
     "postcss": "^8.4.38",
     "qrcode": "^1.5.3",
@@ -37,6 +40,7 @@
     "react-sweetalert2": "^0.6.0",
     "react-table": "^7.8.0",
     "recharts": "^2.12.7",
+    "sweetalert2": "^11.15.10",
     "tailwindcss": "^3.4.3",
     "web-vitals": "^2.1.4"
   },
@@ -67,6 +71,10 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "gh-pages": "^6.1.1",
+    "typescript": "^5.7.3"
   }
 }

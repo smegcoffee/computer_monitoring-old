@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, useSortBy } from "react-table";
-import SideBar from "./Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUp,
@@ -13,7 +12,7 @@ import { Link } from "react-router-dom";
 import Specs from "./PopupForComputers/Specs";
 import View from "./PopupForComputers/View";
 import QrCode from "./PopupForComputers/Qr";
-import axios from "../api/axios";
+import api from "../api/axios";
 import {
   Table,
   TableBody,
@@ -29,7 +28,6 @@ import {
   Breadcrumbs,
   Tooltip,
 } from "@mui/material";
-import Header from "./Header";
 import HomeIcon from "@mui/icons-material/Home";
 import ComputerIcon from "@mui/icons-material/Computer";
 
@@ -40,47 +38,29 @@ export const TableComponent = () => {
   const [isQrPopupOpen, setQrPopupOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [qrCodeData, setQrCodeData] = useState("");
-  const [specsPopupData, setSpecsPopupData] = useState("");
-  const [viewPopupData, setViewPopupData] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [computerUser, setComputerUser] = useState([]);
-  const [computerId, setComputerId] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(false);
-  const [error, setError] = useState(false);
+  const [specsId, setSpecsId] = useState(0);
+  const [viewId, setViewId] = useState(0);
+  const [qrId, setQrId] = useState(0);
 
   useEffect(() => {
     const fetchComputerUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/computer-users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/computer-users");
         const data = response.data.data;
         const userData = data.map((user) => ({
           ...user,
           action: ["Specs", "View", "Qr"],
         }));
 
-        const compId = response.data.data.flatMap((computer) =>
-          computer.computers.map((comp) => comp.id)
-        );
-        setComputerId(compId);
-
         setComputerUser(userData);
         setFilteredData(userData);
       } catch (error) {
         console.error("Error fetching computer users:", error);
-        if (error.response.status === 404) {
-          setError(true);
-        }
       } finally {
         setLoading(false);
       }
@@ -112,7 +92,6 @@ export const TableComponent = () => {
             ?.toLowerCase()
             .includes(value.toLowerCase())
       );
-      console.log(filtered);
       setFilteredData(filtered);
     }
     setPage(0);
@@ -127,107 +106,29 @@ export const TableComponent = () => {
     setPage(0);
   };
 
-  const openSpecsPopup = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.get(`/api/computer-user-specs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data.status) {
-        setSpecsPopupData(response.data.computer_user_specs);
-        setSpecsPopupOpen(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  const openSpecsPopup = useCallback(
+    (id) => () => {
+      setSpecsId(id);
+      setSpecsPopupOpen(!isSpecsPopupOpen);
+    },
+    [isSpecsPopupOpen]
+  );
 
-  const openViewPopup = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.get(`/api/computer-user-specs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data.status) {
-        setViewPopupData(response.data.computer_user_specs);
-        setViewPopupOpen(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-  const openQrPopup = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.get(`/api/computer-user-specs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data.status) {
-        setQrCodeData(response.data.computer_user_specs);
-        setQrPopupOpen(true);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-  const closeSpecsPopup = () => {
-    setSpecsPopupOpen(false);
-    setSpecsPopupData(false);
-  };
+  const openViewPopup = useCallback(
+    (id) => () => {
+      setViewId(id);
+      setViewPopupOpen(!isViewPopupOpen);
+    },
+    [isViewPopupOpen]
+  );
 
-  const closeViewPopup = () => {
-    setViewPopupOpen(false);
-    setViewPopupData(false);
-  };
-
-  const closeQrPopup = () => {
-    setQrPopupOpen(false);
-    setQrCodeData(false);
-  };
-
-  const openSpecsData = (computerUser) => {
-    return {
-      id: computerUser.id,
-      name: computerUser.name,
-      units: computerUser.units,
-    };
-  };
-
-  const openViewData = (computerUser) => {
-    return {
-      units: computerUser.units,
-      branchCode: computerUser.branchCode,
-      name: computerUser.name,
-      position: computerUser.position,
-      id: computerUser.id,
-      category2: computerUser.category2,
-      description: computerUser.description,
-      remarks: computerUser.remarks,
-      information: computerUser.information,
-    };
-  };
-
-  const generateQRCodeData = (computerId) => {
-    return {
-      id: computerId.id,
-      data: `${computerId.id}`,
-    };
-  };
+  const openQrPopup = useCallback(
+    (id) => () => {
+      setQrId(id);
+      setQrPopupOpen(!isQrPopupOpen);
+    },
+    [isQrPopupOpen]
+  );
 
   const columns = useMemo(
     () => [
@@ -254,8 +155,9 @@ export const TableComponent = () => {
             {row.original.action.includes("Specs") && (
               <Tooltip placement="top" title="View Specs" arrow>
                 <Button
+                  type="button"
                   className="hover:text-blue-500"
-                  onClick={() => openSpecsPopup(row.original.id)}
+                  onClick={openSpecsPopup(row.original.id)}
                 >
                   <FontAwesomeIcon icon={faGears} />
                 </Button>
@@ -264,8 +166,9 @@ export const TableComponent = () => {
             {row.original.action.includes("View") && (
               <Tooltip placement="top" title="View Details" arrow>
                 <Button
+                  type="button"
                   className="hover:text-blue-500"
-                  onClick={() => openViewPopup(row.original.id)}
+                  onClick={openViewPopup(row.original.id)}
                 >
                   <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                 </Button>
@@ -274,8 +177,9 @@ export const TableComponent = () => {
             {row.original.action.includes("Qr") && (
               <Tooltip placement="top" title="View QR Code" arrow>
                 <Button
+                  type="button"
                   className="hover:text-blue-500"
-                  onClick={() => openQrPopup(row.original.id)}
+                  onClick={openQrPopup(row.original.id)}
                 >
                   <FontAwesomeIcon icon={faQrcode} />
                 </Button>
@@ -285,7 +189,7 @@ export const TableComponent = () => {
         ),
       },
     ],
-    []
+    [openSpecsPopup, openViewPopup, openQrPopup]
   );
 
   const data = useMemo(() => filteredData, [filteredData]);
@@ -372,7 +276,7 @@ export const TableComponent = () => {
                 .map((row) => {
                   prepareRow(row);
                   return (
-                    <TableRow key={row.original.id} {...row.getRowProps()}>
+                    <TableRow {...row.getRowProps()}>
                       {row.cells.map((cell) => (
                         <TableCell align="center" {...cell.getCellProps()}>
                           {cell.render("Cell")}
@@ -418,79 +322,53 @@ export const TableComponent = () => {
       </TableContainer>
       <Specs
         isOpen={isSpecsPopupOpen}
-        onClose={closeSpecsPopup}
-        specsPopupData={specsPopupData}
-        setSpecsPopupData={setSpecsPopupData}
+        onClose={openSpecsPopup(specsId)}
+        specsId={specsId}
       />
       <View
         isOpen={isViewPopupOpen}
-        onClose={closeViewPopup}
-        viewPopupData={viewPopupData}
-        setViewPopupData={setViewPopupData}
+        viewId={viewId}
+        onClose={openViewPopup(viewId)}
         onSubmit={setRefresh}
       />
-      <QrCode
-        isOpen={isQrPopupOpen}
-        onClose={closeQrPopup}
-        qrCodeData={qrCodeData}
-        setQrCodeData={setQrCodeData}
-      />
+      <QrCode isOpen={isQrPopupOpen} onClose={openQrPopup(qrId)} qrId={qrId} />
     </>
   );
 };
 
 function Computers() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const title = "Monitored Computers";
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header toggleSidebar={toggleSidebar} title={title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <div>
-          <SideBar
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-          />
-        </div>
-        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">Managed Computers</p>
-          <div className="mt-2 ml-10">
-            <Breadcrumbs aria-label="breadcrumb">
-              <Link
-                underline="hover"
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-                path
-                to="/dashboard"
-              >
-                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Home
-              </Link>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <ComputerIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Computers
-              </Typography>
-            </Breadcrumbs>
-          </div>
-          <br /> <br />
-          <div className="h-full ml-10 w-12/12">
-            <div className="max-h-full mt-4 w-12/12">
-              <div>
-                <TableComponent />
-              </div>
-            </div>
+    <>
+      <p className="pt-10 ml-10 text-2xl font-normal">Managed Computers</p>
+      <div className="mt-2 ml-10">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+            to="/dashboard"
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <ComputerIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Computers
+          </Typography>
+        </Breadcrumbs>
+      </div>
+      <br /> <br />
+      <div className="h-full ml-10 w-12/12">
+        <div className="max-h-full mt-4 w-12/12">
+          <div>
+            <TableComponent />
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
