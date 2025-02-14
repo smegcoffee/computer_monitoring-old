@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import Swal from "sweetalert2";
 
 export default function EditDepartmentModal({
@@ -20,17 +20,9 @@ export default function EditDepartmentModal({
       return;
     }
     const fetchBranchCodes = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
 
       try {
-        const response = await axios.get("/api/branches", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/branches");
         if (response.status === 200) {
           setBranchCode(response.data.branches);
         }
@@ -49,15 +41,7 @@ export default function EditDepartmentModal({
     setDataLoading(true);
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get(`api/edit-department/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(`/edit-department/${id}`);
 
         if (response.status === 200) {
           setDepartmentName(response.data.department.department_name);
@@ -78,21 +62,12 @@ export default function EditDepartmentModal({
     setLoading(true);
     isRefresh(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
 
-      const response = await axios.post(
-        `api/update-department/${id}`,
+      const response = await api.post(
+        `/update-department/${id}`,
         {
           department_name: departmentName,
           branch_code_id: branchCodeId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       if (response.status === 200) {
@@ -122,7 +97,7 @@ export default function EditDepartmentModal({
     } catch (error) {
       console.error("Error in adding department:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -143,7 +118,7 @@ export default function EditDepartmentModal({
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setLoading(false);
@@ -153,7 +128,7 @@ export default function EditDepartmentModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="w-full p-6 bg-white rounded-lg shadow-lg sm:w-96">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-800">

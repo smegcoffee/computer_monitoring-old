@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
 import {
   Chip,
@@ -30,7 +30,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateField } from "@mui/x-date-pickers/DateField";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-import Loading from "../context/Loading";
 import dayjs from "dayjs";
 
 const Extract = () => {
@@ -42,7 +41,6 @@ const Extract = () => {
   const [applicationContent, setApplicationContent] = useState([]);
   const [date, setDate] = useState();
   const [showAll, setShowAll] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
@@ -50,15 +48,7 @@ const Extract = () => {
   useEffect(() => {
     const fetchComputerData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get(`/api/computers/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(`computers/${id}`);
         if (response.data.status) {
           setComputer(response.data.computer);
           const apps = response.data.computer.installed_applications.map(
@@ -76,7 +66,7 @@ const Extract = () => {
     };
 
     fetchComputerData();
-  }, [refresh]);
+  }, [refresh, id]);
 
   const toggleShowAll = () => {
     setShowAll(!showAll);
@@ -87,22 +77,13 @@ const Extract = () => {
     setLoading(true);
     setRefresh(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        `api/computers/install-application/add-remarks/${id}`,
+      const response = await api.post(
+        `/computers/install-application/add-remarks/${id}`,
         {
           application_content: applicationContent,
           remark_content: remarksContent,
           date: date,
           format: remark,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       if (response.data.status === true) {
@@ -130,12 +111,10 @@ const Extract = () => {
         setApplicationContent([]);
         setValidationErrors("");
       }
-      console.log("Adding computer set:", response.data);
     } catch (error) {
       console.error("Error in adding computer set:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -156,33 +135,12 @@ const Extract = () => {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setLoading(false);
       setRefresh(false);
     }
-
-    // Example of sending data to backend:
-    /*
-    try {
-      const response = await axios.post('/api/computers/update', {
-        id,
-        remark,
-        remarks,
-        selectedDate,
-        application,
-        ...(application === 'Others' && {otherApplication}),
-      });
-      if (response.data.status) {
-        console.log('Data updated successfully.');
-      } else {
-        console.error('Update error:', response.data.message);
-      }
-    } catch (error) {
-      console.error('Update error:', error);
-    }
-    */
   };
 
   const handleDateChange = (newDate) => {

@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import smct from "../img/smct.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
 import bg from "../img/bg.png";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useAuth } from "../context/AuthContext";
+import Cookies from "js-cookie";
 
 function InputField({ icon, text, value, onChange, errorMessage }) {
   return (
@@ -35,15 +37,13 @@ function InputField({ icon, text, value, onChange, errorMessage }) {
   );
 }
 
-// Component for rendering the login form
 function LoginForm({ fields }) {
   const [inputValues, setInputValues] = useState(fields.map(() => ""));
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState({});
-  //eslint-disable-next-line
-  const [error, setError] = useState("");
+  const { login } = useAuth();
 
   // Handler for input change
   const handleChange = (index, event) => {
@@ -59,25 +59,22 @@ function LoginForm({ fields }) {
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/login", {
+      const response = await api.post("/login", {
         username_or_email,
         password,
       });
 
       if (response.status === 200) {
         setSuccess("Login successful!");
+        login(response.data.token);
         navigate("/dashboard");
-        localStorage.setItem("token", response.data.token);
-      } else {
-        setError("Login failed.");
       }
     } catch (error) {
       console.error("Error:", error);
       if (error.response.status === 409) {
-        localStorage.setItem("token", error.response.data.token);
+        Cookies.set("token", error.response.data.token);
         navigate("/change-new-password");
       } else if (error.response.status === 400) {
-        setError(error.response.data.message);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -96,8 +93,6 @@ function LoginForm({ fields }) {
           icon: "error",
           title: error.response.data.message,
         });
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);

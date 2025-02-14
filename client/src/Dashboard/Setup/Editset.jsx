@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -23,17 +23,17 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import { format } from "date-fns";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUp,
   faArrowDown,
-  faEdit,
   faX,
   faFloppyDisk,
   faSpinner,
@@ -53,13 +53,7 @@ const style = {
   p: 2,
 };
 
-function EditSet({
-  isOpen,
-  onClose,
-  editPopupData,
-  setEditPopupData,
-  onSubmit,
-}) {
+function EditSet({ isOpen, onClose, editId, onSubmit }) {
   const [computerUser, setComputerUser] = useState({ data: [] });
   const [computer, setComputer] = useState({
     computer_user: "",
@@ -70,7 +64,6 @@ function EditSet({
   const [reason, setReason] = useState("");
   const [transferDate, setTransferDate] = useState(null);
   const [sloading, setsLoading] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [checkedRows, setCheckedRows] = useState([]);
   const [computerId, setComputerId] = useState("");
@@ -81,6 +74,8 @@ function EditSet({
   const [editUnitId, setEditUnitId] = useState(null);
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
+  const [editData, setEditData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [editValues, setEditValues] = useState({
     date_of_purchase: "",
     category: "",
@@ -97,28 +92,20 @@ function EditSet({
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleCheckboxClick = (unitId) => {
-    if (checkedRows.includes(unitId)) {
-      setCheckedRows(checkedRows.filter((id) => id !== unitId));
-    } else {
-      setCheckedRows([...checkedRows, unitId]);
-    }
-  };
-
   useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
+    if (!isOpen || !editId) {
+      return;
+    }
+    const fetchItemData = async () => {
+      setLoading(true);
       try {
-        if (Array.isArray(editPopupData.computers)) {
-          const allUnits = editPopupData.computers.flatMap((computer) =>
-            computer.units.map((unit) => ({
-              ...unit,
-              computerName: computer.name,
-            }))
-          );
+        const response = await api.get(`computer-user-edit/${editId}`);
+        if (response.status === 200) {
+          const allUnits = response.data.computer_user_data.computers[0]?.units;
+          setEditData(response.data.computer_user_data);
           setUnit(allUnits);
-          const name = editPopupData.name;
-          const id = editPopupData.computers.map((computer) => computer.id);
+          const name = response.data.computer_user_data.name;
+          const id = response.data.computer_user_data.computers[0]?.id;
           setComputerName(name);
           setComputerId(id);
         }
@@ -129,21 +116,42 @@ function EditSet({
       }
     };
 
-    fetchData();
-  }, []);
+    fetchItemData();
+  }, [isOpen, editId]);
+
+  const filteredUnits = unit
+    ? unit.filter(
+        (unit) =>
+          unit?.category?.category_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.supplier?.supplier_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.date_of_purchase
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          unit?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          unit?.serial_number
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.status?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  const handleCheckboxClick = (unitId) => {
+    if (checkedRows.includes(unitId)) {
+      setCheckedRows(checkedRows.filter((id) => id !== unitId));
+    } else {
+      setCheckedRows([...checkedRows, unitId]);
+    }
+  };
 
   useEffect(() => {
     const fetchComputerUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/computer-users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/computer-users");
         setComputerUser(response.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -156,7 +164,7 @@ function EditSet({
   const ComputerUser =
     computerUser.data && computerUser.data.length > 0
       ? computerUser.data
-          .filter((cu) => cu.id !== editPopupData.id)
+          .filter((cu) => cu.id !== editData.id)
           .map((cu) => ({
             id: cu.id,
             name: cu.name,
@@ -209,21 +217,9 @@ function EditSet({
     setLoadingUpdate(true);
     onSubmit(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
       const formattedValues = formatEditValues(editValues);
 
-      const response = await axios.post(
-        `/api/update-unit/${id}`,
-        formattedValues,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post(`update-unit/${id}`, formattedValues);
 
       if (response.status === 200) {
         const Toast = Swal.mixin({
@@ -249,8 +245,7 @@ function EditSet({
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -270,8 +265,6 @@ function EditSet({
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoadingUpdate(false);
@@ -287,15 +280,7 @@ function EditSet({
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/categories", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/categories");
         setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -307,15 +292,7 @@ function EditSet({
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/suppliers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/suppliers");
         setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -345,26 +322,12 @@ function EditSet({
     onSubmit(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        `/api/computer/${computerId}/unit/action`,
-        {
-          action: reason,
-          computer_user: computer.computer_user,
-          date: transferDate || null,
-          checkRows: checkedRows,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log("Processed unit:", checkedRows, response.data);
+      const response = await api.post(`computer/${computerId}/unit/action`, {
+        action: reason,
+        computer_user: computer.computer_user,
+        date: transferDate || null,
+        checkRows: checkedRows,
+      });
 
       if (response.status === 200) {
         setCheckedRows([]);
@@ -392,8 +355,7 @@ function EditSet({
       console.error("Error in adding computer set:", error);
 
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
 
         const Toast = Swal.mixin({
@@ -415,7 +377,7 @@ function EditSet({
           title: error.response.data.message,
         });
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setsLoading(false);
@@ -432,19 +394,7 @@ function EditSet({
     setMarkedLoading(true);
     onSubmit(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        `/api/cleaning-complete/${computerId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post(`cleaning-complete/${computerId}`, {});
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -469,8 +419,7 @@ function EditSet({
       console.error("Error fetching chart data:", error);
 
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
 
         const Toast = Swal.mixin({
@@ -492,7 +441,7 @@ function EditSet({
           title: error.response.data.message,
         });
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setMarkedLoading(false);
@@ -543,37 +492,40 @@ function EditSet({
   };
   const handleSelectAll = (event) => {
     if (event.target.checked) {
-      setCheckedRows(unit.map((unit) => unit.id));
+      setCheckedRows(filteredUnits.map((unit) => unit.id));
     } else {
       setCheckedRows([]);
     }
   };
+  const handleSearchTerm = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+  };
 
   const isAllChecked =
-    unit.length > 0 && unit.every((unit) => checkedRows.includes(unit.id));
+    filteredUnits.length > 0 && filteredUnits.every((unit) => checkedRows.includes(unit.id));
   return (
     <>
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-800 bg-opacity-40">
         <div
           className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl"
           style={{
             minWidth: "90%",
-            maxWidth: "100%",
-            maxHeight: "90vh",
+            maxWidth: "90%",
+            maxHeight: "100vh",
             overflowY: "auto",
             margin: "0 auto",
           }}
         >
-          <div className="max-h-screen overflow-y-auto text-justify">
+          <div className="max-h-[85vh] overflow-hidden text-justify">
             <TableContainer
               component={Paper}
               style={{
-                borderTopLeftRadius: "10px",
-                borderTopRightRadius: "10px",
+                maxHeight: "80vh",
               }}
             >
-              <Table>
-                <TableHead>
+              <Table className="max-h-[80vh]">
+                <TableHead className="sticky top-0 z-50">
                   <TableRow className="bg-red-200">
                     <TableCell align="center">
                       <Checkbox
@@ -733,7 +685,7 @@ function EditSet({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    sortRows(unit).map((unit, index) => (
+                    sortRows(filteredUnits).map((unit, index) => (
                       <TableRow key={index}>
                         <TableCell align="center">
                           <Checkbox
@@ -1077,14 +1029,53 @@ function EditSet({
                       </TableRow>
                     ))
                   )}
+                  {filteredUnits.length <= 0 && (
+                    <TableCell align="center" colSpan={10}>
+                      {searchTerm && `No results found for "${searchTerm}"`}
+                    </TableCell>
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
-            <div className="flex items-center justify-center">
-              <p className="p-5 text-xl text-center">
-                <strong>{computerName}&apos;s</strong> Computer
-              </p>
-              <div className="items-end justify-end flex-1 ml-48 text-center">
+            <div className="sticky bottom-0 flex items-center justify-between bg-white">
+              <div className="flex items-center w-full gap-2 p-5">
+                <p className="text-xl text-center">
+                  {loading ? (
+                    "Loading..."
+                  ) : (
+                    <>
+                      <strong>{computerName}&apos;s</strong> Computer
+                    </>
+                  )}
+                </p>
+                <div class="relative w-full max-w-xs">
+                  <input
+                    type="search"
+                    placeholder="Search..."
+                    onChange={handleSearchTerm}
+                    value={searchTerm}
+                    class="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm0 0l6 6"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-end justify-end px-5 ml-48 text-center">
                 <button
                   type="button"
                   className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"
@@ -1104,18 +1095,27 @@ function EditSet({
                 >
                   {checkedRows.length === 0 ? "UPDATE" : "UPDATE"}
                 </button>
-                <button
-                  type="button"
-                  disabled={markedLoading}
-                  onClick={handleMarkedAsClean}
-                  className={
-                    markedLoading
-                      ? "h-8 ml-3 text-sm font-semibold text-white bg-green-400 rounded-full w-28 cursor-not-allowed"
-                      : "h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
-                  }
-                >
-                  {markedLoading ? "Cleaning" : "Mark As Clean"}
-                </button>
+                {!loading &&
+                  (editData?.computers[0]?.date_cleaning === null ||
+                    editData?.computers[0]?.date_cleaning <=
+                      new Date().toLocaleDateString("en-CA") ||
+                    editData?.computers[0]?.date_cleaning <=
+                      new Date().toLocaleDateString("en-CA") +
+                        " " +
+                        new Date().toLocaleTimeString("en-GB")) && (
+                    <button
+                      type="button"
+                      disabled={markedLoading}
+                      onClick={handleMarkedAsClean}
+                      className={
+                        markedLoading
+                          ? "h-8 ml-3 text-sm font-semibold text-white bg-green-400 rounded-full w-28 cursor-not-allowed"
+                          : "h-8 ml-3 text-sm font-semibold text-white bg-green-600 rounded-full w-28"
+                      }
+                    >
+                      {markedLoading ? "Cleaning" : "Mark As Clean"}
+                    </button>
+                  )}
                 <Modal
                   open={open}
                   onClose={handleClose}

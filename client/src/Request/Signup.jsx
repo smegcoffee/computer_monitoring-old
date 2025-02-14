@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import smct from "../img/smct.png";
 import bg from "../img/bg.png";
 import { Link } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
-
-//This is for the Searchable Dropdown
 
 const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,7 +87,6 @@ const SearchableDropdown = ({ options, placeholder, onSelect }) => {
   );
 };
 
-// END OF THE SEARCHABLE DROPDOWN
 
 function Backg() {
   return (
@@ -118,7 +115,7 @@ function SignUp() {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await axios.get("/api/branch-code");
+        const response = await api.get("/branch-code");
         setBranches(response.data);
       } catch (error) {
         console.error("Error fetching branches:", error);
@@ -129,8 +126,6 @@ function SignUp() {
   }, []);
 
   const [loading, setLoading] = useState(false);
-  //eslint-disable-next-line
-  const [error, setError] = useState();
   const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const options = branches.branches.map((branch) => ({
@@ -146,7 +141,7 @@ function SignUp() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("/api/register", inputValues);
+      const response = await api.post("/register", inputValues);
       if (response.data.status === true) {
         Swal.fire({
           icon: "success",
@@ -156,10 +151,9 @@ function SignUp() {
           confirmButtonText: "Ok",
           html: "You will redirected to Login page <br>Thank you!",
         }).then(function () {
-          window.location = "/monitoring/login";
+          window.location = "/login";
         });
         setSuccess(response.data.message);
-        setError("");
         setValidationErrors("");
         setInputValues({
           firstName: "",
@@ -177,8 +171,7 @@ function SignUp() {
       console.error("Error: ", error);
       setSuccess("");
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -198,8 +191,6 @@ function SignUp() {
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);

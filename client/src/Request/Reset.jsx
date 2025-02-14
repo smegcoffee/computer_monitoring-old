@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import smct from "../img/smct.png";
 import bg from "../img/bg.png";
 import {
@@ -10,8 +9,9 @@ import {
   OutlinedInput,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axios from "../api/axios";
+import api from "../api/axios";
 import Swal from "sweetalert2";
+import { useAuth } from "../context/AuthContext";
 
 function Backg() {
   return (
@@ -25,19 +25,16 @@ function Backg() {
 }
 
 function Reset() {
-  const { code } = useParams();
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [inputValues, setInputValues] = useState({
     new_password: "",
     new_password_confirmation: "",
   });
   const [error, setError] = useState();
-  const [success, setSuccess] = useState();
   const [validationErrors, setValidationErrors] = useState({});
+  const { user } = useAuth();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowConfirm = () => setShowConfirm((show) => !show);
@@ -50,27 +47,6 @@ function Reset() {
     setInputValues({ ...inputValues, [e.target.name]: e.target.value });
   };
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-        const response = await axios.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
   const handleResetPassword = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -78,8 +54,8 @@ function Reset() {
 
     try {
       const userId = user ? user.id : null;
-      const response = await axios.put(
-        `/api/change-new-password/${userId}`,
+      const response = await api.put(
+        `change-new-password/${userId}`,
         inputValues
       );
       if (response.data.status === true) {
@@ -91,10 +67,9 @@ function Reset() {
           confirmButtonText: "Ok",
           html: "You will redirected to Dashboard <br>Thank you!",
         }).then(function () {
-          window.location = "/monitoring/dashboard";
+          window.location = "/dashboard";
         });
       }
-      console.log("Password reset successful: ", response.data);
       setInputValues({
         new_password: "",
         new_password_confirmation: "",

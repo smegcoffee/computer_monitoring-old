@@ -1,11 +1,15 @@
-import React from "react";
+import { faBan } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 
 const NotAuthorized = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-lg p-8 text-center bg-white rounded-lg shadow-xl">
-        <h1 className="mb-4 text-4xl font-extrabold text-red-600">
+    <div className="fixed inset-0 flex items-center justify-center w-full h-full bg-white z-[100] overflow-hidden">
+      <div className="w-full max-w-xl p-8 text-center bg-white rounded-lg">
+        <p className="mb-4 font-bold text-gray-600">
+          <FontAwesomeIcon icon={faBan} className="text-9xl" />
+        </p>
+        <h1 className="mb-4 text-6xl font-extrabold text-red-600">
           403 - Forbidden
         </h1>
         <p className="mb-6 text-xl text-gray-700">

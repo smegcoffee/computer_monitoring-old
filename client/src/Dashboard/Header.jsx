@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "../api/axios";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBellSlash, faBars } from "@fortawesome/free-solid-svg-icons";
@@ -19,28 +19,22 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ChatIcon from "@mui/icons-material/Chat";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import defaultImg from "../img/profile.png";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
+import { useAuth } from "../context/AuthContext";
+import Cookies from "js-cookie";
+import StorageUtils from "../utils/StorageUtils";
 
-function Header({ toggleSidebar, isRefresh, title }) {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+function Header({ toggleSidebar, title, isAuthenticated }) {
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
-  const [profileImg, setProfileImg] = useState(() => {
-    const savedProfileImg = localStorage.getItem("profileImg");
-    return savedProfileImg ? JSON.parse(savedProfileImg) : null;
-  });
   const [notification, setNotification] = useState([]);
   const [notifCount, setNotifCount] = useState(null);
   const [noNotification, setNoNotification] = useState(null);
-  const [refreshNotification, setRefreshNotification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingNotificationId, setLoadingNotificationId] = useState(null);
   const [loadingAll, setLoadingAll] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+  const { logout, user } = useAuth();
 
   const openProfileMenu = Boolean(profileAnchorEl);
   const openNotificationMenu = Boolean(notificationAnchorEl);
@@ -60,51 +54,16 @@ function Header({ toggleSidebar, isRefresh, title }) {
   const handleNotificationClose = () => {
     setNotificationAnchorEl(null);
   };
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          return;
-        }
-
-        const response = await axios.get("/api/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const fetchedUser = response.data;
-        setUser(fetchedUser);
-        setProfileImg(fetchedUser.data.profile_picture);
-        localStorage.setItem("user", JSON.stringify(fetchedUser));
-        localStorage.setItem(
-          "profileImg",
-          JSON.stringify(fetchedUser.data.profile_picture)
-        );
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    };
-
-    if (!user || isRefresh) {
-      fetchUserProfile();
-    }
-  }, [isRefresh]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = Cookies.get("token");
         if (!token) {
           return;
         }
 
-        const response = await axios.get("/api/unread-notifications", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/unread-notifications");
 
         if (response.data.status) {
           setNotification(response.data.unread);
@@ -122,7 +81,7 @@ function Header({ toggleSidebar, isRefresh, title }) {
             confirmButtonText: "Go to login page",
             html: "Session Expired, You will be redirected to the Login page <br>Thank you!",
           }).then(() => {
-            window.location = "/monitoring/login";
+            logout();
           });
         }
       } finally {
@@ -131,11 +90,7 @@ function Header({ toggleSidebar, isRefresh, title }) {
     };
 
     fetchNotifications();
-
-    const intervalId = setInterval(fetchNotifications, 5 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, [refreshNotification, isRefresh]);
+  }, [logout]);
 
   useEffect(() => {
     if (notifCount > 0) {
@@ -155,20 +110,14 @@ function Header({ toggleSidebar, isRefresh, title }) {
 
     if (result.isConfirmed) {
       try {
-        const token = localStorage.getItem("token");
+        const token = Cookies.get("token");
         if (!token) {
           return;
         }
 
-        await axios.get("/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        localStorage.removeItem("profileImg");
-        window.location = "/monitoring/login";
+        await api.get("/logout");
+
+        logout();
       } catch (error) {
         console.error("Error logging out:", error);
         Swal.fire("Error!", "Failed to log out. Please try again.", "error");
@@ -178,23 +127,10 @@ function Header({ toggleSidebar, isRefresh, title }) {
 
   const handleMarkAsRead = async (event, notifId) => {
     event.preventDefault();
-    setRefreshNotification(true);
     setLoading(true);
     setLoadingNotificationId(notifId);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        `api/marked-as-read/${notifId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post(`/marked-as-read/${notifId}`);
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -216,11 +152,10 @@ function Header({ toggleSidebar, isRefresh, title }) {
           });
         })();
       }
-      console.log("Marking as read:", response.data);
     } catch (error) {
       console.error("Error in marking as read:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
+        console.error("Backend error response:", error.response.data);
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
@@ -240,10 +175,9 @@ function Header({ toggleSidebar, isRefresh, title }) {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
-      setRefreshNotification(false);
       setLoading(false);
       setLoadingNotificationId(false);
     }
@@ -251,23 +185,10 @@ function Header({ toggleSidebar, isRefresh, title }) {
 
   const handleMarkAllAsRead = async (event) => {
     event.preventDefault();
-    setRefreshNotification(true);
     setLoading(true);
     setLoadingAll(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-      const response = await axios.post(
-        "api/marked-all-as-read",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("/marked-all-as-read");
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -289,11 +210,10 @@ function Header({ toggleSidebar, isRefresh, title }) {
           });
         })();
       }
-      console.log("Marking as read:", response.data);
     } catch (error) {
       console.error("Error in marking as read:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
+        console.error("Backend error response:", error.response.data);
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
@@ -313,21 +233,13 @@ function Header({ toggleSidebar, isRefresh, title }) {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
-      setRefreshNotification(false);
       setLoading(false);
       setLoadingAll(false);
     }
   };
-
-//   const imageUrl = profileImg
-//     ? `http://localhost:8000/${profileImg}`
-//     : defaultImg;
-  const imageUrl = profileImg
-  ? `https://desstrongmotors.com/monitoringback/${profileImg}`
-  : defaultImg;
 
   function timeAgo(date) {
     return formatDistanceToNowStrict(parseISO(date), { addSuffix: true });
@@ -338,9 +250,12 @@ function Header({ toggleSidebar, isRefresh, title }) {
   };
 
   return (
-    <div>
+    <div className={isAuthenticated ? "sticky top-0 z-50 w-full" : "hidden"}>
       <div className="flex items-center justify-between w-full h-20 pr-10 bg-blue-800">
-        <button onClick={toggleSidebar} className="ml-4 text-white md:hidden">
+        <button
+          onClick={toggleSidebar}
+          className="ml-4 text-white cursor-pointer md:hidden"
+        >
           <FontAwesomeIcon icon={faBars} />
         </button>
         <div className="flex-grow text-center">
@@ -400,7 +315,7 @@ function Header({ toggleSidebar, isRefresh, title }) {
               aria-haspopup="true"
               aria-expanded={openProfileMenu ? "true" : undefined}
             >
-              <Avatar alt={user?.data.firstName} src={imageUrl} />
+              <Avatar alt={user.firstName} src={StorageUtils(user?.profile_picture)} />
             </IconButton>
           </Tooltip>
         </div>
@@ -439,12 +354,12 @@ function Header({ toggleSidebar, isRefresh, title }) {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          {user && user.data && (
+          {user && (
             <Link to="/profile">
               <MenuItem>
-                <Avatar src={imageUrl} />{" "}
+                <Avatar src={StorageUtils(user?.profile_picture)} />{" "}
                 <b>
-                  {user.data.firstName} {user.data.lastName}
+                  {user.firstName} {user.lastName}
                 </b>
               </MenuItem>
             </Link>
@@ -620,19 +535,12 @@ function Header({ toggleSidebar, isRefresh, title }) {
                     >
                       <div className="absolute top-0 right-0 w-2 h-2 mt-2 mr-3 bg-red-500 rounded-full"></div>
                       <Avatar
-                        src={
-                        //   notif.user.profile_picture
-                        //     ? `http://localhost:8000/${notif.user.profile_picture}`
-                        //     : defaultImg
-                          notif.user.profile_picture
-                            ? `https://desstrongmotors.com/monitoringback/${notif.user.profile_picture}`
-                            : defaultImg
-                        }
+                        src={StorageUtils(notif.user.profile_picture)}
                         sx={{ mr: 2 }}
                       />
                       <div>
                         <Typography variant="body2">
-                          {user.data.id === notif.user.id ? (
+                          {user.id === notif.user.id ? (
                             <strong>You</strong>
                           ) : (
                             <strong>

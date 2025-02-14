@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -23,17 +23,17 @@ import {
 } from "@mui/material";
 import Swal from "sweetalert2";
 import Select from "react-select";
-import axios from "../../../api/axios";
+import api from "../../../api/axios";
 import { format } from "date-fns";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUp,
   faArrowDown,
-  faEdit,
   faX,
   faFloppyDisk,
   faSpinner,
@@ -53,13 +53,7 @@ const style = {
   p: 2,
 };
 
-function EditSet({
-  isOpen,
-  onClose,
-  editPopupData,
-  setEditPopupData,
-  onSubmit,
-}) {
+function EditSet({ isOpen, onClose, editId, onSubmit }) {
   const [branch, setBranch] = useState({ data: [] });
   const [department, setDepartment] = useState({ data: [] });
   const [branchUnit, setBranchUnit] = useState({
@@ -72,7 +66,6 @@ function EditSet({
   const [reason, setReason] = useState("");
   const [transferDate, setTransferDate] = useState(null);
   const [sloading, setsLoading] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [checkedRows, setCheckedRows] = useState([]);
   const [branchUnitId, setBranchUnitId] = useState("");
@@ -83,6 +76,7 @@ function EditSet({
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
   const [searchTerm, setSearchTerm] = useState("");
+  const [branchData, setBranchData] = useState(0);
   const [editValues, setEditValues] = useState({
     date_of_purchase: "",
     category: "",
@@ -99,55 +93,27 @@ function EditSet({
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleCheckboxClick = (unitId) => {
-    if (checkedRows.includes(unitId)) {
-      setCheckedRows(checkedRows.filter((id) => id !== unitId));
-    } else {
-      setCheckedRows([...checkedRows, unitId]);
-    }
-  };
-
   useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
+    if (!editId || !isOpen) {
+      return;
+    }
+    const fetchEditData = async () => {
+      setLoading(true);
       try {
-        if (Array.isArray(editPopupData.branch_units)) {
-          const allUnits = editPopupData.branch_units.map((branchUnit) => ({
-            unit: branchUnit.unit,
-            department: branchUnit.department,
-          }));
-
-          setUnit(
-            allUnits.filter(
-              (data) =>
-                data.unit.unit_code
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.date_of_purchase
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.category.category_name
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.description
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.supplier.supplier_name
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.serial_number
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.unit.status
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase()) ||
-                data.department.department_name
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
-            )
+        const response = await api.get(`/branch-unit-edit/${editId}`);
+        if (response.status === 200) {
+          setBranchData(response.data.branch_unit_data);
+          const allUnits = response.data.branch_unit_data.branch_units.map(
+            (branchUnit) => ({
+              unit: branchUnit.unit,
+              department: branchUnit.department,
+            })
           );
-          const name = `${editPopupData.branch_name_english} (${editPopupData.branch_name})`;
-          const id = editPopupData.branch_units[0].branch_code_id;
+
+          setUnit(allUnits);
+          const name = `${response.data.branch_unit_data.branch_name_english} (${response.data.branch_unit_data.branch_name})`;
+          const id =
+            response.data.branch_unit_data.branch_units[0].branch_code_id;
           setBranchUnitName(name);
           setBranchUnitId(id);
         }
@@ -158,21 +124,21 @@ function EditSet({
       }
     };
 
-    fetchData();
-  }, [isOpen, searchTerm]);
+    fetchEditData();
+  }, [editId, isOpen]);
+
+  const handleCheckboxClick = (unitId) => {
+    if (checkedRows.includes(unitId)) {
+      setCheckedRows(checkedRows.filter((id) => id !== unitId));
+    } else {
+      setCheckedRows([...checkedRows, unitId]);
+    }
+  };
 
   useEffect(() => {
     const fetchBranch = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/branches", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/branches");
         setBranch(response.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -185,15 +151,7 @@ function EditSet({
   useEffect(() => {
     const fetchDepartment = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/departments", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/departments");
         setDepartment(response.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -206,7 +164,7 @@ function EditSet({
   const Branch =
     branch.branches && branch.branches.length > 0
       ? branch.branches
-          .filter((bu) => bu.id !== editPopupData.id)
+          .filter((bu) => bu.id !== branchData.id)
           .map((bu) => ({
             id: bu.id,
             name: `${bu.branch_name_english} (${bu.branch_name})`,
@@ -233,7 +191,7 @@ function EditSet({
     setEditUnitId(id);
     setEditValues({
       ...editValues,
-      date_of_purchase: data.unit.date_of_purchase,
+      date_of_purchase: data.unit.date_of_purchase ?? "",
       category: {
         label: data.unit.category.category_name,
         value: data.unit.category.id,
@@ -275,21 +233,9 @@ function EditSet({
     setLoadingUpdate(true);
     onSubmit(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
       const formattedValues = formatEditValues(editValues);
 
-      const response = await axios.post(
-        `/api/update-unit/${id}`,
-        formattedValues,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post(`/update-unit/${id}`, formattedValues);
 
       if (response.status === 200) {
         const Toast = Swal.mixin({
@@ -312,11 +258,11 @@ function EditSet({
         })();
 
         handleCancelEdit();
+        onClose();
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -336,13 +282,10 @@ function EditSet({
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setLoadingUpdate(false);
       onSubmit(false);
-      onClose();
     }
   };
 
@@ -353,15 +296,7 @@ function EditSet({
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/categories", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/categories");
         setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -370,18 +305,11 @@ function EditSet({
 
     fetchCategory();
   }, []);
+
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/suppliers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/suppliers");
         setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -390,6 +318,36 @@ function EditSet({
 
     fetchSupplier();
   }, []);
+
+  const filteredUnits = unit
+    ? unit.filter(
+        (unit) =>
+          unit?.unit?.unit_code
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.date_of_purchase
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.category?.category_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.supplier?.supplier_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.serial_number
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.unit?.status
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          unit?.department?.department_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   const Category = category.data?.map((cat) => ({
     label: cat.category_name,
@@ -411,118 +369,47 @@ function EditSet({
     onSubmit(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      let transferCount = 0;
-      let defectiveCount = 0;
-      let deleteCount = 0;
-
-      let allSuccess = true;
-      const successMessages = [];
-
-      for (const unitId of checkedRows) {
-        const response = await axios.post(
-          `/api/branch-unit/${branchUnitId}/unit/${unitId}/action`,
-          {
-            action: reason,
-            branch: branchUnit.branch,
-            department: branchUnit.department,
-            date: transferDate || null,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status !== 200) {
-          allSuccess = false;
-          console.log("Operation failed for unit:", unitId);
-        } else {
-          switch (reason) {
-            case "Transfer":
-              transferCount++;
-              successMessages.push(`Transferred unit ${unitId}`);
-              break;
-            case "Defective":
-              defectiveCount++;
-              successMessages.push(`Marked unit ${unitId} as defective`);
-              break;
-            case "Delete":
-              deleteCount++;
-              successMessages.push(`Deleted unit ${unitId}`);
-              break;
-            default:
-              break;
-          }
+      const response = await api.post(
+        `/branch-unit/${branchUnitId}/unit/action`,
+        {
+          action: reason,
+          branch: branchUnit.branch,
+          department: branchUnit.department,
+          date: transferDate || null,
+          checkRows: checkedRows,
         }
+      );
 
-        console.log("Processed unit:", unitId, response.data);
-      }
-
-      if (allSuccess && successMessages.length > 0) {
-        const updatedResponse = await axios.get(
-          `/api/branch-unit-edit/${editPopupData.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setEditPopupData(updatedResponse.data.branch_unit_data);
-        setCheckedRows([]);
-        setTransferDate(null);
-        setReason("");
-        setBranchUnit([]);
-        if (updatedResponse.data.branch_unit_data.branch_units.length === 0) {
-          onClose();
-        } else {
-          setOpen(false);
-        }
+      if (response.status === 200) {
         const Toast = Swal.mixin({
           toast: true,
           position: "top-right",
           iconColor: "green",
           customClass: {
             popup: "colored-toast",
-            container: "swalContainer",
           },
           showConfirmButton: false,
           showCloseButton: true,
-          timer: 3000,
+          timer: 2500,
           timerProgressBar: true,
         });
-
-        await Toast.fire({
-          icon: "success",
-          title: `Successfully processed: ${successMessages.length} unit(s)`,
-          html: `
-            <ul>
-              ${
-                transferCount > 0 ? `<li>${transferCount} transferred</li>` : ""
-              }
-              ${
-                defectiveCount > 0
-                  ? `<li>${defectiveCount} marked defective</li>`
-                  : ""
-              }
-              ${deleteCount > 0 ? `<li>${deleteCount} deleted</li>` : ""}
-            </ul>
-          `,
-        });
-
+        (async () => {
+          await Toast.fire({
+            icon: "success",
+            title: response.data.message,
+          });
+        })();
+        setCheckedRows([]);
+        setTransferDate(null);
+        setReason("");
+        setBranchUnit([]);
         onClose();
       }
     } catch (error) {
       console.error("Error in adding branch unit:", error);
 
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
 
         const Toast = Swal.mixin({
@@ -554,6 +441,11 @@ function EditSet({
 
   const handleDateChange = (newDate) => {
     setTransferDate(dayjs(newDate).format("YYYY-MM-DD"));
+  };
+
+  const handleSearchTerm = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
   };
   const sortRows = (rows) => {
     return rows.sort((a, b) => {
@@ -599,37 +491,36 @@ function EditSet({
   };
   const handleSelectAll = (event) => {
     if (event.target.checked) {
-      setCheckedRows(unit.map((unit) => unit.unit.id));
+      setCheckedRows(filteredUnits.map((unit) => unit.unit.id));
     } else {
       setCheckedRows([]);
     }
   };
 
   const isAllChecked =
-    unit.length > 0 && unit.every((unit) => checkedRows.includes(unit.unit.id));
+    filteredUnits.length > 0 && filteredUnits.every((unit) => checkedRows.includes(unit.unit.id));
   return (
     <>
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
+      <div className="fixed inset-0 flex items-center z-[60] justify-center bg-gray-800 bg-opacity-40">
         <div
           className="bg-white shadow-md rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-xl"
           style={{
             minWidth: "90%",
-            maxWidth: "100%",
+            maxWidth: "90%",
             maxHeight: "90vh",
             overflowY: "auto",
             margin: "0 auto",
           }}
         >
-          <div className="max-h-screen overflow-y-auto text-justify">
+          <div className="max-h-[85vh] overflow-hidden text-justify">
             <TableContainer
               component={Paper}
               style={{
-                borderTopLeftRadius: "10px",
-                borderTopRightRadius: "10px",
+                maxHeight: "75vh",
               }}
             >
-              <Table>
-                <TableHead>
+              <Table className="max-h-[80vh]">
+                <TableHead className="sticky top-0 z-50">
                   <TableRow className="bg-red-200">
                     <TableCell align="center">
                       <Checkbox
@@ -807,7 +698,7 @@ function EditSet({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    sortRows(unit).map((unit, index) => (
+                    sortRows(filteredUnits).map((unit, index) => (
                       <TableRow key={index}>
                         <TableCell align="center">
                           <Checkbox
@@ -1164,7 +1055,7 @@ function EditSet({
                     ))
                   )}
 
-                  {unit.length <= 0 && (
+                  {filteredUnits.length <= 0 && (
                     <TableCell align="center" colSpan={10}>
                       {searchTerm && `No results found for "${searchTerm}"`}
                     </TableCell>
@@ -1172,37 +1063,46 @@ function EditSet({
                 </TableBody>
               </Table>
             </TableContainer>
-            <div className="flex items-center justify-center">
-              <p className="p-5 text-xl text-center">
-                <strong>{branchUnitName}&apos;s</strong> units
-              </p>
-              <div class="relative w-full max-w-xs mx-auto">
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  class="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm0 0l6 6"
-                    />
-                  </svg>
-                </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center w-full gap-2 p-5">
+                {loading ? (
+                  "Loading..."
+                ) : (
+                  <>
+                    <p className="text-xl text-center">
+                      <strong>{branchUnitName}&apos;s</strong> units
+                    </p>
+                  </>
+                )}
+                <div class="relative w-full max-w-xs">
+                  <input
+                    type="search"
+                    placeholder="Search..."
+                    onChange={handleSearchTerm}
+                    value={searchTerm}
+                    class="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm0 0l6 6"
+                      />
+                    </svg>
+                  </span>
+                </div>
               </div>
 
-              <div className="items-end justify-end flex-1 ml-48 text-center">
+              <div className="flex items-end justify-end px-5 ml-48 text-center">
                 <button
                   type="button"
                   className="w-24 h-8 text-sm font-semibold bg-gray-200 rounded-full"

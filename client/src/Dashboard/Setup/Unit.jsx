@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
-import SideBar from "../Sidebar";
+import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCirclePlus,
@@ -13,7 +12,7 @@ import {
   faSpinner,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableHead,
@@ -25,15 +24,14 @@ import {
   Breadcrumbs,
   Tooltip,
 } from "@mui/material";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
-import { TableContainer } from "@material-ui/core";
+import { TableContainer } from "@mui/material";
 import Select from "react-select";
-import Header from "../../Dashboard/Header";
 import HomeIcon from "@mui/icons-material/Home";
 import PhonelinkSetupIcon from "@mui/icons-material/PhonelinkSetup";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -56,14 +54,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomTableB = (refresh) => {
-  const { id } = useParams();
   const classes = useStyles();
   const [unit, setUnit] = useState({ vacantDefective: [] });
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
   const [refreshed, setRefreshed] = useState(false);
   const [editUnitId, setEditUnitId] = useState(null);
@@ -94,34 +90,20 @@ const CustomTableB = (refresh) => {
   useEffect(() => {
     const fetchUnit = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-
-        const response = await axios.get(
-          `/api/units?sort_column=${sortColumn}&sort_order=${sortOrder}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await api.get(
+          `units?sort_column=${sortColumn}&sort_order=${sortOrder}`
         );
         if (response.data.vacantDefective.length === 0) {
           setUnit([]);
-          setError(false);
         } else {
           setUnit(response.data);
-          setError(false);
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
           setUnit([]);
-          setError(false);
         } else {
           console.error("Error fetching units data:", error);
           setUnit([]);
-          setError(true);
         }
       } finally {
         setLoading(false);
@@ -159,16 +141,7 @@ const CustomTableB = (refresh) => {
       });
 
       if (result.isConfirmed) {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-
-        const response = await axios.delete(`/api/unit-delete/${dataId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.delete(`unit-delete/${dataId}`);
 
         if (response.data.status === true) {
           const Toast = Swal.mixin({
@@ -193,8 +166,7 @@ const CustomTableB = (refresh) => {
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -214,8 +186,6 @@ const CustomTableB = (refresh) => {
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setRefreshed(false);
@@ -225,15 +195,7 @@ const CustomTableB = (refresh) => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/categories", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/categories");
         setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -245,15 +207,7 @@ const CustomTableB = (refresh) => {
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/suppliers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/suppliers");
         setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -319,20 +273,11 @@ const CustomTableB = (refresh) => {
     setRefreshed(true);
     setLoadingUpdate(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
       const formattedValues = formatEditValues(editValues);
 
-      const response = await axios.post(
-        `/api/update-unit/${id}`,
-        formattedValues,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await api.post(
+        `update-unit/${id}`,
+        formattedValues
       );
 
       if (response.data.status === true) {
@@ -359,8 +304,7 @@ const CustomTableB = (refresh) => {
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -380,8 +324,6 @@ const CustomTableB = (refresh) => {
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setRefreshed(false);
@@ -713,59 +655,6 @@ const CustomTableB = (refresh) => {
                           )}
                       </span>
                     </TableCell>
-                    {/* <TableCell align="center">
-                      {editUnitId === data.id ? (
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            disabled={loadingUpdate}
-                            onClick={() =>
-                              !loadingUpdate
-                                ? handleSaveUnit(data.id)
-                                : undefined
-                            }
-                            className={
-                              loadingUpdate
-                              ? "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-200 to-blue-500 hover:from-green-300 hover:to-blue-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 cursor-not-allowed"
-                              : "px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-green-500 to-blue-800 hover:from-green-600 hover:to-blue-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                            }
-                          >
-                            {loadingUpdate ? (
-                              <FontAwesomeIcon
-                                className="animate-spin"
-                                icon={faSpinner}
-                              />
-                              ) : (
-                              <FontAwesomeIcon icon={faFloppyDisk} />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleCancelEdit}
-                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                            >
-                            <FontAwesomeIcon icon={faX} />
-                            </button>
-                            </div>
-                            ) : (
-                              <div className="flex gap-1">
-                              <button
-                              type="button"
-                              onClick={() => handleUpdateUnit(data.id, data)}
-                              className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-violet-800 hover:from-blue-600 hover:to-violet-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                              >
-                              <FontAwesomeIcon icon={faPen} />
-                              </button>
-                              <button
-                              type="button"
-                              onClick={() => handleDeleteUnit(data.id)}
-                            className="px-4 py-2 font-semibold text-white transition duration-300 ease-in-out transform rounded-lg shadow-md bg-gradient-to-r from-red-500 to-pink-800 hover:from-red-600 hover:to-pink-900 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                            </div>
-                      )}
-                    </TableCell> */}
 
                     {/* CENTER THE ICONS */}
                     <TableCell style={{ textAlign: "center" }}>
@@ -1039,17 +928,13 @@ const CustomTableA = ({
   rows,
   setRows,
   onSubmit,
-  isCategoryRefresh,
-  isSupplierRefresh,
   toggleModal,
 }) => {
   const classes = useStyles();
   const [category, setCategory] = useState({ data: [] });
   const [supplier, setSupplier] = useState({ data: [] });
   const [uloading, setuLoading] = useState(false);
-  const [error, setError] = useState();
   const [validationErrors, setValidationErrors] = useState({});
-  const [success, setSuccess] = useState();
   const [categorySearchTerms, setCategorySearchTerms] = useState([""]);
   const [supplierSearchTerms, setSupplierSearchTerms] = useState([""]);
   const options = [
@@ -1060,15 +945,7 @@ const CustomTableA = ({
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/categories", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/categories");
         setCategory(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -1076,19 +953,11 @@ const CustomTableA = ({
     };
 
     fetchCategory();
-  }, [isCategoryRefresh]);
+  }, []);
   useEffect(() => {
     const fetchSupplier = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/suppliers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/suppliers");
         setSupplier(response?.data);
       } catch (error) {
         console.error("Error fetching chart data:", error);
@@ -1096,7 +965,7 @@ const CustomTableA = ({
     };
 
     fetchSupplier();
-  }, [isSupplierRefresh]);
+  }, []);
 
   // This is a sample data for Category
   const Category =
@@ -1168,16 +1037,7 @@ const CustomTableA = ({
     setuLoading(true);
     onSubmit(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await axios.post("/api/add-unit", rows, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.post("/add-unit", rows);
       if (response.data.status === true) {
         const Toast = Swal.mixin({
           toast: true,
@@ -1197,8 +1057,6 @@ const CustomTableA = ({
             title: response.data.message,
           });
         })();
-        setSuccess(response.data.message);
-        setError("");
         setValidationErrors("");
         setRows([
           {
@@ -1216,10 +1074,8 @@ const CustomTableA = ({
       }
     } catch (error) {
       console.error("Error: ", error);
-      setSuccess("");
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
-        setError(error.response.data.message);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -1239,8 +1095,6 @@ const CustomTableA = ({
             title: error.response.data.message,
           });
         })();
-      } else {
-        setError("An unexpected error occurred.");
       }
     } finally {
       setuLoading(false);
@@ -1520,14 +1374,7 @@ const CustomTableA = ({
 };
 
 function Unit() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const title = "Setup Unit";
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  const [category, setCategory] = useState("");
   const [rows, setRows] = useState([
     {
       date_of_purchase: "",
@@ -1538,14 +1385,7 @@ function Unit() {
       status: "",
     },
   ]);
-  const [sloading, setsLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
-  const [success, setSuccess] = useState();
-  const [validationErrors, setValidationErrors] = useState({});
   const [refresh, setRefresh] = useState(false);
-  const [isSupplierRefresh, setIsSupplierRefresh] = useState(false);
-  const [isCategoryRefresh, setIsCategoryRefresh] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   const toggleModal = () => {
@@ -1553,91 +1393,69 @@ function Unit() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header toggleSidebar={toggleSidebar} title={title} />
-      <div style={{ display: "flex", flex: 1 }}>
-        <div>
-          <SideBar
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-          />
-        </div>
-        <div style={{ flex: 2, paddingBottom: "50px", overflowY: "auto" }}>
-          <p className="pt-10 ml-10 text-2xl font-normal">Setup Unit</p>
-          <div className="mt-2 ml-10">
-            <Breadcrumbs aria-label="breadcrumb">
-              <Link
-                underline="hover"
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-                path
-                to="/dashboard"
-              >
-                <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Home
-              </Link>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="inherit"
-              >
-                <SettingsIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Setup
-              </Typography>
-              <Typography
-                sx={{ display: "flex", alignItems: "center" }}
-                color="text.primary"
-              >
-                <PhonelinkSetupIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-                Setup Unit
-              </Typography>
-            </Breadcrumbs>
-          </div>
-          <br /> <br />
-          {isOpenModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white min-h-[20rem] max-h-[45rem] max-w-[95%] right-5 top-5 rounded-xl relative">
-                <button
-                  className="absolute z-50 text-5xl text-black right-7 top-2 hover:text-gray-700"
-                  onClick={toggleModal}
-                >
-                  &times;
-                </button>
-                <CustomTableA
-                  isCategoryRefresh={isCategoryRefresh}
-                  isSupplierRefresh={isSupplierRefresh}
-                  rows={rows}
-                  setRows={setRows}
-                  onSubmit={setRefresh}
-                  toggleModal={toggleModal}
-                />
-              </div>
-            </div>
-          )}
-          {/* <div className="flex items-center justify-center ml-10 mr-10">
+    <>
+      <p className="pt-10 ml-10 text-2xl font-normal">Setup Unit</p>
+      <div className="mt-2 ml-10">
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            underline="hover"
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+            path
+            to="/dashboard"
+          >
+            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
+          </Link>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="inherit"
+          >
+            <SettingsIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Setup
+          </Typography>
+          <Typography
+            sx={{ display: "flex", alignItems: "center" }}
+            color="text.primary"
+          >
+            <PhonelinkSetupIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+            Setup Unit
+          </Typography>
+        </Breadcrumbs>
+      </div>
+      <br /> <br />
+      {isOpenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white min-h-[20rem] max-h-[45rem] max-w-[95%] right-5 top-5 rounded-xl relative">
+            <button
+              className="absolute z-50 text-5xl text-black right-7 top-2 hover:text-gray-700"
+              onClick={toggleModal}
+            >
+              &times;
+            </button>
             <CustomTableA
-              isCategoryRefresh={isCategoryRefresh}
-              isSupplierRefresh={isSupplierRefresh}
               rows={rows}
               setRows={setRows}
               onSubmit={setRefresh}
+              toggleModal={toggleModal}
             />
-          </div> */}
-          <div className="relative">
-            <button
-              onClick={toggleModal}
-              className="absolute flex items-center px-6 py-3 space-x-2 font-semibold text-white transition duration-300 ease-in-out bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 right-5"
-            >
-              <FontAwesomeIcon icon={faPlus} />
-              <span>Add Unit</span>
-            </button>
-
-            <div className="mt-12 px-4 py-6 rounded-lg max-h-[45rem] overflow-auto">
-              <CustomTableB rows={rows} refresh={refresh} />
-            </div>
           </div>
         </div>
+      )}
+      <div className="relative">
+        <button
+          onClick={toggleModal}
+          className="absolute flex items-center px-6 py-3 space-x-2 font-semibold text-white transition duration-300 ease-in-out bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 right-5"
+        >
+          <FontAwesomeIcon icon={faPlus} />
+          <span>Add Unit</span>
+        </button>
+
+        <div className="mt-12 px-4 py-6 rounded-lg max-h-[45rem] overflow-auto">
+          <CustomTableB rows={rows} refresh={refresh} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

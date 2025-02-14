@@ -1,33 +1,37 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import smct from "./../../img/smct.png";
 import { QRCode } from "react-qr-svg";
 import { toPng } from "html-to-image";
 import CloseIcon from "@mui/icons-material/Close";
 import Swal from "sweetalert2";
+import api from "../../api/axios";
 
-function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
+function QrCode({ isOpen, onClose, qrId }) {
   const qrCodeRef = useRef(null);
-  const [rows, setRows] = useState([]);
   const [id, setId] = useState([]);
+  const [specs, setSpecs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (qrCodeData?.computers) {
-      const qrData = qrCodeData.computers.flatMap((computer) =>
-        computer.units.map((unit) => ({
-          ...unit,
-          computerName: computer.name,
-        }))
-      );
-      setRows(qrData);
-
-      const ids = qrCodeData.computers.map((comp) => comp.id);
-      setId(ids);
+    if (!isOpen || !qrId) {
+      return;
     }
-  }, [qrCodeData]);
-
-  if (!isOpen) {
-    return null; // Render nothing if isOpen is false
-  }
+    const fetchQrData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get(`computer-user-specs/${qrId}`);
+        if (response.data.status) {
+          setId(response?.data?.computer_user_specs?.computers[0]?.id);
+          setSpecs(response?.data?.computer_user_specs);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchQrData();
+  }, [qrId, isOpen]);
 
   const downloadQRCode = () => {
     toPng(qrCodeRef.current)
@@ -63,6 +67,10 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
     })();
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-40">
       <div
@@ -78,7 +86,7 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
             ></img>
           </div>
           <div className="mt-8 ml-16 text-3xl font-medium text-white flex-2">
-            Computer User: {qrCodeData.name}
+            Computer User: {isLoading ? "Loading..." : specs.name}
           </div>
           <CloseIcon
             onClick={onClose}
@@ -87,16 +95,24 @@ function QrCode({ isOpen, onClose, qrCodeData, setQrCodeData }) {
         </div>
         <div className="flex items-center justify-center">
           <div className="mt-7 mb-14 size-60">
-            <div
-              ref={qrCodeRef}
-              onClick={id.length === 1 ? downloadQRCode : errorDownloadQr}
-              style={{ cursor: "pointer" }}
-            >
-              <QRCode value={JSON.stringify(id[0])} />
-            </div>
-            <h1 className="mt-3 text-base font-semibold text-center">
-              Computer QR Code
-            </h1>
+            {isLoading ? (
+              <>
+                <div className="w-64 h-64 border-8 border-blue-500 border-solid rounded-full border-t-transparent animate-spin"></div>
+              </>
+            ) : (
+              <>
+                <div
+                  ref={qrCodeRef}
+                  onClick={id ? downloadQRCode : errorDownloadQr}
+                  style={{ cursor: "pointer" }}
+                >
+                  <QRCode value={JSON.stringify(id)} />
+                </div>
+                <h1 className="mt-3 text-base font-semibold text-center">
+                  Computer QR Code
+                </h1>
+              </>
+            )}
           </div>
         </div>
       </div>

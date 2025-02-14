@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import Swal from "sweetalert2";
 
 export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
@@ -10,18 +10,12 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
     const fetchBranchCodes = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
       try {
-        const response = await axios.get("/api/branches", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/branches");
         if (response.status === 200) {
           setBranchCode(response.data.branches);
         }
@@ -31,30 +25,17 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
     };
 
     fetchBranchCodes();
-  }, []);
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     isRefresh(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const response = await axios.post(
-        "api/add-department",
-        {
-          department_name: departmentName,
-          branch_code_id: branchCodeId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("/add-department", {
+        department_name: departmentName,
+        branch_code_id: branchCodeId,
+      });
       if (response.status === 201) {
         const Toast = Swal.mixin({
           toast: true,
@@ -81,7 +62,7 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
     } catch (error) {
       console.error("Error in adding department:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -102,7 +83,7 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setLoading(false);
@@ -113,7 +94,7 @@ export default function AddDepartmentModal({ isOpen, onClose, isRefresh }) {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="w-full p-6 bg-white rounded-lg shadow-lg sm:w-96">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-800">

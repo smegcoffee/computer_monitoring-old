@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import profile from "../img/profile.png";
 import { Link } from "react-router-dom";
 import {
@@ -16,13 +16,11 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComputer, faNoteSticky } from "@fortawesome/free-solid-svg-icons";
 import ChartBoxUser from "../data/ChartBoxUser";
 import ChartBoxUnit from "../data/ChartBoxUnit";
 import ChartBoxComputer from "../data/ChartBoxComputer";
 import ChartBoxRemark from "../data/ChartBoxRemark";
-import axios from "../api/axios";
+import api from "../api/axios";
 
 function TopBox({ dashboardData, dashboardLoading }) {
   const [userFormatted, setUserFormatted] = useState([]);
@@ -86,6 +84,7 @@ function TopBox({ dashboardData, dashboardLoading }) {
 }
 
 export function ChartBox(props) {
+  const { icon, chartData, title, dataKey, color, percentage, number } = props;
   return (
     <div className="flex h-full chartBox">
       <div
@@ -93,12 +92,12 @@ export function ChartBox(props) {
         style={{ flex: "3" }}
       >
         <div className="flex items-center gap-2 title">
-          <p className="text-white">{props.icon}</p>
+          <p className="text-white">{icon}</p>
           <span className="text-base font-medium text-white">
-            {props.title}
+            {title}
           </span>
         </div>
-        <h1 className="text-xl font-bold text-white">{props.number}</h1>
+        <h1 className="text-xl font-bold text-white">{number}</h1>
         <Link to="#" style={{ color: "white" }}></Link>
       </div>
       <div
@@ -107,7 +106,7 @@ export function ChartBox(props) {
       >
         <div className="w-full h-full chart">
           <ResponsiveContainer width="99%" height="100%">
-            <LineChart data={props.chartData}>
+            <LineChart data={chartData}>
               <Tooltip
                 contentStyle={{ background: "transparent", border: "none" }}
                 labelStyle={{ display: "none" }}
@@ -115,8 +114,8 @@ export function ChartBox(props) {
               />
               <Line
                 type="monotone"
-                dataKey={props.dataKey}
-                stroke={props.color}
+                dataKey={dataKey}
+                stroke={color}
                 strokeWidth={2}
                 dot={false}
               />
@@ -126,9 +125,9 @@ export function ChartBox(props) {
         <div className="flex flex-col text-right text">
           <span
             className="text-xl font-bold percentage"
-            style={{ color: props.color }}
+            style={{ color: color }}
           >
-            {props.percentage}%
+            {percentage}%
           </span>
           <span className="text-sm text-white duration">This Month</span>
         </div>
@@ -366,15 +365,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchWeeklyDatas = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get("/dashboard");
         const remarksDatas = response.data.weeklyRemarks.map((day) => ({
           name: day.name.substring(0, 3),
           Remarks: day.Remarks,
@@ -452,6 +443,7 @@ function Dashboard() {
 
     fetchWeeklyDatas();
   }, []);
+  
   return (
     <div
       className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"

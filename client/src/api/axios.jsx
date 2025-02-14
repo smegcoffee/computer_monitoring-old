@@ -1,9 +1,22 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
-export default axios.create({
-  baseURL: "https://desstrongmotors.com/monitoringback",
-  // baseURL: "http://136.239.196.178:5001",
-  // baseURL: "http://10.50.2.220:8000",
-  // baseURL: "http://localhost:5001",
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
   withCredentials: true,
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default api;

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "../api/axios";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
 import { ChartBox } from "../Dashboard/Db2";
@@ -8,7 +7,7 @@ const ChartBoxUser = ({
   dashboardData,
   dashboardWeeklyUsers,
   dashboardUserPercent,
-  dashboardLoading
+  dashboardLoading,
 }) => {
   const [chartDataUser, setChartDataUser] = useState([]);
   const [weeklyUsers, setWeeklyUsers] = useState([]);
@@ -28,7 +27,12 @@ const ChartBoxUser = ({
       }
     };
     fetchData();
-  }, [dashboardData, dashboardWeeklyUsers, dashboardUserPercent, dashboardLoading]);
+  }, [
+    dashboardData,
+    dashboardWeeklyUsers,
+    dashboardUserPercent,
+    dashboardLoading,
+  ]);
 
   const chartBoxUser = {
     color: "#ffff00",

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "../api/axios";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faNoteSticky } from "@fortawesome/free-solid-svg-icons";
 import { ChartBox } from "../Dashboard/Db2";

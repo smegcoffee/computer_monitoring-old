@@ -1,21 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Container, Card, CardContent, Grid, Button } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
 import QrReader from "react-qr-reader";
 import { Link } from "react-router-dom";
 
-function Codes({ someProp }) {
+function Codes() {
   const [scanResultFile, setScanResultFile] = useState("");
   const [scanResultWebCam, setScanResultWebCam] = useState("");
   const classes = useStyles();
   const qrRef = useRef(null);
 
-  useEffect(() => {
-    console.log("Changed: ", someProp);
-  }, [someProp]);
-
   const handleErrorFile = (error) => {
-    console.log(error);
+    console.error(error);
   };
 
   const handleScanFile = (result) => {
@@ -25,7 +21,7 @@ function Codes({ someProp }) {
   };
 
   const handleErrorWebCam = (error) => {
-    console.log(error);
+    console.error(error);
   };
 
   const handleScanWebCam = (result) => {
@@ -35,7 +31,7 @@ function Codes({ someProp }) {
   };
 
   const onScanFile = () => {
-    qrRef.current.openImageDialog();
+    qrRef?.current?.openImageDialog();
   };
 
   return (
@@ -116,7 +112,7 @@ function Codes({ someProp }) {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(({
   container: {
     marginTop: 10,
   },

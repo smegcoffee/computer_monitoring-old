@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import smct from "../img/smct.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -19,73 +19,93 @@ import {
   faBuildingUser,
   faList,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
-import { useAdmin } from "../context/AdminContext";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-function SideBar({ isSidebarOpen, toggleSidebar }) {
+function SideBar({ isSidebarOpen, toggleSidebar, setTitle }) {
   const [activeItem, setActiveItem] = useState();
   const [setupOpen, setSetupOpen] = useState(false);
   const [transferedOpen, setTransferedOpen] = useState(false);
-  const { isAdmin } = useAdmin();
+  const { isAdmin } = useAuth();
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const hashPath = window.location.pathname.replace("/monitoring", "");
-    switch (hashPath) {
+    switch (pathname) {
       case "/dashboard":
+        setTitle("Dashboard");
         setActiveItem("dashboard");
         break;
       case "/computers":
+        setTitle("Computers");
         setActiveItem("computers");
         break;
       case "/qr":
+        setTitle("QR");
         setActiveItem("qr");
         break;
       case "/transfered-units":
+        setTitle("Transfer Units");
         setActiveItem("transfered-units");
         break;
       case "/transfered-branch-units":
+        setTitle("Transfered Branch Units");
         setActiveItem("transfered-branch-units");
         break;
       case "/all-units":
+        setTitle("All Units");
         setActiveItem("all-units");
         break;
       case "/all-logs":
+        setTitle("All Logs");
         setActiveItem("all-logs");
         break;
       case "/branches":
+        setTitle("Branches");
         setActiveItem("branches");
         break;
       case "/positions":
+        setTitle("Positions");
         setActiveItem("positions");
         break;
       case "/categories":
+        setTitle("Categories");
         setActiveItem("categories");
         break;
       case "/suppliers":
+        setTitle("Suppliers");
         setActiveItem("suppliers");
         break;
       case "/departments":
+        setTitle("Departments");
         setActiveItem("departments");
         break;
       case "/unit":
+        setTitle("Units");
         setActiveItem("unit");
         break;
       case "/set":
+        setTitle("Computer Sets");
         setActiveItem("set");
         break;
       case "/user":
+        setTitle("Setup Users");
         setActiveItem("user");
         break;
       case "/setup/branch-units":
+        setTitle("Branch Units");
         setActiveItem("setup-branch-units");
         break;
       case "/admin/users-list":
+        setTitle("Users Lists");
         setActiveItem("users-list");
+        break;
+      case "/profile":
+        setTitle("Profile");
         break;
       default:
         setActiveItem("dashboard");
     }
-  }, []);
+  }, [pathname, setTitle]);
 
   const handleSetupOpen = () => {
     setSetupOpen((prev) => !prev);
@@ -96,13 +116,14 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
 
   return (
     <div
-      className={`fixed md:static ${
-        isSidebarOpen ? "left-0 w-80 overflow-y-auto" : "-left-full w-72"
-      } top-0 h-full shadow-[4px_0_10px_rgba(0,0,0,0.25)] bg-white transition-all duration-300 z-50`}
+      className={`fixed h-screen md:static ${
+        isSidebarOpen ? "left-0 w-80" : "-left-full w-80"
+      } top-0 h-full shadow-[4px_0_10px_rgba(0,0,0,0.25)] bg-white transition-all duration-300 z-[51]`}
     >
-      <div className="pb-2 pr-5 w-72">
+      <div className="pr-5 w-72">
         <div>
           <button
+            type="button"
             onClick={toggleSidebar}
             className="mt-4 text-black float-end md:hidden"
           >
@@ -114,9 +135,10 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
             className="block pt-5 ml-10 w-60 h-28"
           />
         </div>
-        <div className="mt-5 ml-10">
+        <div className="w-full mt-5 ml-10 overflow-y-auto max-h-[calc(100vh-105px)]">
           <Link to="/dashboard">
             <button
+              type="button"
               className={`text-lg font-medium pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "dashboard"
                   ? "bg-blue-500 text-white active"
@@ -128,6 +150,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/computers">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "computers"
                   ? "bg-blue-500 text-white active"
@@ -139,6 +162,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/qr">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "qr" ? "bg-blue-500 text-white active" : ""
               } rounded-3xl h-10 cursor-pointer`}
@@ -148,6 +172,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/all-units">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "all-units"
                   ? "bg-blue-500 text-white active"
@@ -159,6 +184,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/all-logs">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "all-logs" ? "bg-blue-500 text-white active" : ""
               } rounded-3xl h-10 cursor-pointer`}
@@ -168,6 +194,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/branches">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "branches" ? "bg-blue-500 text-white active" : ""
               } rounded-3xl h-10 cursor-pointer`}
@@ -177,6 +204,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/categories">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "categories"
                   ? "bg-blue-500 text-white active"
@@ -188,6 +216,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/positions">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "positions"
                   ? "bg-blue-500 text-white active"
@@ -199,6 +228,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/suppliers">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "suppliers"
                   ? "bg-blue-500 text-white active"
@@ -210,6 +240,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           </Link>
           <Link to="/departments">
             <button
+              type="button"
               className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                 activeItem === "departments"
                   ? "bg-blue-500 text-white active"
@@ -222,6 +253,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
           {isAdmin && (
             <Link to="/admin/users-list">
               <button
+                type="button"
                 className={`text-lg font-medium mt-5 pl-5 pt-0.5 w-full text-justify hover:bg-blue-400 hover:text-white ${
                   activeItem === "users-list"
                     ? "bg-blue-500 text-white active"
@@ -232,7 +264,8 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </button>
             </Link>
           )}
-          <p
+          <button
+            type="button"
             onClick={handleTransferedOpen}
             className={`cursor-pointer text-lg flex justify-between font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10`}
           >
@@ -244,12 +277,13 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
                 icon={transferedOpen ? faAngleDown : faAngleRight}
               />
             </div>
-          </p>
+          </button>
 
           {transferedOpen && (
             <div className="p-3 text-center bg-gray-200 rounded-lg">
               <Link to="/transfered-units">
                 <button
+                  type="button"
                   className={`text-md font-medium mt-5 px-6 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "transfered-units"
                       ? "bg-blue-500 text-white active"
@@ -261,6 +295,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </Link>
               <Link to="/transfered-branch-units">
                 <button
+                  type="button"
                   className={`text-sm font-medium mt-5 mb-6 px-6 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "transfered-branch-units"
                       ? "bg-blue-500 text-white active"
@@ -272,7 +307,8 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </Link>
             </div>
           )}
-          <p
+          <button
+            type="button"
             onClick={handleSetupOpen}
             className={`cursor-pointer text-lg flex justify-between font-medium mt-5 pl-5 pt-0.5 rounded-3xl h-10`}
           >
@@ -282,11 +318,12 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
             <div>
               <FontAwesomeIcon icon={setupOpen ? faAngleDown : faAngleRight} />
             </div>
-          </p>
+          </button>
           {setupOpen && (
             <div className="p-3 text-center bg-gray-200 rounded-lg">
               <Link to="/unit">
                 <button
+                  type="button"
                   className={`text-md font-medium mt-5 px-8 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "unit" ? "bg-blue-500 text-white active" : ""
                   } rounded h-10 w-full cursor-pointer`}
@@ -296,6 +333,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </Link>
               <Link to="/set">
                 <button
+                  type="button"
                   className={`text-sm font-medium mt-5 px-8 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "set" ? "bg-blue-500 text-white active" : ""
                   } rounded h-10 w-full cursor-pointer`}
@@ -305,6 +343,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </Link>
               <Link to="/setup/branch-units">
                 <button
+                  type="button"
                   className={`text-sm font-medium mt-5 px-8 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "setup-branch-units"
                       ? "bg-blue-500 text-white active"
@@ -316,6 +355,7 @@ function SideBar({ isSidebarOpen, toggleSidebar }) {
               </Link>
               <Link to="/user">
                 <button
+                  type="button"
                   className={`text-md font-medium mt-5 px-8 text-justify pt-0.5 hover:bg-blue-400 hover:text-white ${
                     activeItem === "user" ? "bg-blue-500 text-white active" : ""
                   } rounded h-10 w-full cursor-pointer`}

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import Swal from "sweetalert2";
 
 export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
@@ -15,15 +15,7 @@ export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
     setDataLoading(true);
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const response = await axios.get(`api/edit-position/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(`/edit-position/${id}`);
 
         if (response.status === 200) {
           setPositionName(response.data.position.position_name);
@@ -43,20 +35,11 @@ export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
     setLoading(true);
     isRefresh(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found");
-      }
 
-      const response = await axios.post(
-        `api/update-position/${id}`,
+      const response = await api.post(
+        `/update-position/${id}`,
         {
           position_name: positionName,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       if (response.status === 200) {
@@ -84,7 +67,7 @@ export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
     } catch (error) {
       console.error("Error in adding position:", error);
       if (error.response && error.response.data) {
-        console.log("Backend error response:", error.response.data);
+        console.error("Backend error response:", error.response.data);
         setValidationErrors(error.response.data.errors || {});
         const Toast = Swal.mixin({
           toast: true,
@@ -105,7 +88,7 @@ export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
           });
         })();
       } else {
-        console.log("ERROR!");
+        console.error("ERROR!");
       }
     } finally {
       setLoading(false);
@@ -115,7 +98,7 @@ export default function EditPositionModal({ isOpen, onClose, isRefresh, id }) {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="w-full p-6 bg-white rounded-lg shadow-lg sm:w-96">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-800">
